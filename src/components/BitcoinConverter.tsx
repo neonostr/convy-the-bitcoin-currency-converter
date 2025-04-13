@@ -3,7 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Bitcoin, RefreshCw } from 'lucide-react';
+import { Bitcoin, RefreshCw, Copy, Sun, Moon } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { useTheme } from '@/hooks/useTheme';
 import { 
   fetchCoinRates, 
   CoinRates, 
@@ -23,8 +25,10 @@ const BitcoinConverter = () => {
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [canRefresh, setCanRefresh] = useState<boolean>(true);
+  const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   // Fetch rates on component mount
   useEffect(() => {
@@ -62,12 +66,28 @@ const BitcoinConverter = () => {
     }
   }, [amount, selectedCurrency, rates]);
 
+  // Countdown effect for refresh timer
+  useEffect(() => {
+    let timer: number | null = null;
+    
+    if (refreshCountdown > 0) {
+      timer = window.setInterval(() => {
+        setRefreshCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [refreshCountdown]);
+
   const fetchRates = async () => {
     setIsRefreshing(true);
     try {
       const newRates = await fetchCoinRates();
       setRates(newRates);
       setCanRefresh(false);
+      setRefreshCountdown(60); // Start countdown from 60 seconds
       
       // If this is our first fetch, update conversions immediately
       if (!rates) {
@@ -80,7 +100,7 @@ const BitcoinConverter = () => {
       
       toast({
         title: "Rates updated",
-        description: "Bitcoin exchange rates have been refreshed.",
+        description: "Bitcoin exchange rates have been refreshed. Next refresh possible in 60 seconds.",
         duration: 3000,
       });
     } catch (error) {
@@ -105,6 +125,12 @@ const BitcoinConverter = () => {
     setSelectedCurrency(currency);
     setAmount('');
     
+    // Reset conversions to show zeros
+    if (rates) {
+      const zeroConversions = convertCurrency(0, currency, rates);
+      setConversions(zeroConversions);
+    }
+    
     // Focus the input field and show numeric keyboard on mobile
     if (inputRef.current) {
       inputRef.current.focus();
@@ -117,7 +143,7 @@ const BitcoinConverter = () => {
     } else {
       toast({
         title: "Rate limit",
-        description: "Please wait at least 1 minute between refreshes.",
+        description: `Please wait ${refreshCountdown} seconds before refreshing again.`,
         duration: 3000,
       });
     }
@@ -135,11 +161,25 @@ const BitcoinConverter = () => {
     });
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
-      <div className="flex items-center space-x-2 mb-6">
-        <Bitcoin className="text-bitcoin-orange h-8 w-8" />
-        <h1 className="text-2xl font-bold">Bitcoin Currency Converter</h1>
+      <div className="flex items-center justify-between w-full mb-6">
+        <div className="flex items-center space-x-2">
+          <Bitcoin className="text-bitcoin-orange h-8 w-8" />
+          <h1 className="text-2xl font-bold">Bitcoin Currency Converter</h1>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Sun className="h-4 w-4 text-muted-foreground" />
+          <Switch
+            checked={theme === 'dark'}
+            onCheckedChange={toggleTheme}
+          />
+          <Moon className="h-4 w-4 text-muted-foreground" />
+        </div>
       </div>
 
       <div className="w-full mb-6">
@@ -177,7 +217,7 @@ const BitcoinConverter = () => {
         </div>
       )}
 
-      <div className="w-full space-y-4 mb-6">
+      <div className="w-full space-y-4 mb-4">
         {CURRENCIES.filter(currency => currency !== selectedCurrency).map((currency) => (
           <div
             key={currency}
@@ -193,16 +233,26 @@ const BitcoinConverter = () => {
           </div>
         ))}
       </div>
+      
+      <div className="text-sm text-muted-foreground mb-4 text-center">
+        <Copy className="inline-block h-3 w-3 mr-1" />
+        Tap any result to copy to clipboard
+      </div>
 
       <Button
         onClick={handleRefreshRates}
         disabled={isRefreshing || !canRefresh}
-        className="w-full mb-6 bg-bitcoin-orange hover:bg-bitcoin-orange/90"
+        className="w-full mb-4 bg-bitcoin-orange hover:bg-bitcoin-orange/90"
       >
         {isRefreshing ? (
           <>
             <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
             Refreshing...
+          </>
+        ) : !canRefresh ? (
+          <>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh Rates ({refreshCountdown}s)
           </>
         ) : (
           <>
