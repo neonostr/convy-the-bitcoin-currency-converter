@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -160,6 +159,10 @@ const BitcoinConverter = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  const handleInputFocus = () => {
+    setAmount('');
+  };
+
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
       <div className="flex items-center justify-between w-full mb-6">
@@ -185,8 +188,8 @@ const BitcoinConverter = () => {
           className="text-3xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0"
           placeholder="Enter amount"
           value={amount}
+          onFocus={handleInputFocus}
           onChange={(e) => {
-            // Only allow numbers, one decimal separator (period or comma), and negative sign
             const value = e.target.value;
             if (/^-?\d*([.,]\d*)?$/.test(value)) {
               setAmount(value);
@@ -262,11 +265,9 @@ const BitcoinConverter = () => {
         )}
       </Button>
 
-      <div className="text-sm text-center text-muted-foreground mb-2">
+      <div className="text-xs text-muted-foreground/50 mb-2 text-center">
         Data provided by CoinGecko API. All calculations are performed offline on your device.
-      </div>
-      <div className="text-sm text-center">
-        <a href="https://github.com/yourusername/bitcoin-converter" className="text-bitcoin-orange underline">
+        <a href="https://github.com/yourusername/bitcoin-converter" className="text-bitcoin-orange underline block mt-1">
           Download the source code to verify or host yourself
         </a>
       </div>
