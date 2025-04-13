@@ -1,73 +1,78 @@
-# Welcome to your Lovable project
 
-## Project info
+# Bitcoin Wise Converter
 
-**URL**: https://lovable.dev/projects/61657ef3-ae99-4e29-8355-3f6e8d1fb5b5
+A privacy-focused, open-source Bitcoin currency converter that works offline and respects your privacy.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Privacy First**: All calculations are performed locally in your browser. No tracking, no analytics, no data collection.
+- **Offline Support**: Works without an internet connection after the first load.
+- **Multiple Currencies**: Convert between BTC, satoshis, USD, EUR, CHF, and CNY.
+- **Real-time Rates**: Fetch the latest exchange rates from CoinGecko (when online).
+- **Mobile Friendly**: Responsive design works great on all devices.
+- **Dark Mode**: Easy on the eyes with a toggleable dark mode.
+- **Open Source**: Free and open-source software (FOSS) you can verify and trust.
+- **PWA Support**: Install as a Progressive Web App on your device.
 
-**Use Lovable**
+## How to Use
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/61657ef3-ae99-4e29-8355-3f6e8d1fb5b5) and start prompting.
+1. Enter an amount in the input field.
+2. Select your base currency (BTC, sats, USD, EUR, CHF, CNY).
+3. View the conversions to all other currencies instantly.
+4. Tap any result to copy just the numeric value to your clipboard.
+5. Use the "Refresh Rates" button to get the latest exchange rates (limited to once per minute).
 
-Changes made via Lovable will be committed automatically to this repo.
+## Privacy
 
-**Use your preferred IDE**
+This app is designed with privacy in mind:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- No server-side tracking or analytics
+- No cookies
+- No user data collection
+- All calculations are performed locally in your browser
+- Exchange rates are fetched anonymously when online
+- Works offline after initial load
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## For Developers
 
 This project is built with:
 
-- Vite
-- TypeScript
 - React
-- shadcn-ui
+- TypeScript
+- Vite
 - Tailwind CSS
+- shadcn/ui components
 
-## How can I deploy this project?
+### Running Locally
 
-Simply open [Lovable](https://lovable.dev/projects/61657ef3-ae99-4e29-8355-3f6e8d1fb5b5) and click on Share -> Publish.
+```sh
+# Clone the repository
+git clone https://github.com/neonostr/bitcoin-wise-converter-app.git
 
-## Can I connect a custom domain to my Lovable project?
+# Navigate to the project directory
+cd bitcoin-wise-converter-app
 
-Yes, you can!
+# Install dependencies
+npm install
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# Start the development server
+npm run dev
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Building for Production
+
+```sh
+npm run build
+```
+
+The built files will be in the `dist` folder and can be served by any static web server.
+
+## Support This Project
+
+If you find this tool useful, consider supporting further development:
+
+[Buy me a coffee](https://zapmeacoffee.com/neo-nostrpurple-com)
+
+## License
+
+MIT License - Feel free to use, modify, and distribute as you see fit.

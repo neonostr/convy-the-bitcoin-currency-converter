@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Bitcoin, RefreshCw, Sun, Moon } from 'lucide-react';
+import { Bitcoin, RefreshCw, Sun, Moon, Coffee } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/useTheme';
 import { 
@@ -96,7 +97,7 @@ const BitcoinConverter = () => {
       
       toast({
         title: "Rates updated",
-        description: "Bitcoin exchange rates have been refreshed. Next refresh possible in 60 seconds.",
+        description: "Next refresh possible in 60 seconds",
         duration: 3000,
       });
     } catch (error) {
@@ -185,7 +186,7 @@ const BitcoinConverter = () => {
           ref={inputRef}
           type="text"
           inputMode="decimal"
-          className="text-3xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0"
+          className="text-3xl md:text-4xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           placeholder="Enter amount"
           value={amount}
           onFocus={handleInputFocus}
@@ -238,7 +239,7 @@ const BitcoinConverter = () => {
         ))}
       </div>
       
-      <div className="text-sm text-muted-foreground/50 mb-4 text-center">
+      <div className="text-xs text-muted-foreground/50 mb-4 text-center">
         Tap any result to copy
       </div>
 
@@ -265,12 +266,17 @@ const BitcoinConverter = () => {
         )}
       </Button>
 
-      <div className="text-xs text-muted-foreground/50 mb-2 text-center">
+      <div className="text-xs text-muted-foreground/50 mb-4 text-center">
         Data provided by CoinGecko API. All calculations are performed offline on your device.
-        <a href="https://github.com/yourusername/bitcoin-converter" className="text-bitcoin-orange underline block mt-1">
+        <a href="https://github.com/neonostr/bitcoin-wise-converter-app" className="text-bitcoin-orange underline block mt-1" target="_blank" rel="noopener noreferrer">
           Download the source code to verify or host yourself
         </a>
       </div>
+
+      <a href="https://zapmeacoffee.com/neo-nostrpurple-com" className="flex items-center text-xs text-muted-foreground/80 hover:text-bitcoin-orange transition-colors mb-2" target="_blank" rel="noopener noreferrer">
+        <Coffee className="h-4 w-4 mr-1" />
+        <span>Buy me a coffee</span>
+      </a>
     </div>
   );
 };
