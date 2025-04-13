@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
@@ -108,8 +109,8 @@ const BitcoinConverter = () => {
       }
       
       toast({
-        title: "Rates refreshed",
-        description: "Your rates have been updated. We'll refresh again in 60 seconds.",
+        title: "Currency Rates Updated",
+        description: "I'll auto-refresh when you convert again - up to every 60 seconds.",
         duration: 3000,
       });
     } catch (error) {
@@ -248,7 +249,7 @@ const BitcoinConverter = () => {
       <div className="text-xs text-muted-foreground mb-4 text-center">
         Tap any result to copy. Data provided by CoinGecko API. All calculations are performed offline on your device. 
         <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
-          <span> <u>Check</u> the source code to verify or host yourself</span>. Add me to your home screen for a seamless web app experience.
+          <span> <u>Check</u> the source code to verify or host yourself.</span> Add me to your home screen for a seamless web app experience.
         </a>
       </div>
 
