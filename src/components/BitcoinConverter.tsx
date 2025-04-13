@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
@@ -30,16 +29,13 @@ const BitcoinConverter = () => {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
 
-  // Initialize with default values
   useEffect(() => {
-    // Set default value on first load or when amount is empty
     if (isFirstLoad || !amount) {
       setAmount('1');
       setSelectedCurrency('btc');
       setIsFirstLoad(false);
     }
     
-    // Check if we can refresh rates and do initial fetch
     fetchRates();
     
     const refreshCheckInterval = setInterval(() => {
@@ -61,7 +57,6 @@ const BitcoinConverter = () => {
 
   useEffect(() => {
     if (rates && amount !== '') {
-      // Normalize input - replace comma with period for calculation
       const normalizedAmount = amount.replace(',', '.');
       const numericAmount = parseFloat(normalizedAmount);
       
@@ -88,13 +83,11 @@ const BitcoinConverter = () => {
     };
   }, [refreshCountdown]);
 
-  // This effect watches for changes in user input or currency selection to trigger rate refresh
   useEffect(() => {
-    // Only try to fetch if we can refresh
     if (canRefresh && rates !== null) {
       fetchRates();
     }
-  }, [selectedCurrency]); // Only trigger on currency change to avoid too many refreshes
+  }, [selectedCurrency]);
 
   const fetchRates = async () => {
     if (!canRefresh) return;
@@ -115,15 +108,15 @@ const BitcoinConverter = () => {
       }
       
       toast({
-        title: "Rates updated",
-        description: "Rates auto-update every 60 seconds with user activity",
+        title: "Rates refreshed",
+        description: "Your rates have been updated. We'll refresh again in 60 seconds.",
         duration: 3000,
       });
     } catch (error) {
       console.error('Failed to fetch rates:', error);
       toast({
-        title: "Failed to update rates",
-        description: "Please try again later.",
+        title: "Oops! Rate update failed",
+        description: "We couldn't update the rates. Please check your connection.",
         variant: "destructive",
         duration: 3000,
       });
@@ -175,7 +168,6 @@ const BitcoinConverter = () => {
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
       
-      // If user is changing input, check if we can refresh rates
       if (canRefresh && value !== '') {
         fetchRates();
       }
@@ -254,19 +246,15 @@ const BitcoinConverter = () => {
       </div>
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        Tap any result to copy
-      </div>
-
-      <div className="text-xs text-muted-foreground mb-4 text-center">
-        Data provided by CoinGecko API. All calculations are performed offline on your device. 
+        Tap any result to copy. Data provided by CoinGecko API. All calculations are performed offline on your device. 
         <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
-          <span> <u>Check</u> the source code to verify or host yourself</span>
+          <span> <u>Check</u> the source code to verify or host yourself</span>. Add me to your home screen for a seamless web app experience.
         </a>
       </div>
 
       <a href="https://zapmeacoffee.com/neo-nostrpurple-com" className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors mb-2" target="_blank" rel="noopener noreferrer">
         <Coffee className="h-4 w-4 mr-1" />
-        <span>Buy me a coffee</span>
+        <span>Zap me a coffee</span>
       </a>
     </div>
   );
