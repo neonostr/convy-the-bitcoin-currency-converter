@@ -73,7 +73,7 @@ The built files will be in the `dist` folder and can be served by any static web
 
 If you find this tool useful, consider supporting further development:
 
-<a href="https://zapmeacoffee.com/neo-nostrpurple-com" target="_blank" style="background-color:#f97316;color:white;padding:10px 20px;border-radius:9999px;text-decoration:none;font-family:system-ui,-apple-system,sans-serif;display:inline-flex;align-items:center;font-weight:500;"><svg style="width:16px;height:16px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>Zap a coffee</a>
+<a href="https://zapmeacoffee.com/neo-nostrpurple-com" target="_blank" style="background-color:#f97316;color:white;padding:10px 20px;border-radius:9999px;text-decoration:none;font-family:system-ui,-apple-system,sans-serif;display:inline-flex;align-items:center;font-weight:500;"><svg style="width:16px;height:16px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>Zap me a coffee</a>
 
 ## License
 
