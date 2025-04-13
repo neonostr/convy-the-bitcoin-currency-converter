@@ -25,14 +25,18 @@ const BitcoinConverter = () => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [canRefresh, setCanRefresh] = useState<boolean>(true);
   const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
+  const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
 
   // Initialize with default values
   useEffect(() => {
-    if (!amount) {
+    // Set default value on first load or when amount is empty
+    if (isFirstLoad || !amount) {
       setAmount('1');
+      setSelectedCurrency('btc');
+      setIsFirstLoad(false);
     }
     
     // Check if we can refresh rates and do initial fetch
@@ -254,13 +258,13 @@ const BitcoinConverter = () => {
       </div>
 
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        Data provided by CoinGecko API. All calculations are performed offline on your device.
-        <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-bitcoin-orange underline block mt-1" target="_blank" rel="noopener noreferrer">
-          <u>Check</u> the source code to verify or host yourself
+        Data provided by CoinGecko API. All calculations are performed offline on your device. 
+        <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
+          <span> <u>Check</u> the source code to verify or host yourself</span>
         </a>
       </div>
 
-      <a href="https://zapmeacoffee.com/neo-nostrpurple-com" className="flex items-center text-xs text-muted-foreground/80 hover:text-bitcoin-orange transition-colors mb-2" target="_blank" rel="noopener noreferrer">
+      <a href="https://zapmeacoffee.com/neo-nostrpurple-com" className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors mb-2" target="_blank" rel="noopener noreferrer">
         <Coffee className="h-4 w-4 mr-1" />
         <span>Buy me a coffee</span>
       </a>
