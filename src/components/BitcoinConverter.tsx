@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Bitcoin, RefreshCw, Copy, Sun, Moon } from 'lucide-react';
+import { Bitcoin, RefreshCw, Sun, Moon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/useTheme';
 import { 
@@ -30,16 +29,13 @@ const BitcoinConverter = () => {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
 
-  // Fetch rates on component mount
   useEffect(() => {
     fetchRates();
     
-    // Set refresh availability check interval
     const refreshCheckInterval = setInterval(() => {
       setCanRefresh(canRefreshRates());
-    }, 5000); // Check every 5 seconds
+    }, 5000);
     
-    // Register manifest for web app capability
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').catch(error => {
@@ -53,7 +49,6 @@ const BitcoinConverter = () => {
     };
   }, []);
 
-  // Update conversions when amount, selected currency or rates change
   useEffect(() => {
     if (rates && amount !== '') {
       const numericAmount = parseFloat(amount);
@@ -66,7 +61,6 @@ const BitcoinConverter = () => {
     }
   }, [amount, selectedCurrency, rates]);
 
-  // Countdown effect for refresh timer
   useEffect(() => {
     let timer: number | null = null;
     
@@ -87,9 +81,8 @@ const BitcoinConverter = () => {
       const newRates = await fetchCoinRates();
       setRates(newRates);
       setCanRefresh(false);
-      setRefreshCountdown(60); // Start countdown from 60 seconds
+      setRefreshCountdown(60);
       
-      // If this is our first fetch, update conversions immediately
       if (!rates) {
         const numericAmount = parseFloat(amount);
         if (!isNaN(numericAmount)) {
@@ -114,7 +107,6 @@ const BitcoinConverter = () => {
     } finally {
       setIsRefreshing(false);
       
-      // Schedule the next check for refresh availability
       setTimeout(() => {
         setCanRefresh(canRefreshRates());
       }, 5000);
@@ -125,13 +117,11 @@ const BitcoinConverter = () => {
     setSelectedCurrency(currency);
     setAmount('');
     
-    // Reset conversions to show zeros
     if (rates) {
       const zeroConversions = convertCurrency(0, currency, rates);
       setConversions(zeroConversions);
     }
     
-    // Focus the input field and show numeric keyboard on mobile
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -142,18 +132,19 @@ const BitcoinConverter = () => {
       fetchRates();
     } else {
       toast({
-        title: "Rate limit",
-        description: `Please wait ${refreshCountdown} seconds before refreshing again.`,
+        title: "Rates updated",
+        description: `Next refresh possible in ${refreshCountdown} seconds`,
         duration: 3000,
       });
     }
   };
 
   const copyToClipboard = (value: string) => {
-    navigator.clipboard.writeText(value).then(() => {
+    const numericValue = value.replace(/[^\d.-]/g, '');
+    navigator.clipboard.writeText(numericValue).then(() => {
       toast({
         title: "Copied to clipboard",
-        description: `Value ${value} copied to clipboard.`,
+        description: `Copied ${numericValue}`,
         duration: 2000,
       });
     }).catch(err => {
@@ -187,11 +178,12 @@ const BitcoinConverter = () => {
           ref={inputRef}
           type="number"
           inputMode="decimal"
-          className="text-xl p-6 text-center w-full border-2 border-bitcoin-orange"
+          className="text-3xl font-bold p-6 text-center w-full border-0 focus:border-0 focus:ring-0"
           placeholder="Enter amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           autoFocus
+          step="any"
         />
       </div>
 
@@ -234,9 +226,8 @@ const BitcoinConverter = () => {
         ))}
       </div>
       
-      <div className="text-sm text-muted-foreground mb-4 text-center">
-        <Copy className="inline-block h-3 w-3 mr-1" />
-        Tap any result to copy to clipboard
+      <div className="text-sm text-muted-foreground/50 mb-4 text-center">
+        Tap any result to copy
       </div>
 
       <Button
