@@ -255,8 +255,8 @@ const BitcoinConverter = () => {
 
       <div className="text-xs text-muted-foreground mb-4 text-center">
         Data provided by CoinGecko API. All calculations are performed offline on your device.
-        <a href="https://github.com/neonostr/bitcoin-wise-converter-app" className="text-bitcoin-orange underline block mt-1" target="_blank" rel="noopener noreferrer">
-          <u>Download</u> the source code to verify or host yourself
+        <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-bitcoin-orange underline block mt-1" target="_blank" rel="noopener noreferrer">
+          <u>Check</u> the source code to verify or host yourself
         </a>
       </div>
 

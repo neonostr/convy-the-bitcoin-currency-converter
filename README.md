@@ -1,4 +1,3 @@
-
 # Bitcoin Wise Converter
 
 A privacy-focused, open-source Bitcoin currency converter that works offline and respects your privacy.
@@ -34,6 +33,8 @@ This app is designed with privacy in mind:
 - Works offline after initial load
 
 ## For Developers
+
+This project is hosted at: https://github.com/neonostr/convy-the-bitcoin-currency-converter
 
 This project is built with:
 
