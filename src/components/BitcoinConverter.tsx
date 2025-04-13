@@ -1,22 +1,11 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { Bitcoin, Sun, Moon, Coffee } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '@/hooks/useTheme';
-import { 
-  fetchCoinRates, 
-  CoinRates, 
-  convertCurrency, 
-  formatCurrency, 
-  getCurrencySymbol, 
-  getLastUpdatedFormatted,
-  canRefreshRates 
-} from '@/services/coingeckoService';
-
+import { fetchCoinRates, CoinRates, convertCurrency, formatCurrency, getCurrencySymbol, getLastUpdatedFormatted, canRefreshRates } from '@/services/coingeckoService';
 const CURRENCIES = ['btc', 'sats', 'usd', 'eur', 'chf', 'cny'];
-
 const BitcoinConverter = () => {
   const [amount, setAmount] = useState<string>('1');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('btc');
@@ -26,22 +15,25 @@ const BitcoinConverter = () => {
   const [canRefresh, setCanRefresh] = useState<boolean>(true);
   const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
+  const {
+    toast
+  } = useToast();
+  const {
+    theme,
+    setTheme
+  } = useTheme();
 
   // Initialize with default values
   useEffect(() => {
     if (!amount) {
       setAmount('1');
     }
-    
+
     // Check if we can refresh rates and do initial fetch
     fetchRates();
-    
     const refreshCheckInterval = setInterval(() => {
       setCanRefresh(canRefreshRates());
     }, 5000);
-    
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').catch(error => {
@@ -49,18 +41,15 @@ const BitcoinConverter = () => {
         });
       });
     }
-    
     return () => {
       clearInterval(refreshCheckInterval);
     };
   }, []);
-
   useEffect(() => {
     if (rates && amount !== '') {
       // Normalize input - replace comma with period for calculation
       const normalizedAmount = amount.replace(',', '.');
       const numericAmount = parseFloat(normalizedAmount);
-      
       if (!isNaN(numericAmount)) {
         const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
         setConversions(newConversions);
@@ -69,16 +58,13 @@ const BitcoinConverter = () => {
       }
     }
   }, [amount, selectedCurrency, rates]);
-
   useEffect(() => {
     let timer: number | null = null;
-    
     if (refreshCountdown > 0) {
       timer = window.setInterval(() => {
         setRefreshCountdown(prev => prev - 1);
       }, 1000);
     }
-    
     return () => {
       if (timer) clearInterval(timer);
     };
@@ -94,14 +80,12 @@ const BitcoinConverter = () => {
 
   const fetchRates = async () => {
     if (!canRefresh) return;
-    
     setIsRefreshing(true);
     try {
       const newRates = await fetchCoinRates();
       setRates(newRates);
       setCanRefresh(false);
       setRefreshCountdown(60);
-      
       if (!rates) {
         const numericAmount = parseFloat(amount);
         if (!isNaN(numericAmount)) {
@@ -109,11 +93,10 @@ const BitcoinConverter = () => {
           setConversions(newConversions);
         }
       }
-      
       toast({
         title: "Rates updated",
         description: "Rates auto-update every 60 seconds with user activity",
-        duration: 3000,
+        duration: 3000
       });
     } catch (error) {
       console.error('Failed to fetch rates:', error);
@@ -121,65 +104,55 @@ const BitcoinConverter = () => {
         title: "Failed to update rates",
         description: "Please try again later.",
         variant: "destructive",
-        duration: 3000,
+        duration: 3000
       });
     } finally {
       setIsRefreshing(false);
-      
       setTimeout(() => {
         setCanRefresh(canRefreshRates());
       }, 5000);
     }
   };
-
   const handleCurrencySelect = (currency: string) => {
     setSelectedCurrency(currency);
     setAmount('');
-    
     if (rates) {
       const zeroConversions = convertCurrency(0, currency, rates);
       setConversions(zeroConversions);
     }
-    
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
-
   const copyToClipboard = (value: string) => {
     const numericValue = value.replace(/[^\d.-]/g, '');
     navigator.clipboard.writeText(numericValue).then(() => {
       toast({
         title: "Copied to clipboard",
         description: `Copied ${numericValue}`,
-        duration: 2000,
+        duration: 2000
       });
     }).catch(err => {
       console.error('Failed to copy:', err);
     });
   };
-
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
-
   const handleInputFocus = () => {
     setAmount('');
   };
-
   const handleInputChange = (value: string) => {
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
-      
+
       // If user is changing input, check if we can refresh rates
       if (canRefresh && value !== '') {
         fetchRates();
       }
     }
   };
-
-  return (
-    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
+  return <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
       <div className="flex items-center justify-between w-full mb-6">
         <div className="flex items-center space-x-2">
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />
@@ -187,66 +160,37 @@ const BitcoinConverter = () => {
         </div>
         <div className="flex items-center space-x-2">
           <Sun className="h-4 w-4 text-muted-foreground" />
-          <Switch
-            checked={theme === 'dark'}
-            onCheckedChange={toggleTheme}
-          />
+          <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
           <Moon className="h-4 w-4 text-muted-foreground" />
         </div>
       </div>
 
       <div className="w-full mb-6">
-        <Input
-          ref={inputRef}
-          type="text"
-          inputMode="decimal"
-          className="text-3xl md:text-4xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          placeholder="Enter amount"
-          value={amount}
-          onFocus={handleInputFocus}
-          onChange={(e) => handleInputChange(e.target.value)}
-          autoFocus
-        />
+        <Input ref={inputRef} type="text" inputMode="decimal" className="text-3xl md:text-4xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" placeholder="Enter amount" value={amount} onFocus={handleInputFocus} onChange={e => handleInputChange(e.target.value)} autoFocus />
       </div>
 
       <div className="grid grid-cols-3 gap-2 w-full mb-6">
-        {CURRENCIES.map((currency) => (
-          <button
-            key={currency}
-            className={`
+        {CURRENCIES.map(currency => <button key={currency} className={`
               uppercase font-bold rounded-md px-4 py-2
-              ${selectedCurrency === currency 
-                ? 'bg-bitcoin-orange hover:bg-bitcoin-orange/90 text-white' 
-                : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}
-            `}
-            onClick={() => handleCurrencySelect(currency)}
-          >
+              ${selectedCurrency === currency ? 'bg-bitcoin-orange hover:bg-bitcoin-orange/90 text-white' : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'}
+            `} onClick={() => handleCurrencySelect(currency)}>
             {currency}
-          </button>
-        ))}
+          </button>)}
       </div>
 
-      {rates && (
-        <div className="text-sm text-muted-foreground mb-4">
+      {rates && <div className="text-sm text-muted-foreground mb-4">
           Last updated: {getLastUpdatedFormatted(rates.lastUpdated)}
-        </div>
-      )}
+        </div>}
 
       <div className="w-full space-y-4 mb-4">
-        {CURRENCIES.filter(currency => currency !== selectedCurrency).map((currency) => (
-          <div
-            key={currency}
-            className="bg-secondary p-4 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors"
-            onClick={() => copyToClipboard(`${formatCurrency(conversions[currency] || 0, currency)} ${getCurrencySymbol(currency)}`)}
-          >
+        {CURRENCIES.filter(currency => currency !== selectedCurrency).map(currency => <div key={currency} className="bg-secondary p-4 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors" onClick={() => copyToClipboard(`${formatCurrency(conversions[currency] || 0, currency)} ${getCurrencySymbol(currency)}`)}>
             <div className="flex justify-between">
               <span className="uppercase font-medium">{currency}</span>
               <span className="font-bold">
                 {formatCurrency(conversions[currency] || 0, currency)} {getCurrencySymbol(currency)}
               </span>
             </div>
-          </div>
-        ))}
+          </div>)}
       </div>
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
@@ -255,7 +199,7 @@ const BitcoinConverter = () => {
 
       <div className="text-xs text-muted-foreground mb-4 text-center">
         Data provided by CoinGecko API. All calculations are performed offline on your device.
-        <a href="https://github.com/neonostr/bitcoin-wise-converter-app" className="text-bitcoin-orange underline block mt-1" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/neonostr/bitcoin-wise-converter-app" target="_blank" rel="noopener noreferrer" className="underline block mt-1">
           <u>Download</u> the source code to verify or host yourself
         </a>
       </div>
@@ -264,8 +208,6 @@ const BitcoinConverter = () => {
         <Coffee className="h-4 w-4 mr-1" />
         <span>Buy me a coffee</span>
       </a>
-    </div>
-  );
+    </div>;
 };
-
 export default BitcoinConverter;
