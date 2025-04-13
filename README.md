@@ -1,5 +1,5 @@
 
-# Bitcoin Wise Converter
+# Convy - The Bitcoin Currency Converter
 
 A privacy-focused, open-source Bitcoin currency converter that works offline and respects your privacy.
 
