@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,7 +52,10 @@ const BitcoinConverter = () => {
 
   useEffect(() => {
     if (rates && amount !== '') {
-      const numericAmount = parseFloat(amount);
+      // Normalize input - replace comma with period for calculation
+      const normalizedAmount = amount.replace(',', '.');
+      const numericAmount = parseFloat(normalizedAmount);
+      
       if (!isNaN(numericAmount)) {
         const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
         setConversions(newConversions);
@@ -176,14 +180,19 @@ const BitcoinConverter = () => {
       <div className="w-full mb-6">
         <Input
           ref={inputRef}
-          type="number"
+          type="text"
           inputMode="decimal"
-          className="text-3xl font-bold p-6 text-center w-full border-0 focus:border-0 focus:ring-0"
+          className="text-3xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0"
           placeholder="Enter amount"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => {
+            // Only allow numbers, one decimal separator (period or comma), and negative sign
+            const value = e.target.value;
+            if (/^-?\d*([.,]\d*)?$/.test(value)) {
+              setAmount(value);
+            }
+          }}
           autoFocus
-          step="any"
         />
       </div>
 
