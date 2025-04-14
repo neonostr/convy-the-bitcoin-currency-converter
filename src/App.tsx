@@ -13,7 +13,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity, // Keep data fresh forever
-      cacheTime: 1000 * 60 * 60 * 24, // Cache for 24 hours
+      gcTime: 1000 * 60 * 60 * 24, // Cache for 24 hours (previously cacheTime)
     },
   },
 });

@@ -108,12 +108,15 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
 
 // Initialize service worker data synchronization
 export function initializeServiceWorkerSync(): void {
-  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready.then(registration => {
-      // Register a sync event to save rates when online
-      registration.sync.register('save-rates').catch(err => {
-        console.error('Failed to register sync event:', err);
-      });
+      // Check if the SyncManager is supported before trying to use it
+      if ('SyncManager' in window) {
+        // Register a sync event to save rates when online
+        registration.sync?.register('save-rates').catch(err => {
+          console.error('Failed to register sync event:', err);
+        });
+      }
       
       // Send current rates to service worker when page is about to unload
       window.addEventListener('beforeunload', () => {
