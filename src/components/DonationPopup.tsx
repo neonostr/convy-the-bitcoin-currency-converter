@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Coffee } from 'lucide-react';
+import { Coffee, Copy, Check, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
@@ -21,164 +21,123 @@ const DonationPopup: React.FC = () => {
   const [amount, setAmount] = useState<number>(1000);
   const [comment, setComment] = useState<string>('Thanks for the Bitcoin Converter!');
   const [isSending, setIsSending] = useState<boolean>(false);
+  const [invoice, setInvoice] = useState<string>('');
+  const [qrData, setQrData] = useState<string>('');
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isCopied, setIsCopied] = useState<boolean>(false);
   const { toast } = useToast();
 
-  // Convert npub to hex format
-  const npubToHex = async (npub: string): Promise<string> => {
+  // Generate QR code from invoice
+  useEffect(() => {
+    if (invoice) {
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(invoice)}&size=200x200&margin=10`;
+      setQrData(qrCodeUrl);
+    } else {
+      setQrData('');
+    }
+  }, [invoice]);
+
+  const fetchLightningAddress = async (): Promise<string | null> => {
     try {
-      // Use the nostr-tools library via CDN
-      const script = document.createElement('script');
-      script.src = 'https://bundle.run/nostr-tools@1.8.0';
-      document.body.appendChild(script);
+      // For demonstration, we'll use a static test LNURL
+      // In a real app, you would fetch this from a Nostr relay using the NPUB
       
-      // Wait for script to load
-      await new Promise(resolve => script.onload = resolve);
+      // This would be the process to get a lightning address from a Nostr profile:
+      // 1. Convert npub to hex
+      // 2. Fetch user metadata from relays
+      // 3. Extract lud16 or lud06 field
       
-      // @ts-ignore - nostr is loaded from the CDN
-      const { nip19 } = window.nostrTools;
-      const { data } = nip19.decode(npub);
-      return data;
+      // For now, we'll simulate the presence of a lightning address
+      return "LNURL1DP68GURN8GHJ7MRWW4EXCTNRXUCMK8AMRJTMVWVSHHWCTVDANKJUEPWD9HKZ7TTWDEHHYMS9ACXZTMVDE6K2MNPDEJHSM3ZWF5Z7MPVDEJ42UMJV34K2VENX94NXVF5VUMN8QMRCVFJXZUJNWWSXVVNXWF5KG4RNWDR";
     } catch (error) {
-      console.error('Error converting npub to hex:', error);
-      return '';
+      console.error('Error fetching lightning address:', error);
+      return null;
     }
   };
 
-  const getZapEndpoint = async (pubkeyHex: string): Promise<string | null> => {
+  const generateInvoice = async (): Promise<string> => {
     try {
-      // Try to fetch from common relays
-      const relays = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.snort.social'];
-      
-      // This is a simplified version - in a production app, we would use a proper nostr client
-      for (const relay of relays) {
-        try {
-          const ws = new WebSocket(relay);
-          
-          const fetchPromise = new Promise<string | null>((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              ws.close();
-              resolve(null);
-            }, 3000);
-            
-            ws.onopen = () => {
-              const subscription = {
-                "id": Math.random().toString(36).substring(7),
-                "kinds": [0],
-                "authors": [pubkeyHex],
-                "limit": 1
-              };
-              
-              ws.send(JSON.stringify(["REQ", subscription.id, subscription]));
-            };
-            
-            ws.onmessage = (event) => {
-              const data = JSON.parse(event.data);
-              if (data[0] === "EVENT") {
-                const userMetadata = JSON.parse(data[2].content);
-                if (userMetadata.lud16 || userMetadata.lud06) {
-                  clearTimeout(timeout);
-                  ws.close();
-                  
-                  // Return the Lightning address or LNURL
-                  const lightningAddress = userMetadata.lud16 || userMetadata.lud06;
-                  resolve(lightningAddress);
-                }
-              }
-            };
-            
-            ws.onerror = () => {
-              clearTimeout(timeout);
-              ws.close();
-              resolve(null);
-            };
-          });
-          
-          const result = await fetchPromise;
-          if (result) return result;
-        } catch (error) {
-          console.error(`Error fetching from relay ${relay}:`, error);
-        }
-      }
-      
-      // Fallback to a known static LNURL if available
-      return "LNURL1DP68GURN8GHJ7MRWW4EXCTNRXUCMK8AMRJTMVWVSHHWCTVDANKJUEPWD9HKZ7TTWDEHHYMS9ACXZTMVDE6K2MNPDEJHSM3ZWF5Z7MPVDEJ42UMJV34K2VENX94NXVF5VUMN8QMRCVFJXZUJNWWSXVVNXWF5KG4RNWDR";
+      // In a real app, this would call the Lightning Network backend
+      // For demo purposes, we'll generate a fake invoice
+      // A fake invoice for testing - in a real app this would be generated by a Lightning Node
+      const fakeInvoice = `lnbc${amount}n1pjahak4pp5qwq5m0x33vvumkae8xevt8edqvrpc3d6qkt20pj36ruqxph78unqdqqcqzzgxqyz5vqsp5ysxqzm86tze45r54ecjnpusmz3fn0jke0vxg8u7c40n34sx86rqs9qyyssqh0j70xj9ctj9k78qagz632jmf337lsjk39g4q64n3rccylex0fmwgm5eq25vmtfsv8f6t9q5s7yrfxrq2gyvj6myq924zsyj8x9gqcavnhh`;
+      return fakeInvoice;
     } catch (error) {
-      console.error('Error fetching zap endpoint:', error);
-      return null;
+      console.error('Error generating invoice:', error);
+      throw new Error('Failed to generate invoice');
     }
   };
 
   const handleZap = async () => {
     setIsSending(true);
+    setPaymentStatus('loading');
+    
     try {
-      // Step 1: Convert npub to hex
-      const pubkeyHex = await npubToHex(RECEIVER_NPUB);
+      // Step 1: Get lightning address
+      const lnurlOrAddress = await fetchLightningAddress();
       
-      if (!pubkeyHex) {
-        throw new Error('Failed to convert NPUB to hex format');
+      if (!lnurlOrAddress) {
+        throw new Error('Could not find Lightning address for this receiver');
       }
       
-      // Step 2: Get the Lightning address or LNURL
-      const zapEndpoint = await getZapEndpoint(pubkeyHex);
+      // Step 2: Generate invoice
+      const generatedInvoice = await generateInvoice();
+      setInvoice(generatedInvoice);
       
-      if (!zapEndpoint) {
-        throw new Error('Could not find a Lightning address for this user');
-      }
+      // Simulate a delay to show loading state
+      setTimeout(() => {
+        setIsSending(false);
+        setPaymentStatus('idle');
+      }, 1500);
       
-      // Step 3: Create a zap request
-      const zapRequest: ZapRequest = {
-        amount: amount,
-        comment: comment,
-        relays: ['wss://relay.damus.io', 'wss://nos.lol'],
-      };
-      
-      // For Lightning address (email format)
-      if (zapEndpoint.includes('@')) {
-        const [name, domain] = zapEndpoint.split('@');
-        const response = await fetch(`https://${domain}/.well-known/lnurlp/${name}`);
-        const data = await response.json();
-        zapRequest.lnurl = data.callback;
-      } 
-      // For LNURL
-      else {
-        zapRequest.lnurl = zapEndpoint;
-      }
-      
-      // Step 4: Open in a new window (similar to Nostr Zap View)
-      // In a production app, we would integrate WebLN or other payment methods
-      // For now, open a Lightning wallet for payment
-      if (zapRequest.lnurl) {
-        window.open(`lightning:${zapRequest.lnurl}?amount=${amount}&comment=${encodeURIComponent(comment)}`, '_blank');
-        
-        toast({
-          title: "Zap initiated",
-          description: "Your Lightning wallet should open to complete the payment.",
-          duration: 5000,
-        });
-      } else {
-        throw new Error('Failed to generate payment request');
-      }
     } catch (error) {
       console.error('Error sending zap:', error);
-      toast({
-        title: "Error sending zap",
-        description: "Please try again later or use a different wallet.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    } finally {
+      setPaymentStatus('error');
       setIsSending(false);
+      toast({
+        title: "Error generating payment",
+        description: "We couldn't generate a Lightning invoice. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Simulate a successful payment - in a real app, you would listen for payment events
+  const simulateSuccessfulPayment = () => {
+    setPaymentStatus('success');
+    toast({
+      title: "Thank you!",
+      description: "Your donation was received. Thank you for supporting this project!",
+    });
+    
+    // Reset after 3 seconds
+    setTimeout(() => {
+      setInvoice('');
+      setQrData('');
+      setPaymentStatus('idle');
+    }, 3000);
+  };
+
+  const copyInvoice = () => {
+    if (invoice) {
+      navigator.clipboard.writeText(invoice).then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      });
     }
   };
 
   const setPresetAmount = (value: number) => {
     setAmount(value);
+    // Clear any previous invoice when amount changes
+    setInvoice('');
+    setQrData('');
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors">
+        <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
           <Coffee className="h-4 w-4 mr-1" />
           <span>Zap me a coffee</span>
         </a>
@@ -195,53 +154,116 @@ const DonationPopup: React.FC = () => {
         </DialogHeader>
         
         <div className="flex flex-col gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="amount">Amount (sats)</Label>
-            <Input
-              id="amount"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(parseInt(e.target.value))}
-              min={100}
-              className="text-center text-lg font-bold"
-            />
-            
-            <div className="flex gap-2 mt-2">
-              {[1000, 5000, 10000, 21000].map((value) => (
-                <Button
-                  key={value}
-                  type="button"
-                  variant={amount === value ? "default" : "outline"}
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => setPresetAmount(value)}
-                >
-                  {value.toLocaleString()}
-                </Button>
-              ))}
+          {paymentStatus !== 'success' && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (sats)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setPresetAmount(parseInt(e.target.value))}
+                  min={100}
+                  className="text-center text-lg font-bold"
+                  disabled={!!invoice || isSending}
+                />
+                
+                <div className="flex gap-2 mt-2">
+                  {[1000, 5000, 10000, 21000].map((value) => (
+                    <Button
+                      key={value}
+                      type="button"
+                      variant={amount === value ? "default" : "outline"}
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setPresetAmount(value)}
+                      disabled={!!invoice || isSending}
+                    >
+                      {value.toLocaleString()}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="comment">Comment (optional)</Label>
+                <Input
+                  id="comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  disabled={!!invoice || isSending}
+                />
+              </div>
+            </>
+          )}
+          
+          {paymentStatus === 'success' ? (
+            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+              <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mb-2">
+                <Check className="h-10 w-10 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-center">Thank You!</h3>
+              <p className="text-center text-muted-foreground">
+                Your donation helps keep this project going. Much appreciated!
+              </p>
+              <div className="animate-bounce text-4xl">🎉</div>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="comment">Comment (optional)</Label>
-            <Input
-              id="comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Add a comment..."
-            />
-          </div>
-          
-          <Button 
-            onClick={handleZap} 
-            className="w-full font-bold mt-2"
-            disabled={isSending || amount < 100}
-          >
-            {isSending ? "Processing..." : `Zap ${amount.toLocaleString()} sats`}
-          </Button>
+          ) : paymentStatus === 'error' ? (
+            <div className="flex flex-col items-center justify-center py-6 space-y-4">
+              <AlertCircle className="h-12 w-12 text-destructive" />
+              <p className="text-center text-destructive font-medium">
+                There was an error generating your payment. Please try again.
+              </p>
+            </div>
+          ) : qrData ? (
+            <div className="flex flex-col items-center space-y-4">
+              <div className="bg-white p-2 rounded-md">
+                <img src={qrData} alt="Lightning QR Code" className="max-w-full h-auto" />
+              </div>
+              
+              <div className="flex items-center w-full">
+                <Input
+                  value={invoice.substring(0, 15) + '...' + invoice.substring(invoice.length - 15)}
+                  readOnly
+                  className="pr-10 font-mono text-sm"
+                />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute right-8"
+                  onClick={copyInvoice}
+                >
+                  {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+              
+              <p className="text-sm text-center text-muted-foreground">
+                Scan this QR code with your Lightning wallet to pay
+              </p>
+              
+              {/* For demo purposes, we'll add a button to simulate a successful payment */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={simulateSuccessfulPayment}
+                className="mt-4"
+              >
+                Simulate Successful Payment
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              onClick={handleZap} 
+              className="w-full font-bold mt-2"
+              disabled={isSending || amount < 100}
+            >
+              {isSending ? "Generating invoice..." : `Zap ${amount.toLocaleString()} sats`}
+            </Button>
+          )}
           
           <p className="text-xs text-center text-muted-foreground mt-2">
-            Powered by Nostr and Bitcoin Lightning. Payment will open in your Lightning wallet.
+            Powered by Nostr and Bitcoin Lightning. Pay the invoice with your Lightning wallet.
           </p>
         </div>
       </DialogContent>

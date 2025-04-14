@@ -58,6 +58,10 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     
     const data = await response.json();
     
+    if (!data.bitcoin) {
+      throw new Error('Invalid response from CoinGecko API');
+    }
+    
     // Calculate rates
     const btcToUsd = data.bitcoin.usd;
     const btcToEur = data.bitcoin.eur;

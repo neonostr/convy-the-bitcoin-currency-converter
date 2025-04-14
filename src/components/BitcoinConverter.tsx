@@ -18,7 +18,7 @@ import {
 
 const BitcoinConverter = () => {
   const [amount, setAmount] = useState<string>('1');
-  const [selectedCurrency, setSelectedCurrency] = useState<string>('btc');
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
   const [rates, setRates] = useState<CoinRates | null>(null);
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -61,7 +61,7 @@ const BitcoinConverter = () => {
       const numericAmount = parseFloat(normalizedAmount);
       
       if (!isNaN(numericAmount)) {
-        const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
+        const newConversions = convertCurrency(numericAmount, selectedCurrency as Currency, rates);
         setConversions(newConversions);
       } else {
         setConversions({});
@@ -102,7 +102,7 @@ const BitcoinConverter = () => {
       if (!rates) {
         const numericAmount = parseFloat(amount);
         if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
+          const newConversions = convertCurrency(numericAmount, selectedCurrency as Currency, newRates);
           setConversions(newConversions);
         }
       }
@@ -129,7 +129,7 @@ const BitcoinConverter = () => {
     }
   };
 
-  const handleCurrencySelect = (currency: string) => {
+  const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency);
     setAmount('');
     

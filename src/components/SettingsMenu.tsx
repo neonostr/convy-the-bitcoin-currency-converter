@@ -57,7 +57,7 @@ const SettingsMenu: React.FC = () => {
       case 'cad': return 'Canadian Dollar (CAD)';
       case 'inr': return 'Indian Rupee (INR)';
       case 'rub': return 'Russian Ruble (RUB)';
-      default: return currency.toUpperCase();
+      default: return currency;
     }
   };
 
