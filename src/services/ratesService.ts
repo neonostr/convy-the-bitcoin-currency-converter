@@ -1,4 +1,3 @@
-
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Current market rates as fallback (Updated April 2023)
@@ -112,8 +111,8 @@ export function initializeServiceWorkerSync(): void {
     navigator.serviceWorker.ready.then(registration => {
       // Check if the SyncManager is supported before trying to use it
       if ('SyncManager' in window) {
-        // Register a sync event to save rates when online
-        registration.sync?.register('save-rates').catch(err => {
+        // Use type assertion to handle potential undefined sync property
+        (registration as any).sync?.register('save-rates').catch((err: Error) => {
           console.error('Failed to register sync event:', err);
         });
       }
