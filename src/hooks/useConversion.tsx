@@ -18,18 +18,6 @@ export const useConversion = () => {
 
   // Fetch rates initially when component mounts
   useEffect(() => {
-    // Load cached rates immediately before fetching fresh ones
-    const cachedRates = getCachedRates();
-    if (cachedRates) {
-      setRates(cachedRates);
-      const numericAmount = parseFloat(amount);
-      if (!isNaN(numericAmount)) {
-        const newConversions = convertCurrency(numericAmount, selectedCurrency, cachedRates);
-        setConversions(newConversions);
-      }
-    }
-    
-    // Then try to fetch fresh rates
     fetchRates();
   }, []);
 
@@ -99,7 +87,7 @@ export const useConversion = () => {
       
       toast({
         title: "Currency Rates Updated",
-        description: "Rates will auto-refresh after 60 seconds if activity is detected.",
+        description: "Rates will auto-refresh after 60 seconds of inactivity.",
         duration: 3000,
       });
     } catch (error) {

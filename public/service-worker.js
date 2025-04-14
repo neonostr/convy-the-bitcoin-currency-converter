@@ -1,15 +1,13 @@
+
 // Service Worker for Bitcoin Currency Converter
 
-const CACHE_NAME = 'bitcoin-converter-cache-v3';
+const CACHE_NAME = 'bitcoin-converter-cache-v2';
 const APP_URLS_TO_CACHE = [
   '/',
   '/index.html',
   '/src/main.tsx',
   '/src/index.css',
-  '/src/App.tsx',
-  '/manifest.json',
-  '/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png',
-  '/lovable-uploads/97fd222f-9245-4a69-a4cc-ebe26eb4076e.png'
+  '/src/App.tsx'
 ];
 
 // Install a service worker
@@ -21,96 +19,53 @@ self.addEventListener('install', event => {
         return cache.addAll(APP_URLS_TO_CACHE);
       })
   );
-  // Activate immediately and take control of clients
+  // Activate immediately
   self.skipWaiting();
 });
 
-// Cache and return requests with improved offline fallback
+// Cache and return requests
 self.addEventListener('fetch', event => {
-  // For API requests that might fail, use a network-first strategy
-  if (event.request.url.includes('api.coingecko.com')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          return response;
-        })
-        .catch(() => {
-          // If network request fails, try to return cached API response
-          return caches.match(event.request);
-        })
-    );
-    return;
-  }
-  
-  // For navigation requests (HTML pages), use a cache-first strategy with network fallback
-  if (event.request.mode === 'navigate') {
+  // Skip cross-origin requests
+  if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
-        .then(cachedResponse => {
-          // Return cached response if available
-          if (cachedResponse) {
-            return cachedResponse;
+        .then(response => {
+          // Cache hit - return response
+          if (response) {
+            return response;
           }
           
-          // Otherwise try network, and cache the result
-          return fetch(event.request)
-            .then(response => {
-              // Don't cache non-success responses
-              if (!response || response.status !== 200) {
-                return response;
-              }
-              
-              // Clone the response for caching
-              const responseToCache = response.clone();
+          // Clone the request
+          const fetchRequest = event.request.clone();
+          
+          return fetch(fetchRequest).then(response => {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Clone the response
+            const responseToCache = response.clone();
+            
+            // Don't cache API calls to external services except rate data
+            if (!event.request.url.includes('api.coingecko.com')) {
               caches.open(CACHE_NAME)
                 .then(cache => {
                   cache.put(event.request, responseToCache);
                 });
-                
-              return response;
-            })
-            .catch(() => {
-              // If all fails, return the cached home page as fallback
-              return caches.match('/');
-            });
-        })
-    );
-    return;
-  }
-  
-  // For all other requests, try cache first with network fallback
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        // Return cached response if available
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        
-        // Otherwise try network
-        return fetch(event.request)
-          .then(response => {
-            // Don't cache non-success responses
-            if (!response || response.status !== 200) {
-              return response;
             }
             
-            // Clone the response for caching
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-              
             return response;
-          })
-          .catch(error => {
-            console.error('Fetch failed:', error);
-            // Return null to indicate network error
+          }).catch(() => {
+            // Offline fallback for navigation requests
+            if (event.request.mode === 'navigate') {
+              return caches.match('/');
+            }
             return null;
           });
-      })
-  );
+        })
+    );
+  }
 });
 
 // Listen for messages from clients

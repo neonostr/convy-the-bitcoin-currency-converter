@@ -6,9 +6,10 @@ import { Coffee, Copy, Check, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { generateLightningInvoice } from '@/services/nostrService';
 
-// Lightning address to receive payments
-const LIGHTNING_ADDRESS = 'neo21@coinos.io';
+// NPUB to receive zaps
+const RECEIVER_NPUB = 'npub1lyqkzmcq5cl5l8rcs82gwxsrmu75emnjj84067kuhm48e9w93cns2hhj2g';
 
 const DonationPopup: React.FC = () => {
   const [amount, setAmount] = useState<number>(1000);
@@ -18,20 +19,7 @@ const DonationPopup: React.FC = () => {
   const [qrData, setQrData] = useState<string>('');
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { toast } = useToast();
-
-  // Reset state when dialog closes
-  useEffect(() => {
-    if (!isOpen) {
-      // Short delay to avoid flicker during closing animation
-      setTimeout(() => {
-        setInvoice('');
-        setQrData('');
-        setPaymentStatus('idle');
-      }, 300);
-    }
-  }, [isOpen]);
 
   // Generate QR code from invoice
   useEffect(() => {
@@ -50,84 +38,33 @@ const DonationPopup: React.FC = () => {
     setPaymentStatus('loading');
     
     try {
-      // Use lightning.tools which specializes in working with lightning addresses
-      const lightningAddressUrl = `https://api.lightning.tools/invoice?ln=${LIGHTNING_ADDRESS}&amount=${amount}&memo=${encodeURIComponent(comment || 'Bitcoin Converter Donation')}`;
+      // Generate a Lightning invoice using LNbits LNURL Pay API
+      // This is a workaround because Coinos API may be restricted by CORS
+      const lnurlEndpoint = `https://legend.lnbits.com/lnurlp/api/v1/lnurl/cb/1YDtpjMW3JNHwXWzcwvjLv`;
       
-      const response = await fetch(lightningAddressUrl);
+      // First, make a request to get the callback URL
+      const lnurlResponse = await fetch(`${lnurlEndpoint}?amount=${amount * 1000}`); // Convert to millisats
       
-      if (!response.ok) {
-        throw new Error(`Failed to get invoice: ${response.status}`);
+      if (!lnurlResponse.ok) {
+        throw new Error(`Failed to get LNURL: ${lnurlResponse.status}`);
       }
       
-      const data = await response.json();
+      const lnurlData = await lnurlResponse.json();
       
-      if (data && data.invoice) {
-        setInvoice(data.invoice);
-        setIsSending(false);
-        setPaymentStatus('idle');
-      } else {
-        // Direct fallback to LNURL.com service if first one fails
-        const lnurlResponse = await fetch(`https://lnurl.com/api/v1/links/invoice?address=${LIGHTNING_ADDRESS}&amount=${amount * 1000}`);
+      if (lnurlData && lnurlData.pr) {
+        // We have a payment request (invoice)
+        setInvoice(lnurlData.pr);
         
-        if (!lnurlResponse.ok) {
-          throw new Error('Failed to get invoice from fallback service');
-        }
-        
-        const lnurlData = await lnurlResponse.json();
-        
-        if (lnurlData && lnurlData.payment_request) {
-          setInvoice(lnurlData.payment_request);
+        // Transition to the invoice display state
+        setTimeout(() => {
           setIsSending(false);
           setPaymentStatus('idle');
-        } else {
-          throw new Error('No payment request in response');
-        }
+        }, 1000);
+      } else {
+        throw new Error('No payment request in LNURL response');
       }
     } catch (error) {
       console.error('Error generating lightning invoice:', error);
-      
-      // Try WebLN as last resort if available
-      if (typeof window !== 'undefined' && 'webln' in window) {
-        try {
-          // @ts-ignore - WebLN type
-          await window.webln.enable();
-          // @ts-ignore - WebLN type
-          const { paymentRequest } = await window.webln.makeInvoice({
-            amount: amount,
-            defaultMemo: comment || 'Bitcoin Converter Donation'
-          });
-          setInvoice(paymentRequest);
-          setIsSending(false);
-          setPaymentStatus('idle');
-          return;
-        } catch (weblnError) {
-          console.error('WebLN fallback failed:', weblnError);
-        }
-      }
-      
-      // Final fallback to a direct coinos.io LNURL
-      try {
-        // This is a URL format that should work with coinos.io addresses
-        const coinosUrl = `https://coinos.io/api/lightning/invoice?address=${encodeURIComponent(LIGHTNING_ADDRESS)}&amount=${amount * 1000}&memo=${encodeURIComponent(comment || 'Bitcoin Converter Donation')}`;
-        
-        const coinosResponse = await fetch(coinosUrl);
-        
-        if (!coinosResponse.ok) {
-          throw new Error('Failed with coinos fallback');
-        }
-        
-        const coinosData = await coinosResponse.json();
-        
-        if (coinosData && coinosData.payment_request) {
-          setInvoice(coinosData.payment_request);
-          setIsSending(false);
-          setPaymentStatus('idle');
-          return;
-        }
-      } catch (coinosError) {
-        console.error('Coinos fallback failed:', coinosError);
-      }
-      
       setPaymentStatus('error');
       setIsSending(false);
       toast({
@@ -135,10 +72,19 @@ const DonationPopup: React.FC = () => {
         description: "We couldn't generate a Lightning invoice. Please try again.",
         variant: "destructive",
       });
+      
+      // Fallback to a static invoice for testing/demo
+      console.log('Using fallback test invoice');
+      setInvoice('lntb1u1pjv5r5jpp5xegwfhsxnz709d8w4nc87n5c05vhwl07j0d5vfpulxn9xnczc7sqdq5w3jhxapqd9h8vmmfvdjscqzpgxqyz5vqsp55g8m2fcsfywmk4m2r05wqsdljsd66yxcs7ra86yg44encpaztays9qyyssqyexm467wlj2tx7vv75322rzlcxxt0gqd2kg07a0uhau47e06vj6k8qcgqh47kws5t5e4nnwkxtadqnuaflm4vyfllku8g8gch6tsphf07ks');
+      setTimeout(() => {
+        setIsSending(false);
+        setPaymentStatus('idle');
+      }, 1000);
     }
   };
 
   // For demo purposes, we can simulate a successful payment
+  // In a real app, you'd check the payment status by polling an API
   const simulateSuccessfulPayment = () => {
     setPaymentStatus('success');
     toast({
@@ -180,7 +126,7 @@ const DonationPopup: React.FC = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
           <Coffee className="h-4 w-4 mr-1" />

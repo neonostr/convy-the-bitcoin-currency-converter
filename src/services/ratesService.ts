@@ -1,4 +1,3 @@
-
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Current market rates as fallback (Updated April 2023)
@@ -49,17 +48,9 @@ export function updateCachedRates(rates: CoinRates): void {
   // Save to localStorage for offline access
   try {
     localStorage.setItem('bitcoin-converter-rates', JSON.stringify(rates));
-    
-    // Also try to save to sessionStorage as a backup
-    sessionStorage.setItem('bitcoin-converter-rates', JSON.stringify(rates));
   } catch (error) {
     console.error('Failed to save rates to localStorage:', error);
   }
-  
-  // Save before unload
-  window.addEventListener('beforeunload', () => {
-    localStorage.setItem('bitcoin-converter-rates', JSON.stringify(rates));
-  }, { once: true });
   
   // Also save to the service worker cache if available
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -126,7 +117,7 @@ export function initializeServiceWorkerSync(): void {
         });
       }
       
-      // Save current rates to service worker when page is about to unload
+      // Send current rates to service worker when page is about to unload
       window.addEventListener('beforeunload', () => {
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({
@@ -135,16 +126,6 @@ export function initializeServiceWorkerSync(): void {
           });
         }
       });
-      
-      // Save rates periodically to ensure they're always available offline
-      setInterval(() => {
-        if (navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage({
-            type: 'CACHE_RATES',
-            payload: cachedRates
-          });
-        }
-      }, 60000); // Every minute
     });
   }
 }
