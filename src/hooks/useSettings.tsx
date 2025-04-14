@@ -49,7 +49,9 @@ export const useSettings = () => {
   };
 
   const updateDisplayCurrencies = (currencies: Currency[]) => {
-    updateSettings({ displayCurrencies: currencies });
+    if (currencies.length > 0) {
+      updateSettings({ displayCurrencies: currencies });
+    }
   };
 
   return {

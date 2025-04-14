@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Settings, Moon, Sun } from 'lucide-react';
@@ -25,6 +25,15 @@ const SettingsMenu: React.FC = () => {
     }
   }, [isOpen, settings.displayCurrencies]);
 
+  // Ensure changes are committed when the menu is closed
+  const handleOpenChange = useCallback((open: boolean) => {
+    if (!open && selectedCurrencies.length > 0) {
+      // Apply settings when closing the menu
+      updateDisplayCurrencies(selectedCurrencies);
+    }
+    setIsOpen(open);
+  }, [selectedCurrencies, updateDisplayCurrencies]);
+
   const handleDragEnd = (result: DropResult) => {
     // Dropped outside the list
     if (!result.destination) return;
@@ -33,7 +42,7 @@ const SettingsMenu: React.FC = () => {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update both local state and settings immediately
+    // Update local state and propagate changes to app state
     setSelectedCurrencies(items);
     updateDisplayCurrencies(items);
   };
@@ -57,13 +66,13 @@ const SettingsMenu: React.FC = () => {
       }
     }
     
-    // Update both local state and settings immediately
+    // Update both local state and app state
     setSelectedCurrencies(newSelection);
     updateDisplayCurrencies(newSelection);
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Settings className="h-5 w-5" />

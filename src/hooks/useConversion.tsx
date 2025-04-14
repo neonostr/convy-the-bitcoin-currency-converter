@@ -58,11 +58,20 @@ export const useConversion = () => {
           const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
           setConversions(newConversions);
         }
+      } else {
+        // Recalculate conversions with new rates
+        const normalizedAmount = amount.replace(',', '.');
+        const numericAmount = parseFloat(normalizedAmount);
+        
+        if (!isNaN(numericAmount)) {
+          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
+          setConversions(newConversions);
+        }
       }
       
       toast({
         title: "Currency Rates Updated",
-        description: "I'll auto-refresh when you convert again - up to every 60 seconds.",
+        description: "Rates will auto-refresh after 60 seconds of inactivity.",
         duration: 3000,
       });
     } catch (error) {
