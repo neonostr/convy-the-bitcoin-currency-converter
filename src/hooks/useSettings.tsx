@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
-
-export type Currency = 'btc' | 'sats' | 'usd' | 'eur' | 'chf' | 'cny' | 'jpy' | 'gbp' | 'aud' | 'cad' | 'inr' | 'rub';
+import { Currency } from '@/types/currency.types';
 
 export interface Settings {
   theme: 'light' | 'dark';
@@ -54,12 +53,12 @@ export const useSettings = () => {
     updateSettings({ displayCurrencies: currencies, draftDisplayCurrencies: undefined });
   };
 
-  // New function to update draft currencies for live preview
+  // Update draft currencies for live preview
   const updateDraftCurrencies = (currencies: Currency[]) => {
     updateSettings({ draftDisplayCurrencies: currencies });
   };
 
-  // New function to cancel draft changes
+  // Cancel draft changes
   const cancelDraftChanges = () => {
     updateSettings({ draftDisplayCurrencies: undefined });
   };

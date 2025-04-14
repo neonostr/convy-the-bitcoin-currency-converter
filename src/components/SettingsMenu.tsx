@@ -3,10 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Settings, Moon, Sun } from 'lucide-react';
-import { useSettings, Currency } from '@/hooks/useSettings';
+import { useSettings, Settings as SettingsType } from '@/hooks/useSettings';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { Currency } from '@/types/currency.types';
+import { getCurrencyLabel } from '@/utils/formatUtils';
+
+const MIN_CURRENCIES = 6;
 
 const SettingsMenu: React.FC = () => {
   const { settings, toggleTheme, updateDisplayCurrencies, updateDraftCurrencies, cancelDraftChanges, allCurrencies } = useSettings();
@@ -44,8 +48,8 @@ const SettingsMenu: React.FC = () => {
   const toggleCurrency = (currency: Currency) => {
     setSelectedCurrencies(prev => {
       if (prev.includes(currency)) {
-        // Ensure we don't go below 6 currencies
-        if (prev.length <= 6) {
+        // Ensure we don't go below MIN_CURRENCIES currencies
+        if (prev.length <= MIN_CURRENCIES) {
           return prev;
         }
         return prev.filter(c => c !== currency);
@@ -63,24 +67,6 @@ const SettingsMenu: React.FC = () => {
   const handleCancel = () => {
     cancelDraftChanges();
     setIsOpen(false);
-  };
-
-  const getCurrencyLabel = (currency: Currency): string => {
-    switch (currency) {
-      case 'btc': return 'Bitcoin (BTC)';
-      case 'sats': return 'Satoshis (sats)';
-      case 'usd': return 'US Dollar (USD)';
-      case 'eur': return 'Euro (EUR)';
-      case 'chf': return 'Swiss Franc (CHF)';
-      case 'cny': return 'Chinese Yuan (CNY)';
-      case 'jpy': return 'Japanese Yen (JPY)';
-      case 'gbp': return 'British Pound (GBP)';
-      case 'aud': return 'Australian Dollar (AUD)';
-      case 'cad': return 'Canadian Dollar (CAD)';
-      case 'inr': return 'Indian Rupee (INR)';
-      case 'rub': return 'Russian Ruble (RUB)';
-      default: return currency;
-    }
   };
 
   return (
@@ -120,7 +106,7 @@ const SettingsMenu: React.FC = () => {
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">Display Currencies</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select at least 6 currencies to display on the main screen. Drag and drop to reorder.
+            Select at least {MIN_CURRENCIES} currencies to display on the main screen. Drag and drop to reorder.
           </p>
           
           <div className="space-y-4">
@@ -148,7 +134,7 @@ const SettingsMenu: React.FC = () => {
                             <Switch 
                               checked={true}
                               onCheckedChange={() => toggleCurrency(currency)}
-                              disabled={selectedCurrencies.length <= 6}
+                              disabled={selectedCurrencies.length <= MIN_CURRENCIES}
                             />
                           </div>
                         )}

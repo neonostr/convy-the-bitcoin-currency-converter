@@ -6,16 +6,10 @@ import { Coffee, Copy, Check, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { generateLightningInvoice } from '@/services/nostrService';
 
 // NPUB to receive zaps
 const RECEIVER_NPUB = 'npub1lyqkzmcq5cl5l8rcs82gwxsrmu75emnjj84067kuhm48e9w93cns2hhj2g';
-
-interface ZapRequest {
-  amount: number;
-  comment: string;
-  relays: string[];
-  lnurl?: string;
-}
 
 const DonationPopup: React.FC = () => {
   const [amount, setAmount] = useState<number>(1000);
@@ -31,65 +25,21 @@ const DonationPopup: React.FC = () => {
   useEffect(() => {
     if (invoice) {
       // Use a reliable QR code service
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(invoice)}&size=200x200&margin=10`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(`lightning:${invoice}`)}&size=200x200&margin=10`;
       setQrData(qrCodeUrl);
     } else {
       setQrData('');
     }
   }, [invoice]);
 
-  const fetchLightningAddress = async (): Promise<string | null> => {
-    try {
-      // In production, this would fetch the lightning address from a Nostr relay using the NPUB
-      // For now, we're simulating this with a fixed LNURL
-      console.log("Fetching lightning address for NPUB:", RECEIVER_NPUB);
-      
-      // Simulated LNURL for demo purposes
-      const lnurlExample = "LNURL1DP68GURN8GHJ7MRWW4EXCTNRXUCMK8AMRJTMVWVSHHWCTVDANKJUEPWD9HKZ7TTWDEHHYMS9ACXZTMVDE6K2MNPDEJHSM3ZWF5Z7MPVDEJ42UMJV34K2VENX94NXVF5VUMN8QMRCVFJXZUJNWWSXVVNXWF5KG4RNWDR";
-      return lnurlExample;
-    } catch (error) {
-      console.error('Error fetching lightning address:', error);
-      return null;
-    }
-  };
-
-  const generateInvoice = async (satAmount: number): Promise<string> => {
-    try {
-      // In production, this would call a Lightning Network service to generate a real invoice
-      // For demo purposes, we generate a "realistic" fake invoice with the correct amount
-      console.log("Generating invoice for", satAmount, "sats");
-      
-      // Create a more realistic invoice using the current timestamp and amount
-      const timestamp = Math.floor(Date.now() / 1000);
-      const randomDigits = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-      
-      // Format the amount with proper encoding
-      const formattedAmount = satAmount.toString();
-      
-      // Create a fake but realistic-looking Lightning invoice
-      const fakeInvoice = `lnbc${formattedAmount}n1p${randomDigits}pp5q0cm7dkwxecn4clrqvp5x7gj7nffmp69xqrszs05wfkjq5c9uslge2quw3jhucmvd9h8gztgcq${timestamp}sp5s8e244rvx0z0njqv9we9c2hcgw7p278h2mg4c5ta0ejq6r9gytj06qsqzcpgvvnlvv4ex7h657ftkfyxzdcnrl80qxsm3pxz4mg3ypjzgyt75smlvluewupkszgrhkh0hnhxk0sqq2qqqqqqqlgqqqqqeqqjqrz6rnf59rx867syp4lq2la73cxnlz5v7rnlctnzf8apmmuvxt9y5dczpgxdvj9sq9p2vzlq9q0l55exc32k6cwv6mkcjsqzc6dss`;
-      
-      return fakeInvoice;
-    } catch (error) {
-      console.error('Error generating invoice:', error);
-      throw new Error('Failed to generate invoice');
-    }
-  };
-
   const handleZap = async () => {
     setIsSending(true);
     setPaymentStatus('loading');
     
     try {
-      // Step 1: Get lightning address
-      const lnurlOrAddress = await fetchLightningAddress();
+      // Generate a Lightning invoice using our service
+      const generatedInvoice = await generateLightningInvoice(amount, comment);
       
-      if (!lnurlOrAddress) {
-        throw new Error('Could not find Lightning address for this receiver');
-      }
-      
-      // Step 2: Generate invoice based on the current amount
-      const generatedInvoice = await generateInvoice(amount);
       setInvoice(generatedInvoice);
       
       // Transition to the invoice display state
@@ -146,6 +96,11 @@ const DonationPopup: React.FC = () => {
     setQrData('');
   };
 
+  const handleAmountChange = (value: string) => {
+    const numValue = parseInt(value) || 0;
+    setPresetAmount(numValue);
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -174,7 +129,7 @@ const DonationPopup: React.FC = () => {
                   id="amount"
                   type="number"
                   value={amount}
-                  onChange={(e) => setPresetAmount(parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleAmountChange(e.target.value)}
                   min={1}
                   className="text-center text-lg font-bold"
                   disabled={!!invoice || isSending}
