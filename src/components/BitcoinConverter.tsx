@@ -1,7 +1,8 @@
+
 import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Bitcoin, Coffee } from 'lucide-react';
+import { Bitcoin } from 'lucide-react';
 import SettingsMenu from '@/components/SettingsMenu';
 import DonationPopup from '@/components/DonationPopup';
 import { useSettings } from '@/hooks/useSettings';
