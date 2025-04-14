@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +9,7 @@ import { useConversion } from '@/hooks/useConversion';
 import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
+import { Currency } from '@/types/currency.types';
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +25,6 @@ const BitcoinConverter = () => {
     handleInputChange 
   } = useConversion();
 
-  // Get the current display currencies (with live preview support)
   const displayCurrencies = settings.draftDisplayCurrencies || settings.displayCurrencies;
 
   const handleInputFocus = () => {
