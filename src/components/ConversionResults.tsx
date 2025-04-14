@@ -20,7 +20,6 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
     <div className="w-full space-y-4 mb-4">
       {displayCurrencies
         .filter(currency => currency !== selectedCurrency)
-        .slice(0, 5)
         .map((currency) => (
           <div
             key={currency}

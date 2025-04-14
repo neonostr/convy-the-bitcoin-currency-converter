@@ -5,7 +5,6 @@ import { Currency } from '@/types/currency.types';
 export interface Settings {
   theme: 'light' | 'dark';
   displayCurrencies: Currency[];
-  draftDisplayCurrencies?: Currency[]; // Added for live preview
 }
 
 const DEFAULT_CURRENCIES: Currency[] = ['btc', 'sats', 'usd', 'eur', 'chf', 'gbp'];
@@ -50,17 +49,7 @@ export const useSettings = () => {
   };
 
   const updateDisplayCurrencies = (currencies: Currency[]) => {
-    updateSettings({ displayCurrencies: currencies, draftDisplayCurrencies: undefined });
-  };
-
-  // Update draft currencies for live preview
-  const updateDraftCurrencies = (currencies: Currency[]) => {
-    updateSettings({ draftDisplayCurrencies: currencies });
-  };
-
-  // Cancel draft changes
-  const cancelDraftChanges = () => {
-    updateSettings({ draftDisplayCurrencies: undefined });
+    updateSettings({ displayCurrencies: currencies });
   };
 
   return {
@@ -68,8 +57,6 @@ export const useSettings = () => {
     updateSettings,
     toggleTheme,
     updateDisplayCurrencies,
-    updateDraftCurrencies,
-    cancelDraftChanges,
     allCurrencies: ALL_CURRENCIES,
   };
 };

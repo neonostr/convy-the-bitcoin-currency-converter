@@ -1,7 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
-import { fetchCoinRates, convertCurrency, canRefreshRates } from '@/services/coingeckoService';
+import { fetchCoinRates } from '@/services/coinGeckoApi';
+import { convertCurrency, getCachedRates, canRefreshRates } from '@/services/ratesService';
 import { useToast } from '@/hooks/use-toast';
 
 export const useConversion = () => {
@@ -10,20 +11,12 @@ export const useConversion = () => {
   const [rates, setRates] = useState<CoinRates | null>(null);
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [canRefresh, setCanRefresh] = useState<boolean>(true);
-  const [refreshCountdown, setRefreshCountdown] = useState<number>(0);
+  const lastRefreshTime = useRef<number>(0);
   const { toast } = useToast();
 
+  // Fetch rates initially when component mounts
   useEffect(() => {
     fetchRates();
-    
-    const refreshCheckInterval = setInterval(() => {
-      setCanRefresh(canRefreshRates());
-    }, 5000);
-    
-    return () => {
-      clearInterval(refreshCheckInterval);
-    };
   }, []);
 
   useEffect(() => {
@@ -40,36 +33,25 @@ export const useConversion = () => {
     }
   }, [amount, selectedCurrency, rates]);
 
-  useEffect(() => {
-    let timer: number | null = null;
-    
-    if (refreshCountdown > 0) {
-      timer = window.setInterval(() => {
-        setRefreshCountdown(prev => prev - 1);
-      }, 1000);
-    }
-    
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [refreshCountdown]);
-
-  useEffect(() => {
-    if (canRefresh && rates !== null) {
-      fetchRates();
-    }
-  }, [selectedCurrency]);
+  const shouldRefreshRates = (): boolean => {
+    const currentTime = Date.now();
+    const timeSinceLastRefresh = currentTime - lastRefreshTime.current;
+    return timeSinceLastRefresh >= 60000; // 60 seconds
+  };
 
   const fetchRates = async () => {
-    if (!canRefresh) return;
+    if (!shouldRefreshRates() && rates !== null) {
+      console.log('Skipping API call - using cached rates (< 60s since last refresh)');
+      return;
+    }
     
     setIsRefreshing(true);
     try {
       const newRates = await fetchCoinRates();
       setRates(newRates);
-      setCanRefresh(false);
-      setRefreshCountdown(60);
+      lastRefreshTime.current = Date.now();
       
+      // If rates weren't set before, calculate initial conversions
       if (!rates) {
         const numericAmount = parseFloat(amount);
         if (!isNaN(numericAmount)) {
@@ -85,6 +67,13 @@ export const useConversion = () => {
       });
     } catch (error) {
       console.error('Failed to fetch rates:', error);
+      
+      // If API fails but we have cached rates, use those
+      if (!rates) {
+        const cachedRates = getCachedRates();
+        setRates(cachedRates);
+      }
+      
       toast({
         title: "Oops! Rate update failed",
         description: "We couldn't update the rates. Please check your connection.",
@@ -93,20 +82,22 @@ export const useConversion = () => {
       });
     } finally {
       setIsRefreshing(false);
-      
-      setTimeout(() => {
-        setCanRefresh(canRefreshRates());
-      }, 5000);
     }
   };
 
   const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency);
-    setAmount('');
+    
+    // Only update rates if it's been more than 60 seconds
+    if (shouldRefreshRates()) {
+      fetchRates();
+    }
     
     if (rates) {
-      const zeroConversions = convertCurrency(0, currency, rates);
-      setConversions(zeroConversions);
+      // When changing currency, convert the current amount to the new currency
+      const numericAmount = parseFloat(amount) || 0;
+      const newConversions = convertCurrency(numericAmount, currency, rates);
+      setConversions(newConversions);
     }
   };
 
@@ -114,7 +105,8 @@ export const useConversion = () => {
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
       
-      if (canRefresh && value !== '') {
+      // Only fetch new rates if value is not empty and it's been over 60 seconds
+      if (value !== '' && shouldRefreshRates()) {
         fetchRates();
       }
     }

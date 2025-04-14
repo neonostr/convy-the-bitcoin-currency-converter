@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -25,7 +26,7 @@ const BitcoinConverter = () => {
     handleInputChange 
   } = useConversion();
 
-  const displayCurrencies = settings.draftDisplayCurrencies || settings.displayCurrencies;
+  const displayCurrencies = settings.displayCurrencies;
 
   const handleInputFocus = () => {
     setAmount('');

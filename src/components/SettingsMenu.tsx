@@ -1,38 +1,28 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Settings, Moon, Sun } from 'lucide-react';
-import { useSettings, Settings as SettingsType } from '@/hooks/useSettings';
+import { useSettings } from '@/hooks/useSettings';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Currency } from '@/types/currency.types';
 import { getCurrencyLabel } from '@/utils/formatUtils';
 
-const MIN_CURRENCIES = 6;
+const FIXED_CURRENCY_COUNT = 6;
 
 const SettingsMenu: React.FC = () => {
-  const { settings, toggleTheme, updateDisplayCurrencies, updateDraftCurrencies, cancelDraftChanges, allCurrencies } = useSettings();
+  const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
 
   // Initialize selected currencies when the menu opens
   useEffect(() => {
     if (isOpen) {
-      // Use draft currencies if available, otherwise use the current display currencies
-      setSelectedCurrencies(
-        settings.draftDisplayCurrencies || [...settings.displayCurrencies]
-      );
+      setSelectedCurrencies([...settings.displayCurrencies]);
     }
-  }, [isOpen, settings.displayCurrencies, settings.draftDisplayCurrencies]);
-
-  // Update the draft currencies whenever selected currencies change
-  useEffect(() => {
-    if (isOpen && selectedCurrencies.length > 0) {
-      updateDraftCurrencies(selectedCurrencies);
-    }
-  }, [selectedCurrencies, isOpen, updateDraftCurrencies]);
+  }, [isOpen, settings.displayCurrencies]);
 
   const handleDragEnd = (result: DropResult) => {
     // Dropped outside the list
@@ -42,31 +32,33 @@ const SettingsMenu: React.FC = () => {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
+    // Update both local state and settings immediately
     setSelectedCurrencies(items);
+    updateDisplayCurrencies(items);
   };
 
-  const toggleCurrency = (currency: Currency) => {
-    setSelectedCurrencies(prev => {
-      if (prev.includes(currency)) {
-        // Ensure we don't go below MIN_CURRENCIES currencies
-        if (prev.length <= MIN_CURRENCIES) {
-          return prev;
-        }
-        return prev.filter(c => c !== currency);
+  const toggleCurrency = (currency: Currency, isEnabled: boolean) => {
+    let newSelection: Currency[];
+    
+    if (isEnabled) {
+      // Only add if we have less than FIXED_CURRENCY_COUNT
+      if (selectedCurrencies.length < FIXED_CURRENCY_COUNT) {
+        newSelection = [...selectedCurrencies, currency];
       } else {
-        return [...prev, currency];
+        return; // Don't allow more than FIXED_CURRENCY_COUNT
       }
-    });
-  };
-
-  const saveSettings = () => {
-    updateDisplayCurrencies(selectedCurrencies);
-    setIsOpen(false);
-  };
-
-  const handleCancel = () => {
-    cancelDraftChanges();
-    setIsOpen(false);
+    } else {
+      // Only remove if we still have FIXED_CURRENCY_COUNT currencies
+      if (selectedCurrencies.length > FIXED_CURRENCY_COUNT) {
+        newSelection = selectedCurrencies.filter(c => c !== currency);
+      } else {
+        return; // Don't allow less than FIXED_CURRENCY_COUNT
+      }
+    }
+    
+    // Update both local state and settings immediately
+    setSelectedCurrencies(newSelection);
+    updateDisplayCurrencies(newSelection);
   };
 
   return (
@@ -79,9 +71,6 @@ const SettingsMenu: React.FC = () => {
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Settings</SheetTitle>
-          <SheetDescription>
-            Customize your Bitcoin Converter experience
-          </SheetDescription>
         </SheetHeader>
         
         <div className="py-6">
@@ -106,7 +95,7 @@ const SettingsMenu: React.FC = () => {
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">Display Currencies</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select at least {MIN_CURRENCIES} currencies to display on the main screen. Drag and drop to reorder.
+            Select exactly {FIXED_CURRENCY_COUNT} currencies to display on the main screen. Drag and drop to reorder.
           </p>
           
           <div className="space-y-4">
@@ -133,8 +122,8 @@ const SettingsMenu: React.FC = () => {
                             <span className="font-medium">{getCurrencyLabel(currency)}</span>
                             <Switch 
                               checked={true}
-                              onCheckedChange={() => toggleCurrency(currency)}
-                              disabled={selectedCurrencies.length <= MIN_CURRENCIES}
+                              onCheckedChange={() => toggleCurrency(currency, false)}
+                              disabled={selectedCurrencies.length <= FIXED_CURRENCY_COUNT}
                             />
                           </div>
                         )}
@@ -160,21 +149,13 @@ const SettingsMenu: React.FC = () => {
                     <span>{getCurrencyLabel(currency)}</span>
                     <Switch 
                       checked={false}
-                      onCheckedChange={() => toggleCurrency(currency)}
+                      onCheckedChange={() => toggleCurrency(currency, true)}
+                      disabled={selectedCurrencies.length >= FIXED_CURRENCY_COUNT}
                     />
                   </div>
                 ))}
             </div>
           </div>
-        </div>
-        
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button onClick={saveSettings}>
-            Save Changes
-          </Button>
         </div>
       </SheetContent>
     </Sheet>

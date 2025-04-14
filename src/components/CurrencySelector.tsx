@@ -15,7 +15,7 @@ const CurrencySelector: React.FC<CurrencySelectorProps> = ({
 }) => {
   return (
     <div className="grid grid-cols-3 gap-2 w-full mb-6">
-      {displayCurrencies.slice(0, 6).map((currency) => (
+      {displayCurrencies.map((currency) => (
         <button
           key={currency}
           className={`
