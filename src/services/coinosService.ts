@@ -9,6 +9,7 @@ interface LNURLData {
 
 interface InvoiceData {
   pr: string;
+  verify?: string;
 }
 
 const COINOS_USERNAME = 'neo21';
@@ -33,16 +34,14 @@ export async function getInvoice(callbackUrl: string, amountMsat: number): Promi
   return await response.json();
 }
 
-export async function createCoinosInvoice(amountSats: number): Promise<string> {
+export async function createCoinosInvoice(amountSats: number): Promise<{ invoice: string; verifyUrl?: string }> {
   try {
-    // Step 1: Get the LNURL-pay data
     const lnurlData = await getLnurlData();
     
     if (!lnurlData || lnurlData.status === 'ERROR') {
       throw new Error(lnurlData.reason || 'Invalid username or service unavailable');
     }
     
-    // Step 2: Request a specific invoice (convert sats to millisats)
     const amountMsat = amountSats * 1000;
     
     if (amountMsat < lnurlData.minSendable || amountMsat > lnurlData.maxSendable) {
@@ -55,7 +54,10 @@ export async function createCoinosInvoice(amountSats: number): Promise<string> {
       throw new Error('Failed to generate invoice');
     }
     
-    return invoiceData.pr;
+    return {
+      invoice: invoiceData.pr,
+      verifyUrl: invoiceData.verify
+    };
   } catch (error) {
     console.error('Error generating payment QR code:', error);
     throw error;

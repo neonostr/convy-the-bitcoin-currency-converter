@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Coffee, Copy, Check } from 'lucide-react';
+import { Coffee, Copy, Check, HeartHandshake } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
@@ -15,12 +15,14 @@ const DonationPopup: React.FC = () => {
   const [invoice, setInvoice] = useState<string>('');
   const [qrData, setQrData] = useState<string>('');
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState<boolean>(false);
   const { toast } = useToast();
 
   const resetState = () => {
     setInvoice('');
     setQrData('');
     setIsSending(false);
+    setPaymentConfirmed(false);
   };
 
   const handleClose = () => {
@@ -40,13 +42,45 @@ const DonationPopup: React.FC = () => {
     }
   };
 
+  const checkPaymentStatus = async (verifyUrl: string) => {
+    try {
+      const response = await fetch(verifyUrl);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.settled) {
+          setPaymentConfirmed(true);
+          toast({
+            title: "Thank you! 🙏",
+            description: "Your support is greatly appreciated!",
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error checking payment status:', error);
+    }
+  };
+
   const handleZap = async () => {
     setIsSending(true);
     
     try {
-      const generatedInvoice = await createCoinosInvoice(amount);
+      const { invoice: generatedInvoice, verifyUrl } = await createCoinosInvoice(amount);
       setInvoice(generatedInvoice);
       await generateQR(generatedInvoice);
+      
+      // Start polling for payment confirmation
+      const pollInterval = setInterval(async () => {
+        if (!verifyUrl) {
+          clearInterval(pollInterval);
+          return;
+        }
+        
+        await checkPaymentStatus(verifyUrl);
+      }, 2000);
+
+      // Clear polling after 5 minutes
+      setTimeout(() => clearInterval(pollInterval), 300000);
+
     } catch (error) {
       console.error('Error generating lightning invoice:', error);
       toast({
@@ -97,7 +131,12 @@ const DonationPopup: React.FC = () => {
         </DialogHeader>
         
         <div className="flex flex-col gap-4 py-4">
-          {!invoice ? (
+          {paymentConfirmed ? (
+            <div className="flex flex-col items-center gap-4 py-8 animate-fade-in">
+              <HeartHandshake className="h-16 w-16 text-bitcoin-orange animate-scale-in" />
+              <h2 className="text-2xl font-bold text-center">Thank you for your support! ⚡️</h2>
+            </div>
+          ) : !invoice ? (
             <>
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount (sats)</Label>
@@ -163,10 +202,6 @@ const DonationPopup: React.FC = () => {
               </p>
             </div>
           )}
-          
-          <p className="text-xs text-center text-muted-foreground mt-2">
-            Powered by Coinos.io
-          </p>
         </div>
       </DialogContent>
     </Dialog>
