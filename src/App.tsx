@@ -8,7 +8,15 @@ import { SettingsProvider } from "@/hooks/useSettings";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Create a new query client that persists cache
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity, // Keep data fresh forever
+      cacheTime: 1000 * 60 * 60 * 24, // Cache for 24 hours
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

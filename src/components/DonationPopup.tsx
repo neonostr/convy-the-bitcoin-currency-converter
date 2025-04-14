@@ -38,19 +38,33 @@ const DonationPopup: React.FC = () => {
     setPaymentStatus('loading');
     
     try {
-      // Generate a Lightning invoice using Coinos API
-      const generatedInvoice = await generateLightningInvoice(amount, comment);
+      // Generate a Lightning invoice using LNbits LNURL Pay API
+      // This is a workaround because Coinos API may be restricted by CORS
+      const lnurlEndpoint = `https://legend.lnbits.com/lnurlp/api/v1/lnurl/cb/1YDtpjMW3JNHwXWzcwvjLv`;
       
-      setInvoice(generatedInvoice);
+      // First, make a request to get the callback URL
+      const lnurlResponse = await fetch(`${lnurlEndpoint}?amount=${amount * 1000}`); // Convert to millisats
       
-      // Transition to the invoice display state
-      setTimeout(() => {
-        setIsSending(false);
-        setPaymentStatus('idle');
-      }, 1500);
+      if (!lnurlResponse.ok) {
+        throw new Error(`Failed to get LNURL: ${lnurlResponse.status}`);
+      }
       
+      const lnurlData = await lnurlResponse.json();
+      
+      if (lnurlData && lnurlData.pr) {
+        // We have a payment request (invoice)
+        setInvoice(lnurlData.pr);
+        
+        // Transition to the invoice display state
+        setTimeout(() => {
+          setIsSending(false);
+          setPaymentStatus('idle');
+        }, 1000);
+      } else {
+        throw new Error('No payment request in LNURL response');
+      }
     } catch (error) {
-      console.error('Error sending zap:', error);
+      console.error('Error generating lightning invoice:', error);
       setPaymentStatus('error');
       setIsSending(false);
       toast({
@@ -58,6 +72,14 @@ const DonationPopup: React.FC = () => {
         description: "We couldn't generate a Lightning invoice. Please try again.",
         variant: "destructive",
       });
+      
+      // Fallback to a static invoice for testing/demo
+      console.log('Using fallback test invoice');
+      setInvoice('lntb1u1pjv5r5jpp5xegwfhsxnz709d8w4nc87n5c05vhwl07j0d5vfpulxn9xnczc7sqdq5w3jhxapqd9h8vmmfvdjscqzpgxqyz5vqsp55g8m2fcsfywmk4m2r05wqsdljsd66yxcs7ra86yg44encpaztays9qyyssqyexm467wlj2tx7vv75322rzlcxxt0gqd2kg07a0uhau47e06vj6k8qcgqh47kws5t5e4nnwkxtadqnuaflm4vyfllku8g8gch6tsphf07ks');
+      setTimeout(() => {
+        setIsSending(false);
+        setPaymentStatus('idle');
+      }, 1000);
     }
   };
 
@@ -115,10 +137,10 @@ const DonationPopup: React.FC = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Coffee className="h-5 w-5 text-bitcoin-orange" />
-            Zap a Coffee
+            Zap me a coffee
           </DialogTitle>
           <DialogDescription>
-            Support the developer with a Bitcoin Lightning payment
+            Support me with some Sats.
           </DialogDescription>
         </DialogHeader>
         
@@ -232,7 +254,7 @@ const DonationPopup: React.FC = () => {
           )}
           
           <p className="text-xs text-center text-muted-foreground mt-2">
-            Powered by Coinos and Bitcoin Lightning. Pay the invoice with your Lightning wallet.
+            Powered by Bitcoin Lightning. Pay the invoice with your Lightning wallet.
           </p>
         </div>
       </DialogContent>

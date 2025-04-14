@@ -18,7 +18,23 @@ export const initialRates: CoinRates = {
   lastUpdated: new Date()
 };
 
-let cachedRates: CoinRates = { ...initialRates };
+// Try to load rates from localStorage on startup
+const loadRatesFromStorage = (): CoinRates => {
+  try {
+    const storedRates = localStorage.getItem('bitcoin-converter-rates');
+    if (storedRates) {
+      const parsedRates = JSON.parse(storedRates);
+      // Convert the string date back to a Date object
+      parsedRates.lastUpdated = new Date(parsedRates.lastUpdated);
+      return parsedRates;
+    }
+  } catch (error) {
+    console.error('Failed to load rates from localStorage:', error);
+  }
+  return { ...initialRates };
+};
+
+let cachedRates: CoinRates = loadRatesFromStorage();
 let lastFetchTime: number = 0;
 export const THROTTLE_TIME = 60000; // 1 minute in milliseconds
 
@@ -29,6 +45,21 @@ export function getCachedRates(): CoinRates {
 export function updateCachedRates(rates: CoinRates): void {
   cachedRates = { ...rates };
   lastFetchTime = Date.now();
+  
+  // Save to localStorage for offline access
+  try {
+    localStorage.setItem('bitcoin-converter-rates', JSON.stringify(rates));
+  } catch (error) {
+    console.error('Failed to save rates to localStorage:', error);
+  }
+  
+  // Also save to the service worker cache if available
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'CACHE_RATES',
+      payload: rates
+    });
+  }
 }
 
 export function canRefreshRates(): boolean {
@@ -73,4 +104,26 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
     inr: amountInBtc * rates.inr,
     rub: amountInBtc * rates.rub
   };
+}
+
+// Initialize service worker data synchronization
+export function initializeServiceWorkerSync(): void {
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready.then(registration => {
+      // Register a sync event to save rates when online
+      registration.sync.register('save-rates').catch(err => {
+        console.error('Failed to register sync event:', err);
+      });
+      
+      // Send current rates to service worker when page is about to unload
+      window.addEventListener('beforeunload', () => {
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: 'CACHE_RATES',
+            payload: cachedRates
+          });
+        }
+      });
+    });
+  }
 }

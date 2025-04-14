@@ -61,7 +61,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateDisplayCurrencies = (currencies: Currency[]) => {
-    if (currencies.length > 0) {
+    if (currencies.length >= 2) {
       updateSettings({ displayCurrencies: currencies });
     }
   };

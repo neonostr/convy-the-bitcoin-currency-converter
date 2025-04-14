@@ -28,7 +28,7 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
           >
             <div className="flex justify-between">
               <span className="uppercase font-medium">
-                {currency}
+                {currency === 'sats' ? 'SATS' : currency}
               </span>
               <span className="font-bold">
                 {formatCurrency(conversions[currency] || 0, currency)} {getCurrencySymbol(currency)}

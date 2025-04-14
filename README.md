@@ -6,7 +6,7 @@ A privacy-focused, open-source Bitcoin currency converter that works offline and
 ## Features
 
 - **Privacy First**: All calculations are performed locally in your browser. No tracking, no analytics, no data collection.
-- **Offline Support**: Works without an internet connection after the first load.
+- **Offline Support**: Works without an internet connection after the first load, with cached exchange rates.
 - **Multiple Currencies**: Convert between BTC, satoshis, and various fiat currencies (USD, EUR, GBP, etc.).
 - **Customizable Currency Display**: Choose up to 6 currencies to display and reorder them as you prefer.
 - **Real-time Rates**: Fetch the latest exchange rates from CoinGecko (when online).
@@ -14,7 +14,7 @@ A privacy-focused, open-source Bitcoin currency converter that works offline and
 - **Dark Mode**: Easy on the eyes with a toggleable dark mode.
 - **Open Source**: Free and open-source software (FOSS) you can verify and trust.
 - **PWA Support**: Install as a Progressive Web App on your device with custom home screen icon.
-- **Lightning Payments**: Support development via Lightning Network using Coinos.
+- **Lightning Payments**: Support development via Lightning Network.
 
 ## How to Use
 
@@ -22,13 +22,13 @@ A privacy-focused, open-source Bitcoin currency converter that works offline and
 2. Select your base currency (BTC, sats, USD, EUR, etc.).
 3. View the conversions to all other currencies instantly.
 4. Tap any result to copy just the numeric value to your clipboard.
-5. Rates auto-update every 60 seconds with user activity.
+5. Rates auto-update every 60 seconds with user activity, and are cached for offline use.
 6. Customize your currency display in the settings menu.
 
 ## Customizing Currency Display
 
 1. Click the settings icon in the top-right corner.
-2. Under "Display Currencies," switch on/off currencies you want to show.
+2. Under "Display Currencies," switch on/off currencies you want to show (minimum 2, maximum 6).
 3. Drag and drop to reorder the currencies.
 4. Close the settings menu, and changes will be applied immediately.
 
@@ -45,6 +45,14 @@ A privacy-focused, open-source Bitcoin currency converter that works offline and
 2. Tap the three-dot menu.
 3. Tap "Add to Home Screen" or "Install App".
 4. Follow the prompts to install.
+
+## Offline Support
+
+The app will work without an internet connection after the first load:
+- All currency conversion calculations happen locally on your device
+- Exchange rates are cached for offline use
+- The app will use the most recently fetched rates when offline
+- When you come back online, the app will automatically refresh rates
 
 ## Privacy
 
@@ -71,12 +79,11 @@ This project is built with:
 
 ### Creating a Favicon
 
-To create a custom favicon:
+The app uses custom favicons for better recognition when installed as a PWA. To create your own:
 
-1. Create a square image (recommended size: 512x512 pixels)
-2. Convert it to different formats using a tool like [RealFaviconGenerator](https://realfavicongenerator.net/)
-3. Place the favicon files in the public directory
-4. Update the references in index.html
+1. Create square images in multiple sizes (192x192 and 512x512 pixels are recommended)
+2. Update the references in manifest.json and index.html
+3. For best compatibility, provide both PNG and ICO formats
 
 ### Running Locally
 

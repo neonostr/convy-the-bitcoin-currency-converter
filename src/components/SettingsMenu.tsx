@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Settings, Moon, Sun } from 'lucide-react';
@@ -10,7 +10,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Currency } from '@/types/currency.types';
 import { getCurrencyLabel } from '@/utils/formatUtils';
 
-// Maximum number of allowed currencies to display
+// Minimum and maximum number of allowed currencies to display
+const MIN_CURRENCY_COUNT = 2;
 const MAX_CURRENCY_COUNT = 6;
 
 const SettingsMenu: React.FC = () => {
@@ -25,6 +26,15 @@ const SettingsMenu: React.FC = () => {
     }
   }, [isOpen, settings.displayCurrencies]);
 
+  // Handle menu close with explicit state update
+  const handleOpenChange = useCallback((open: boolean) => {
+    // When closing, ensure settings are updated
+    if (!open && selectedCurrencies.length >= MIN_CURRENCY_COUNT) {
+      updateDisplayCurrencies(selectedCurrencies);
+    }
+    setIsOpen(open);
+  }, [selectedCurrencies, updateDisplayCurrencies]);
+
   const handleDragEnd = (result: DropResult) => {
     // Dropped outside the list
     if (!result.destination) return;
@@ -33,10 +43,8 @@ const SettingsMenu: React.FC = () => {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update local state
+    // Update local state and global settings
     setSelectedCurrencies(items);
-    
-    // Apply changes immediately to global state
     updateDisplayCurrencies(items);
   };
 
@@ -51,23 +59,21 @@ const SettingsMenu: React.FC = () => {
         return; // Don't allow more than MAX_CURRENCY_COUNT
       }
     } else {
-      // Allow removing currencies as long as we have at least one
-      if (selectedCurrencies.length > 1) {
+      // Allow removing currencies as long as we have at least MIN_CURRENCY_COUNT
+      if (selectedCurrencies.length > MIN_CURRENCY_COUNT) {
         newSelection = selectedCurrencies.filter(c => c !== currency);
       } else {
-        return; // Don't allow less than 1 currency
+        return; // Don't allow less than MIN_CURRENCY_COUNT
       }
     }
     
-    // Update local state
+    // Update local state and global settings
     setSelectedCurrencies(newSelection);
-    
-    // Apply changes immediately to global state
     updateDisplayCurrencies(newSelection);
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Settings className="h-5 w-5" />
@@ -100,7 +106,7 @@ const SettingsMenu: React.FC = () => {
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">Display Currencies</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select up to {MAX_CURRENCY_COUNT} currencies to display on the main screen. Drag and drop to reorder.
+            Select between {MIN_CURRENCY_COUNT} and {MAX_CURRENCY_COUNT} currencies to display on the main screen. Drag and drop to reorder.
           </p>
           
           <div className="space-y-4">
@@ -130,7 +136,7 @@ const SettingsMenu: React.FC = () => {
                             <Switch 
                               checked={true}
                               onCheckedChange={() => toggleCurrency(currency, false)}
-                              disabled={selectedCurrencies.length <= 1}
+                              disabled={selectedCurrencies.length <= MIN_CURRENCY_COUNT}
                             />
                           </div>
                         )}
