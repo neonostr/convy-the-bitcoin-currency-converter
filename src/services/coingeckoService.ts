@@ -1,3 +1,4 @@
+
 import { useToast } from "@/components/ui/use-toast";
 
 export interface CoinRates {
@@ -7,6 +8,12 @@ export interface CoinRates {
   eur: number;
   chf: number;
   cny: number;
+  jpy: number;
+  gbp: number;
+  aud: number;
+  cad: number;
+  inr: number;
+  rub: number;
   lastUpdated: Date;
 }
 
@@ -18,6 +25,12 @@ const initialRates: CoinRates = {
   eur: 62500,
   chf: 60000,
   cny: 440000,
+  jpy: 10000000,
+  gbp: 53000,
+  aud: 102000,
+  cad: 91000,
+  inr: 5600000,
+  rub: 6200000,
   lastUpdated: new Date()
 };
 
@@ -35,7 +48,7 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   
   try {
     const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny'
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     );
     
     if (!response.ok) {
@@ -49,6 +62,12 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     const btcToEur = data.bitcoin.eur;
     const btcToChf = data.bitcoin.chf;
     const btcToCny = data.bitcoin.cny;
+    const btcToJpy = data.bitcoin.jpy;
+    const btcToGbp = data.bitcoin.gbp;
+    const btcToAud = data.bitcoin.aud;
+    const btcToCad = data.bitcoin.cad;
+    const btcToInr = data.bitcoin.inr;
+    const btcToRub = data.bitcoin.rub;
     
     // Update cached rates
     cachedRates = {
@@ -58,6 +77,12 @@ export async function fetchCoinRates(): Promise<CoinRates> {
       eur: btcToEur,
       chf: btcToChf,
       cny: btcToCny,
+      jpy: btcToJpy,
+      gbp: btcToGbp,
+      aud: btcToAud,
+      cad: btcToCad,
+      inr: btcToInr,
+      rub: btcToRub,
       lastUpdated: new Date()
     };
     
@@ -99,6 +124,24 @@ export function convertCurrency(amount: number, fromCurrency: string, rates: Coi
     case 'cny':
       amountInBtc = amount / rates.cny;
       break;
+    case 'jpy':
+      amountInBtc = amount / rates.jpy;
+      break;
+    case 'gbp':
+      amountInBtc = amount / rates.gbp;
+      break;
+    case 'aud':
+      amountInBtc = amount / rates.aud;
+      break;
+    case 'cad':
+      amountInBtc = amount / rates.cad;
+      break;
+    case 'inr':
+      amountInBtc = amount / rates.inr;
+      break;
+    case 'rub':
+      amountInBtc = amount / rates.rub;
+      break;
     default:
       amountInBtc = 0;
   }
@@ -110,7 +153,13 @@ export function convertCurrency(amount: number, fromCurrency: string, rates: Coi
     usd: amountInBtc * rates.usd,
     eur: amountInBtc * rates.eur,
     chf: amountInBtc * rates.chf,
-    cny: amountInBtc * rates.cny
+    cny: amountInBtc * rates.cny,
+    jpy: amountInBtc * rates.jpy,
+    gbp: amountInBtc * rates.gbp,
+    aud: amountInBtc * rates.aud,
+    cad: amountInBtc * rates.cad,
+    inr: amountInBtc * rates.inr,
+    rub: amountInBtc * rates.rub
   };
 }
 
@@ -151,6 +200,18 @@ export function getCurrencySymbol(currency: string): string {
       return 'CHF';
     case 'cny':
       return '¥';
+    case 'jpy':
+      return '¥';
+    case 'gbp':
+      return '£';
+    case 'aud':
+      return 'A$';
+    case 'cad':
+      return 'C$';
+    case 'inr':
+      return '₹';
+    case 'rub':
+      return '₽';
     default:
       return '';
   }

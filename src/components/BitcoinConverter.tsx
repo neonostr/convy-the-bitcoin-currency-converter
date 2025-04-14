@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Bitcoin, Sun, Moon, Coffee } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { useTheme } from '@/hooks/useTheme';
+import { Bitcoin, Coffee } from 'lucide-react';
+import SettingsMenu from '@/components/SettingsMenu';
+import DonationPopup from '@/components/DonationPopup';
+import { useSettings, Currency } from '@/hooks/useSettings';
 import { 
   fetchCoinRates, 
   CoinRates, 
@@ -13,8 +15,6 @@ import {
   getLastUpdatedFormatted,
   canRefreshRates 
 } from '@/services/coingeckoService';
-
-const CURRENCIES = ['btc', 'sats', 'usd', 'eur', 'chf', 'cny'];
 
 const BitcoinConverter = () => {
   const [amount, setAmount] = useState<string>('1');
@@ -27,7 +27,7 @@ const BitcoinConverter = () => {
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
+  const { settings } = useSettings();
 
   useEffect(() => {
     if (isFirstLoad || !amount) {
@@ -156,10 +156,6 @@ const BitcoinConverter = () => {
     });
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
   const handleInputFocus = () => {
     setAmount('');
   };
@@ -181,14 +177,7 @@ const BitcoinConverter = () => {
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />
           <h1 className="text-2xl font-bold">Bitcoin Currency Converter</h1>
         </div>
-        <div className="flex items-center space-x-2">
-          <Sun className="h-4 w-4 text-muted-foreground" />
-          <Switch
-            checked={theme === 'dark'}
-            onCheckedChange={toggleTheme}
-          />
-          <Moon className="h-4 w-4 text-muted-foreground" />
-        </div>
+        <SettingsMenu />
       </div>
 
       <div className="w-full mb-6">
@@ -206,7 +195,7 @@ const BitcoinConverter = () => {
       </div>
 
       <div className="grid grid-cols-3 gap-2 w-full mb-6">
-        {CURRENCIES.map((currency) => (
+        {settings.displayCurrencies.slice(0, 6).map((currency) => (
           <button
             key={currency}
             className={`
@@ -229,20 +218,23 @@ const BitcoinConverter = () => {
       )}
 
       <div className="w-full space-y-4 mb-4">
-        {CURRENCIES.filter(currency => currency !== selectedCurrency).map((currency) => (
-          <div
-            key={currency}
-            className="bg-secondary p-4 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors"
-            onClick={() => copyToClipboard(`${formatCurrency(conversions[currency] || 0, currency)} ${getCurrencySymbol(currency)}`)}
-          >
-            <div className="flex justify-between">
-              <span className="uppercase font-medium">{currency}</span>
-              <span className="font-bold">
-                {formatCurrency(conversions[currency] || 0, currency)} {getCurrencySymbol(currency)}
-              </span>
+        {settings.displayCurrencies
+          .filter(currency => currency !== selectedCurrency)
+          .slice(0, 5)
+          .map((currency) => (
+            <div
+              key={currency}
+              className="bg-secondary p-4 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors"
+              onClick={() => copyToClipboard(`${formatCurrency(conversions[currency] || 0, currency)} ${getCurrencySymbol(currency)}`)}
+            >
+              <div className="flex justify-between">
+                <span className="uppercase font-medium">{currency}</span>
+                <span className="font-bold">
+                  {formatCurrency(conversions[currency] || 0, currency)} {getCurrencySymbol(currency)}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
@@ -252,10 +244,7 @@ const BitcoinConverter = () => {
         </a> the source code to verify or host yourself. Add me to your home screen for a seamless web app experience.
       </div>
 
-      <a href="https://zapmeacoffee.com/neo-nostrpurple-com" className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors mb-2" target="_blank" rel="noopener noreferrer">
-        <Coffee className="h-4 w-4 mr-1" />
-        <span>Zap me a coffee</span>
-      </a>
+      <DonationPopup />
     </div>
   );
 };
