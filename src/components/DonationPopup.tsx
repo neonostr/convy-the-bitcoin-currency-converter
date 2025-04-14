@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -49,10 +48,6 @@ const DonationPopup: React.FC = () => {
         const data = await response.json();
         if (data.settled) {
           setPaymentConfirmed(true);
-          toast({
-            title: "Thank you! 🙏",
-            description: "Your support is greatly appreciated!",
-          });
         }
       }
     } catch (error) {
@@ -68,7 +63,6 @@ const DonationPopup: React.FC = () => {
       setInvoice(generatedInvoice);
       await generateQR(generatedInvoice);
       
-      // Start polling for payment confirmation
       const pollInterval = setInterval(async () => {
         if (!verifyUrl) {
           clearInterval(pollInterval);
@@ -78,7 +72,6 @@ const DonationPopup: React.FC = () => {
         await checkPaymentStatus(verifyUrl);
       }, 2000);
 
-      // Clear polling after 5 minutes
       setTimeout(() => clearInterval(pollInterval), 300000);
 
     } catch (error) {
