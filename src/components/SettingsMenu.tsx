@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Settings, Moon, Sun } from 'lucide-react';
@@ -24,15 +24,6 @@ const SettingsMenu: React.FC = () => {
       setSelectedCurrencies([...settings.displayCurrencies]);
     }
   }, [isOpen, settings.displayCurrencies]);
-
-  // Handle open/close of the menu
-  const handleOpenChange = useCallback((open: boolean) => {
-    // When closing, make sure we apply any pending changes
-    if (!open && selectedCurrencies.length > 0) {
-      updateDisplayCurrencies(selectedCurrencies);
-    }
-    setIsOpen(open);
-  }, [selectedCurrencies, updateDisplayCurrencies]);
 
   const handleDragEnd = (result: DropResult) => {
     // Dropped outside the list
@@ -76,7 +67,7 @@ const SettingsMenu: React.FC = () => {
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Settings className="h-5 w-5" />

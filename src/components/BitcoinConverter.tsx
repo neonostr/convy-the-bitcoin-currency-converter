@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin, Coffee } from 'lucide-react';
@@ -99,8 +99,8 @@ const BitcoinConverter = () => {
       <div className="text-xs text-muted-foreground mb-4 text-center">
         Tap any result to copy. Data provided by CoinGecko API. All calculations are performed offline on your device. 
         You can <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
-          <u>check</u>
-        </a> the source code to verify or host yourself. Add me to your home screen for a seamless web app experience.
+          <u>source code</u>
+        </a> to verify or host yourself. Add me to your home screen for a seamless web app experience.
       </div>
 
       <DonationPopup />

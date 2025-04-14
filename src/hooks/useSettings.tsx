@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { Currency } from '@/types/currency.types';
 
 export interface Settings {
@@ -7,10 +7,22 @@ export interface Settings {
   displayCurrencies: Currency[];
 }
 
+interface SettingsContextType {
+  settings: Settings;
+  updateSettings: (newSettings: Partial<Settings>) => void;
+  toggleTheme: () => void;
+  updateDisplayCurrencies: (currencies: Currency[]) => void;
+  allCurrencies: Currency[];
+}
+
 const DEFAULT_CURRENCIES: Currency[] = ['btc', 'sats', 'usd', 'eur', 'chf', 'gbp'];
 const ALL_CURRENCIES: Currency[] = ['btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub'];
 
-export const useSettings = () => {
+// Create a context
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+
+// Provider component
+export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<Settings>(() => {
     const savedSettings = localStorage.getItem('bitcoin-converter-settings');
     
@@ -54,11 +66,26 @@ export const useSettings = () => {
     }
   };
 
-  return {
-    settings,
-    updateSettings,
-    toggleTheme,
-    updateDisplayCurrencies,
-    allCurrencies: ALL_CURRENCIES,
-  };
+  return (
+    <SettingsContext.Provider 
+      value={{ 
+        settings, 
+        updateSettings, 
+        toggleTheme, 
+        updateDisplayCurrencies, 
+        allCurrencies: ALL_CURRENCIES 
+      }}
+    >
+      {children}
+    </SettingsContext.Provider>
+  );
+};
+
+// Hook for using the settings context
+export const useSettings = () => {
+  const context = useContext(SettingsContext);
+  if (context === undefined) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
 };

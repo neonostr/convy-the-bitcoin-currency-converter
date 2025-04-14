@@ -27,7 +27,9 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
             onClick={() => onResultClick(`${formatCurrency(conversions[currency] || 0, currency)} ${getCurrencySymbol(currency)}`)}
           >
             <div className="flex justify-between">
-              <span className="uppercase font-medium">{currency}</span>
+              <span className="uppercase font-medium">
+                {currency}
+              </span>
               <span className="font-bold">
                 {formatCurrency(conversions[currency] || 0, currency)} {getCurrencySymbol(currency)}
               </span>
