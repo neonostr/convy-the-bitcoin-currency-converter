@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin, Coffee } from 'lucide-react';
@@ -26,7 +26,8 @@ const BitcoinConverter = () => {
     handleInputChange 
   } = useConversion();
 
-  const displayCurrencies = settings.displayCurrencies;
+  // Get display currencies directly from settings to ensure we always have the latest
+  const { displayCurrencies } = settings;
 
   const handleInputFocus = () => {
     setAmount('');

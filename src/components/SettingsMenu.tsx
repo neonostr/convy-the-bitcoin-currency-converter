@@ -25,10 +25,10 @@ const SettingsMenu: React.FC = () => {
     }
   }, [isOpen, settings.displayCurrencies]);
 
-  // Ensure changes are committed when the menu is closed
+  // Handle open/close of the menu
   const handleOpenChange = useCallback((open: boolean) => {
+    // When closing, make sure we apply any pending changes
     if (!open && selectedCurrencies.length > 0) {
-      // Apply settings when closing the menu
       updateDisplayCurrencies(selectedCurrencies);
     }
     setIsOpen(open);
@@ -42,8 +42,10 @@ const SettingsMenu: React.FC = () => {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update local state and propagate changes to app state
+    // Update local state
     setSelectedCurrencies(items);
+    
+    // Apply changes immediately to global state
     updateDisplayCurrencies(items);
   };
 
@@ -66,8 +68,10 @@ const SettingsMenu: React.FC = () => {
       }
     }
     
-    // Update both local state and app state
+    // Update local state
     setSelectedCurrencies(newSelection);
+    
+    // Apply changes immediately to global state
     updateDisplayCurrencies(newSelection);
   };
 
@@ -129,7 +133,9 @@ const SettingsMenu: React.FC = () => {
                             {...provided.dragHandleProps}
                             className="flex items-center justify-between p-3 bg-secondary rounded-md"
                           >
-                            <span className="font-medium">{getCurrencyLabel(currency)}</span>
+                            <span className="font-medium">
+                              {currency === 'sats' ? 'Satoshis (SATS)' : getCurrencyLabel(currency)}
+                            </span>
                             <Switch 
                               checked={true}
                               onCheckedChange={() => toggleCurrency(currency, false)}
@@ -156,7 +162,9 @@ const SettingsMenu: React.FC = () => {
                     key={currency}
                     className="flex items-center justify-between p-3 bg-secondary/50 rounded-md"
                   >
-                    <span>{getCurrencyLabel(currency)}</span>
+                    <span>
+                      {currency === 'sats' ? 'Satoshis (SATS)' : getCurrencyLabel(currency)}
+                    </span>
                     <Switch 
                       checked={false}
                       onCheckedChange={() => toggleCurrency(currency, true)}

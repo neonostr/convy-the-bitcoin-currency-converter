@@ -4,6 +4,7 @@ import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
 import { convertCurrency, getCachedRates, canRefreshRates } from '@/services/ratesService';
 import { useToast } from '@/hooks/use-toast';
+import { useSettings } from '@/hooks/useSettings';
 
 export const useConversion = () => {
   const [amount, setAmount] = useState<string>('1');
@@ -13,12 +14,14 @@ export const useConversion = () => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const lastRefreshTime = useRef<number>(0);
   const { toast } = useToast();
+  const { settings } = useSettings();
 
   // Fetch rates initially when component mounts
   useEffect(() => {
     fetchRates();
   }, []);
 
+  // Update conversions when amount, selected currency, or rates change
   useEffect(() => {
     if (rates && amount !== '') {
       const normalizedAmount = amount.replace(',', '.');
@@ -32,6 +35,19 @@ export const useConversion = () => {
       }
     }
   }, [amount, selectedCurrency, rates]);
+
+  // Update conversions when settings change (to reflect any changes in display currencies)
+  useEffect(() => {
+    if (rates && amount !== '') {
+      const normalizedAmount = amount.replace(',', '.');
+      const numericAmount = parseFloat(normalizedAmount);
+      
+      if (!isNaN(numericAmount)) {
+        const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
+        setConversions(newConversions);
+      }
+    }
+  }, [settings]);
 
   const shouldRefreshRates = (): boolean => {
     const currentTime = Date.now();
