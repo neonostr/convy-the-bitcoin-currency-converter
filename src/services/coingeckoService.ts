@@ -1,5 +1,6 @@
 
 import { useToast } from "@/components/ui/use-toast";
+import { Currency } from "@/hooks/useSettings";
 
 export interface CoinRates {
   btc: number;
@@ -101,7 +102,7 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   }
 }
 
-export function convertCurrency(amount: number, fromCurrency: string, rates: CoinRates): Record<string, number> {
+export function convertCurrency(amount: number, fromCurrency: Currency, rates: CoinRates): Record<string, number> {
   // Convert to BTC first
   let amountInBtc = 0;
   
