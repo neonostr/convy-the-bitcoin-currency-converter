@@ -10,7 +10,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Currency } from '@/types/currency.types';
 import { getCurrencyLabel } from '@/utils/formatUtils';
 
-const FIXED_CURRENCY_COUNT = 6;
+// Maximum number of allowed currencies to display
+const MAX_CURRENCY_COUNT = 6;
 
 const SettingsMenu: React.FC = () => {
   const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies } = useSettings();
@@ -41,18 +42,18 @@ const SettingsMenu: React.FC = () => {
     let newSelection: Currency[];
     
     if (isEnabled) {
-      // Only add if we have less than FIXED_CURRENCY_COUNT
-      if (selectedCurrencies.length < FIXED_CURRENCY_COUNT) {
+      // Only add if we have less than MAX_CURRENCY_COUNT
+      if (selectedCurrencies.length < MAX_CURRENCY_COUNT) {
         newSelection = [...selectedCurrencies, currency];
       } else {
-        return; // Don't allow more than FIXED_CURRENCY_COUNT
+        return; // Don't allow more than MAX_CURRENCY_COUNT
       }
     } else {
-      // Only remove if we still have FIXED_CURRENCY_COUNT currencies
-      if (selectedCurrencies.length > FIXED_CURRENCY_COUNT) {
+      // Allow removing currencies as long as we have at least one
+      if (selectedCurrencies.length > 1) {
         newSelection = selectedCurrencies.filter(c => c !== currency);
       } else {
-        return; // Don't allow less than FIXED_CURRENCY_COUNT
+        return; // Don't allow less than 1 currency
       }
     }
     
@@ -95,7 +96,7 @@ const SettingsMenu: React.FC = () => {
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">Display Currencies</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select exactly {FIXED_CURRENCY_COUNT} currencies to display on the main screen. Drag and drop to reorder.
+            Select up to {MAX_CURRENCY_COUNT} currencies to display on the main screen. Drag and drop to reorder.
           </p>
           
           <div className="space-y-4">
@@ -123,7 +124,7 @@ const SettingsMenu: React.FC = () => {
                             <Switch 
                               checked={true}
                               onCheckedChange={() => toggleCurrency(currency, false)}
-                              disabled={selectedCurrencies.length <= FIXED_CURRENCY_COUNT}
+                              disabled={selectedCurrencies.length <= 1}
                             />
                           </div>
                         )}
@@ -150,7 +151,7 @@ const SettingsMenu: React.FC = () => {
                     <Switch 
                       checked={false}
                       onCheckedChange={() => toggleCurrency(currency, true)}
-                      disabled={selectedCurrencies.length >= FIXED_CURRENCY_COUNT}
+                      disabled={selectedCurrencies.length >= MAX_CURRENCY_COUNT}
                     />
                   </div>
                 ))}

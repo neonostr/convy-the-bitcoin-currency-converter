@@ -63,7 +63,7 @@ export function getLastUpdatedFormatted(timestamp: Date): string {
 export function getCurrencyLabel(currency: string): string {
   switch (currency) {
     case 'btc': return 'Bitcoin (BTC)';
-    case 'sats': return 'Satoshis (sats)';
+    case 'sats': return 'Satoshis (SATS)';
     case 'usd': return 'US Dollar (USD)';
     case 'eur': return 'Euro (EUR)';
     case 'chf': return 'Swiss Franc (CHF)';

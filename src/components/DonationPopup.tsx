@@ -24,8 +24,9 @@ const DonationPopup: React.FC = () => {
   // Generate QR code from invoice
   useEffect(() => {
     if (invoice) {
-      // Use a reliable QR code service
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(`lightning:${invoice}`)}&size=200x200&margin=10`;
+      // Make sure the QR code includes the lightning: prefix for wallet apps
+      const invoiceData = invoice.startsWith('lightning:') ? invoice : `lightning:${invoice}`;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(invoiceData)}&size=200x200&margin=10`;
       setQrData(qrCodeUrl);
     } else {
       setQrData('');
@@ -37,7 +38,7 @@ const DonationPopup: React.FC = () => {
     setPaymentStatus('loading');
     
     try {
-      // Generate a Lightning invoice using our service
+      // Generate a Lightning invoice using Coinos API
       const generatedInvoice = await generateLightningInvoice(amount, comment);
       
       setInvoice(generatedInvoice);
@@ -59,8 +60,9 @@ const DonationPopup: React.FC = () => {
       });
     }
   };
-  
-  // Simulate a successful payment
+
+  // For demo purposes, we can simulate a successful payment
+  // In a real app, you'd check the payment status by polling an API
   const simulateSuccessfulPayment = () => {
     setPaymentStatus('success');
     toast({
@@ -191,7 +193,7 @@ const DonationPopup: React.FC = () => {
               
               <div className="flex items-center w-full">
                 <Input
-                  value={invoice.substring(0, 15) + '...' + invoice.substring(invoice.length - 15)}
+                  value={invoice.length > 30 ? `${invoice.substring(0, 15)}...${invoice.substring(invoice.length - 15)}` : invoice}
                   readOnly
                   className="pr-10 font-mono text-sm"
                 />
@@ -209,7 +211,7 @@ const DonationPopup: React.FC = () => {
                 Scan this QR code with your Lightning wallet to pay
               </p>
               
-              {/* For demo purposes, we'll add a button to simulate a successful payment */}
+              {/* For demo purposes only */}
               <Button 
                 variant="outline" 
                 size="sm"
@@ -230,7 +232,7 @@ const DonationPopup: React.FC = () => {
           )}
           
           <p className="text-xs text-center text-muted-foreground mt-2">
-            Powered by Nostr and Bitcoin Lightning. Pay the invoice with your Lightning wallet.
+            Powered by Coinos and Bitcoin Lightning. Pay the invoice with your Lightning wallet.
           </p>
         </div>
       </DialogContent>
