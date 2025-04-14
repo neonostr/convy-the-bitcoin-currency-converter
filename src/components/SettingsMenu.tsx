@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Settings, Moon, Sun } from 'lucide-react';
@@ -9,9 +9,26 @@ import { Label } from '@/components/ui/label';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 const SettingsMenu: React.FC = () => {
-  const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies } = useSettings();
+  const { settings, toggleTheme, updateDisplayCurrencies, updateDraftCurrencies, cancelDraftChanges, allCurrencies } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([...settings.displayCurrencies]);
+  const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
+
+  // Initialize selected currencies when the menu opens
+  useEffect(() => {
+    if (isOpen) {
+      // Use draft currencies if available, otherwise use the current display currencies
+      setSelectedCurrencies(
+        settings.draftDisplayCurrencies || [...settings.displayCurrencies]
+      );
+    }
+  }, [isOpen, settings.displayCurrencies, settings.draftDisplayCurrencies]);
+
+  // Update the draft currencies whenever selected currencies change
+  useEffect(() => {
+    if (isOpen && selectedCurrencies.length > 0) {
+      updateDraftCurrencies(selectedCurrencies);
+    }
+  }, [selectedCurrencies, isOpen, updateDraftCurrencies]);
 
   const handleDragEnd = (result: DropResult) => {
     // Dropped outside the list
@@ -27,8 +44,8 @@ const SettingsMenu: React.FC = () => {
   const toggleCurrency = (currency: Currency) => {
     setSelectedCurrencies(prev => {
       if (prev.includes(currency)) {
-        // Ensure we don't go below 5 currencies
-        if (prev.length <= 5) {
+        // Ensure we don't go below 6 currencies
+        if (prev.length <= 6) {
           return prev;
         }
         return prev.filter(c => c !== currency);
@@ -40,6 +57,11 @@ const SettingsMenu: React.FC = () => {
 
   const saveSettings = () => {
     updateDisplayCurrencies(selectedCurrencies);
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    cancelDraftChanges();
     setIsOpen(false);
   };
 
@@ -98,7 +120,7 @@ const SettingsMenu: React.FC = () => {
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">Display Currencies</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select at least 5 currencies to display on the main screen. Drag and drop to reorder.
+            Select at least 6 currencies to display on the main screen. Drag and drop to reorder.
           </p>
           
           <div className="space-y-4">
@@ -126,7 +148,7 @@ const SettingsMenu: React.FC = () => {
                             <Switch 
                               checked={true}
                               onCheckedChange={() => toggleCurrency(currency)}
-                              disabled={selectedCurrencies.length <= 5}
+                              disabled={selectedCurrencies.length <= 6}
                             />
                           </div>
                         )}
@@ -161,7 +183,7 @@ const SettingsMenu: React.FC = () => {
         </div>
         
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
+          <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
           <Button onClick={saveSettings}>

@@ -6,6 +6,7 @@ export type Currency = 'btc' | 'sats' | 'usd' | 'eur' | 'chf' | 'cny' | 'jpy' | 
 export interface Settings {
   theme: 'light' | 'dark';
   displayCurrencies: Currency[];
+  draftDisplayCurrencies?: Currency[]; // Added for live preview
 }
 
 const DEFAULT_CURRENCIES: Currency[] = ['btc', 'sats', 'usd', 'eur', 'chf', 'gbp'];
@@ -50,7 +51,17 @@ export const useSettings = () => {
   };
 
   const updateDisplayCurrencies = (currencies: Currency[]) => {
-    updateSettings({ displayCurrencies: currencies });
+    updateSettings({ displayCurrencies: currencies, draftDisplayCurrencies: undefined });
+  };
+
+  // New function to update draft currencies for live preview
+  const updateDraftCurrencies = (currencies: Currency[]) => {
+    updateSettings({ draftDisplayCurrencies: currencies });
+  };
+
+  // New function to cancel draft changes
+  const cancelDraftChanges = () => {
+    updateSettings({ draftDisplayCurrencies: undefined });
   };
 
   return {
@@ -58,6 +69,8 @@ export const useSettings = () => {
     updateSettings,
     toggleTheme,
     updateDisplayCurrencies,
+    updateDraftCurrencies,
+    cancelDraftChanges,
     allCurrencies: ALL_CURRENCIES,
   };
 };

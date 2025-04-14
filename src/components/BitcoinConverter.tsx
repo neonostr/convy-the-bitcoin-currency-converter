@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Bitcoin, Coffee } from 'lucide-react';
 import SettingsMenu from '@/components/SettingsMenu';
 import DonationPopup from '@/components/DonationPopup';
@@ -29,8 +29,11 @@ const BitcoinConverter = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
 
+  // Get the current display currencies (with live preview support)
+  const displayCurrencies = settings.draftDisplayCurrencies || settings.displayCurrencies;
+
   useEffect(() => {
-    if (isFirstLoad || !amount) {
+    if (isFirstLoad) {
       setAmount('1');
       setSelectedCurrency('btc');
       setIsFirstLoad(false);
@@ -195,7 +198,7 @@ const BitcoinConverter = () => {
       </div>
 
       <div className="grid grid-cols-3 gap-2 w-full mb-6">
-        {settings.displayCurrencies.slice(0, 6).map((currency) => (
+        {displayCurrencies.slice(0, 6).map((currency) => (
           <button
             key={currency}
             className={`
@@ -218,7 +221,7 @@ const BitcoinConverter = () => {
       )}
 
       <div className="w-full space-y-4 mb-4">
-        {settings.displayCurrencies
+        {displayCurrencies
           .filter(currency => currency !== selectedCurrency)
           .slice(0, 5)
           .map((currency) => (

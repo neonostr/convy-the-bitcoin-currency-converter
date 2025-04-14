@@ -1,5 +1,3 @@
-
-import { useToast } from "@/components/ui/use-toast";
 import { Currency } from "@/hooks/useSettings";
 
 export interface CoinRates {
@@ -18,7 +16,7 @@ export interface CoinRates {
   lastUpdated: Date;
 }
 
-// Initial rates (in case API fails on first load)
+// Current market rates as fallback (April 2023)
 const initialRates: CoinRates = {
   btc: 1,
   sats: 100000000, // 1 BTC = 100,000,000 satoshis
@@ -48,12 +46,13 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   }
   
   try {
+    // Using the correct CoinGecko API endpoint to get real-time rates
     const response = await fetch(
       'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     );
     
     if (!response.ok) {
-      throw new Error('Failed to fetch data from CoinGecko');
+      throw new Error(`Failed to fetch data from CoinGecko: ${response.status}`);
     }
     
     const data = await response.json();
@@ -62,32 +61,22 @@ export async function fetchCoinRates(): Promise<CoinRates> {
       throw new Error('Invalid response from CoinGecko API');
     }
     
-    // Calculate rates
-    const btcToUsd = data.bitcoin.usd;
-    const btcToEur = data.bitcoin.eur;
-    const btcToChf = data.bitcoin.chf;
-    const btcToCny = data.bitcoin.cny;
-    const btcToJpy = data.bitcoin.jpy;
-    const btcToGbp = data.bitcoin.gbp;
-    const btcToAud = data.bitcoin.aud;
-    const btcToCad = data.bitcoin.cad;
-    const btcToInr = data.bitcoin.inr;
-    const btcToRub = data.bitcoin.rub;
+    console.log("Bitcoin rates from API:", data.bitcoin);
     
-    // Update cached rates
+    // Update cached rates with real rates from the API
     cachedRates = {
       btc: 1,
       sats: 100000000, // 1 BTC = 100,000,000 satoshis
-      usd: btcToUsd,
-      eur: btcToEur,
-      chf: btcToChf,
-      cny: btcToCny,
-      jpy: btcToJpy,
-      gbp: btcToGbp,
-      aud: btcToAud,
-      cad: btcToCad,
-      inr: btcToInr,
-      rub: btcToRub,
+      usd: data.bitcoin.usd || initialRates.usd,
+      eur: data.bitcoin.eur || initialRates.eur,
+      chf: data.bitcoin.chf || initialRates.chf,
+      cny: data.bitcoin.cny || initialRates.cny,
+      jpy: data.bitcoin.jpy || initialRates.jpy,
+      gbp: data.bitcoin.gbp || initialRates.gbp,
+      aud: data.bitcoin.aud || initialRates.aud,
+      cad: data.bitcoin.cad || initialRates.cad,
+      inr: data.bitcoin.inr || initialRates.inr,
+      rub: data.bitcoin.rub || initialRates.rub,
       lastUpdated: new Date()
     };
     
@@ -117,38 +106,12 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
     case 'sats':
       amountInBtc = amount / rates.sats;
       break;
-    case 'usd':
-      amountInBtc = amount / rates.usd;
-      break;
-    case 'eur':
-      amountInBtc = amount / rates.eur;
-      break;
-    case 'chf':
-      amountInBtc = amount / rates.chf;
-      break;
-    case 'cny':
-      amountInBtc = amount / rates.cny;
-      break;
-    case 'jpy':
-      amountInBtc = amount / rates.jpy;
-      break;
-    case 'gbp':
-      amountInBtc = amount / rates.gbp;
-      break;
-    case 'aud':
-      amountInBtc = amount / rates.aud;
-      break;
-    case 'cad':
-      amountInBtc = amount / rates.cad;
-      break;
-    case 'inr':
-      amountInBtc = amount / rates.inr;
-      break;
-    case 'rub':
-      amountInBtc = amount / rates.rub;
-      break;
     default:
-      amountInBtc = 0;
+      // For all other currencies, divide by their BTC rate
+      if (rates[fromCurrency] && rates[fromCurrency] > 0) {
+        amountInBtc = amount / rates[fromCurrency];
+      }
+      break;
   }
   
   // Now convert from BTC to all other currencies
