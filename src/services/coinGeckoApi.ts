@@ -27,7 +27,14 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   
   // Check if we need to throttle the request
   if (!canRefreshRates()) {
-    return getCachedRates();
+    const cachedRates = getCachedRates();
+    // Update initialRates with cached data if it's newer
+    if (cachedRates.lastUpdated && 
+        (!initialRates.lastUpdated || 
+         new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated))) {
+      updateInitialRates(cachedRates);
+    }
+    return cachedRates;
   }
   
   try {
@@ -61,10 +68,9 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     
     console.log("Bitcoin rates from API:", data.bitcoin);
     
-    // Update cached rates with real rates from the API
     const newRates: CoinRates = {
       btc: 1,
-      sats: 100000000, // 1 BTC = 100,000,000 satoshis
+      sats: 100000000,
       usd: data.bitcoin.usd || initialRates.usd,
       eur: data.bitcoin.eur || initialRates.eur,
       chf: data.bitcoin.chf || initialRates.chf,
@@ -78,13 +84,23 @@ export async function fetchCoinRates(): Promise<CoinRates> {
       lastUpdated: new Date()
     };
     
-    // Update both cached rates and initialRates with the fresh data
+    // Always update both cached rates and initialRates with fresh data
     updateCachedRates(newRates);
     updateInitialRates(newRates);
     
+    console.log('Successfully updated rates with fresh data');
     return newRates;
   } catch (error) {
     console.error('Error fetching Bitcoin rates:', error);
+    
+    // Get cached rates to check if they're newer than initialRates
+    const cachedRates = getCachedRates();
+    if (cachedRates.lastUpdated && 
+        (!initialRates.lastUpdated || 
+         new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated))) {
+      updateInitialRates(cachedRates);
+      return cachedRates;
+    }
     
     // If we have cached rates and this isn't the first fetch, return those
     if (getLastFetchTime() > 0) {
