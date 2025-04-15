@@ -1,4 +1,3 @@
-
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Cache settings
@@ -17,11 +16,11 @@ const loadRatesFromStorage = (): CoinRates => {
   } catch (error) {
     console.error('Failed to load rates from localStorage:', error);
   }
-  return { ...initialRates };
+  return { ...DEFAULT_INITIAL_RATES };
 };
 
-// Current market rates as fallback (will be dynamically updated)
-export const initialRates: CoinRates = {
+// Default initial market rates as fallback (will be dynamically updated)
+export const DEFAULT_INITIAL_RATES: CoinRates = {
   btc: 1,
   sats: 100000000, // 1 BTC = 100,000,000 satoshis
   usd: 70123,
@@ -36,6 +35,9 @@ export const initialRates: CoinRates = {
   rub: 6423000,
   lastUpdated: new Date()
 };
+
+// Mutable variable to store current rates
+export let initialRates: CoinRates = { ...DEFAULT_INITIAL_RATES };
 
 // Cache state
 let cachedRates: CoinRates = loadRatesFromStorage();
@@ -78,6 +80,10 @@ export function updateCachedRates(rates: CoinRates): void {
 export function updateInitialRates(rates: CoinRates): void {
   initialRates = { ...rates };
   console.log('Updated initialRates with fresh data:', initialRates);
+}
+
+export function resetInitialRates(): void {
+  initialRates = { ...DEFAULT_INITIAL_RATES };
 }
 
 export function isCacheStale(): boolean {
