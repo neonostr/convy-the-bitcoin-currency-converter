@@ -2,7 +2,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
-import { convertCurrency, getCachedRates, isCacheStale } from '@/services/ratesService';
+import { 
+  convertCurrency, 
+  getCachedRates, 
+  isCacheStale, 
+  initialRates 
+} from '@/services/ratesService';
 import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
 

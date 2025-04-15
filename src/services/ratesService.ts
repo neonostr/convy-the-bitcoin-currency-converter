@@ -21,7 +21,7 @@ const loadRatesFromStorage = (): CoinRates => {
 };
 
 // Current market rates as fallback (will be dynamically updated)
-export let initialRates: CoinRates = {
+export const initialRates: CoinRates = {
   btc: 1,
   sats: 100000000, // 1 BTC = 100,000,000 satoshis
   usd: 70123,
