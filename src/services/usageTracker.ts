@@ -11,7 +11,7 @@ interface UsageStats {
   apiCalls: number;
 }
 
-// Log events to our Supabase table
+// Log events to our Supabase table, with rate limiting
 export const logEvent = async (eventType: string) => {
   // Rate limit event logging (one per minute per event type)
   const now = Date.now();
@@ -67,15 +67,15 @@ export const trackAppUsage = () => {
   localStorage.setItem(DAILY_USAGE_KEY, JSON.stringify(stats));
   
   // Log app open event based on device type
-  if (window.matchMedia('(max-width: 768px)').matches) {
-    logEvent('app_open_brower_mobile');
-  } else {
-    logEvent('app_open_brower_desktop');
-  }
-  
-  // Check if app is running as PWA
   if (window.matchMedia('(display-mode: standalone)').matches) {
+    // This is a PWA
     logEvent('app_open_pwa');
+  } else if (window.matchMedia('(max-width: 768px)').matches) {
+    // This is a mobile browser
+    logEvent('app_open_browser_mobile');
+  } else {
+    // This is a desktop browser
+    logEvent('app_open_browser_desktop');
   }
 
   return stats;

@@ -23,6 +23,8 @@ const queryClient = new QueryClient({
 const App = () => {
   // Track app usage on initial load
   useEffect(() => {
+    // Track the app open event - this sends the appropriate event based on browser/PWA status
+    console.log('App mounted - tracking usage');
     trackAppUsage();
   }, []);
 

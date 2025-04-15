@@ -31,13 +31,14 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   // Add an additional time-based throttle to prevent too frequent API calls
   if (now - lastFetchTimestamp < FETCH_COOLDOWN) {
     console.log(`Throttling API call - last fetch was ${(now - lastFetchTimestamp)/1000}s ago`);
-    logEvent('provided_cached_data');
+    logEvent('provided_cached_data_throttled');
     return { ...cachedRates };
   }
   
   // Check if another request is already fetching fresh data
   if (isFetching()) {
     console.log('Another request is already fetching data, waiting for that result');
+    logEvent('provided_cached_data_concurrent');
     const activePromise = getActiveFetchPromise();
     if (activePromise) {
       try {
@@ -90,6 +91,13 @@ async function performFetch(): Promise<CoinRates> {
     console.log("Bitcoin rates from API:", data.bitcoin);
     console.log("API type used:", data.api_type);
     
+    // Log based on which API was used
+    if (data.api_type === 'pro') {
+      logEvent('api_call_used_pro');
+    } else {
+      logEvent('api_call_used_public');
+    }
+    
     const newRates: CoinRates = {
       btc: 1,
       sats: 100000000,
@@ -128,7 +136,7 @@ function getLatestAvailableRates(): CoinRates {
     if (!initialRates.lastUpdated || 
         new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated)) {
       updateInitialRates(cachedRates);
-      logEvent('initial_rates_updated');
+      logEvent('initial_rates_updated_from_cache');
     }
     return cachedRates;
   }

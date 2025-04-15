@@ -55,10 +55,12 @@ Deno.serve(async (req) => {
     
     // Track which API we successfully used
     let api_type = 'public';
+    let pro_attempted = false;
     
     // If public API fails with rate limit (429) and we have a valid key, try the pro API
     if (response.status === 429 && isValidKey) {
       console.log(`Public API rate limited, switching to Pro API with key`);
+      pro_attempted = true;
       
       response = await fetch(
         `${apiUrl}&x_cg_api_key=${apiKey}`,
@@ -79,7 +81,7 @@ Deno.serve(async (req) => {
         throw new Error(`CoinGecko Pro API error: ${response.status}`);
       }
     } else if (response.ok) {
-      // Public API succeeded
+      // Public API succeeded - make sure we log it as public
       await logEdgeFunctionEvent(`coingecko_api_public_success`);
     } else {
       // Public API failed with error other than rate limit
@@ -90,7 +92,12 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
     
-    return new Response(JSON.stringify({ ...data, api_type }), {
+    // Make sure we explicitly indicate which API was used
+    return new Response(JSON.stringify({ 
+      ...data, 
+      api_type: api_type,
+      pro_attempted: pro_attempted 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
