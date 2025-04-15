@@ -1,4 +1,3 @@
-import { logApiCall } from './analyticsService';
 
 export interface CoinRates {
   usd: number;
@@ -32,9 +31,6 @@ export const fetchCoinRates = async () => {
     }
     
     const data = await response.json();
-    
-    // Log successful API call
-    await logApiCall();
     
     const rates: CoinRates = {
       usd: data.bitcoin.usd,
