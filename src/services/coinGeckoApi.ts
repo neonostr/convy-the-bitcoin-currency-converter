@@ -25,6 +25,13 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     console.log("API type used:", data.api_type);
     console.log("Cache hit:", data.cache_hit);
     
+    // Log if this was a cache hit
+    if (data.cache_hit) {
+      await logEvent('provided_cached_rates');
+    } else {
+      await logEvent('new_rates_fetched');
+    }
+    
     const newRates: CoinRates = {
       btc: 1,
       sats: 100000000,
@@ -41,7 +48,6 @@ export async function fetchCoinRates(): Promise<CoinRates> {
       lastUpdated: new Date()
     };
 
-    await logEvent(data.cache_hit ? 'provided_cached_rates' : 'new_rates_fetched');
     return newRates;
   } catch (error) {
     console.error('Error fetching Bitcoin rates:', error);

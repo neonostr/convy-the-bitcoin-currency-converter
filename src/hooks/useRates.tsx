@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
 import { useToast } from '@/hooks/use-toast';
-import { isCacheStale, getCachedRates } from '@/services/ratesService';
+import { getCachedRates } from '@/services/ratesService';
 import { logEvent } from '@/services/usageTracker';
 
 export const useRates = () => {
@@ -14,7 +14,7 @@ export const useRates = () => {
   const fetchController = useRef<AbortController | null>(null);
   const initialFetchDone = useRef<boolean>(false);
 
-  // Initialize rates from cache on mount
+  // Initialize rates from client-side cache on mount
   useEffect(() => {
     // Check if we have valid cached rates and set them
     if (!initialFetchDone.current) {
@@ -46,14 +46,6 @@ export const useRates = () => {
       return;
     }
     
-    // Simplified caching check - only check if cache is fresh and we have rates
-    if (!forceRefresh && !isCacheStale() && rates !== null) {
-      console.log('Using cached rates - skipping API call');
-      await logEvent('conversion_used_cached_data');
-      initialFetchDone.current = true; // Mark initial fetch as done when using cache
-      return;
-    }
-    
     if (forceRefresh) {
       lastManualFetchTimestamp.current = now;
       await logEvent('manual_refresh_rates');
@@ -61,7 +53,7 @@ export const useRates = () => {
     
     setIsRefreshing(true);
     try {
-      console.log('Fetching rates, forceRefresh:', forceRefresh, 'cache stale:', isCacheStale());
+      console.log('Fetching rates, forceRefresh:', forceRefresh);
       const newRates = await fetchCoinRates();
       setRates(newRates);
       initialFetchDone.current = true;

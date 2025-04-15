@@ -31,45 +31,73 @@ async function logEdgeFunctionEvent(eventType: string) {
   }
 }
 
+// Get fresh cache from Supabase
 async function getRecentCache() {
-  const { data, error } = await supabase
-    .from('rate_cache')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  console.log("Checking for fresh cache in Supabase...");
+  
+  try {
+    const { data, error } = await supabase
+      .from('rate_cache')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-  if (error) {
-    console.error('Error fetching cache:', error);
-    return null;
-  }
+    if (error) {
+      console.error('Error fetching cache:', error);
+      return null;
+    }
 
-  // Check if cache is still fresh (less than CACHE_DURATION seconds old)
-  if (data) {
-    const cacheAge = (Date.now() - new Date(data.created_at).getTime()) / 1000;
+    // If no cache found
+    if (!data || data.length === 0) {
+      console.log('No cache records found');
+      return null;
+    }
+
+    const cacheRecord = data[0];
+    // Check if cache is still fresh (less than CACHE_DURATION seconds old)
+    const cacheAge = (Date.now() - new Date(cacheRecord.created_at).getTime()) / 1000;
+    
+    console.log(`Found cache record, age: ${cacheAge}s, max age: ${CACHE_DURATION}s`);
+    
     if (cacheAge < CACHE_DURATION) {
       console.log(`Using cached rates, age: ${cacheAge}s`);
-      return data.rates;
+      return cacheRecord.rates;
+    } else {
+      console.log(`Cache is stale (${cacheAge}s old), will fetch fresh data`);
+      return null;
     }
+  } catch (err) {
+    console.error('Error in getRecentCache:', err);
+    return null;
   }
-
-  return null;
 }
 
+// Update cache in Supabase
 async function updateCache(rates: any) {
-  const { error } = await supabase
-    .from('rate_cache')
-    .insert({ rates });
+  console.log("Updating cache in Supabase with new rates");
+  
+  try {
+    const { data, error } = await supabase
+      .from('rate_cache')
+      .insert({ rates })
+      .select();
 
-  if (error) {
-    console.error('Error updating cache:', error);
-    throw error;
+    if (error) {
+      console.error('Error updating cache:', error);
+      throw error;
+    }
+    
+    console.log('Cache updated successfully', data);
+    return data;
+  } catch (err) {
+    console.error('Failed to update cache:', err);
+    throw err;
   }
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
 
   // Handle app_open events and other tracking events
@@ -95,10 +123,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // First, try to get cached rates
+    // First, try to get cached rates from Supabase
     const cachedRates = await getRecentCache();
+    
     if (cachedRates) {
       await logEdgeFunctionEvent('provided_cached_rates');
+      console.log("Returning cached rates from Supabase");
+      
       return new Response(JSON.stringify({ 
         bitcoin: cachedRates,
         api_type: 'cached',
@@ -110,6 +141,7 @@ Deno.serve(async (req) => {
     }
 
     // No fresh cache, fetch from CoinGecko
+    console.log("No fresh cache available, fetching from CoinGecko");
     const apiKey = Deno.env.get('COINGECKO_API_KEY')
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     
@@ -165,6 +197,8 @@ Deno.serve(async (req) => {
     // Update cache with new rates
     await updateCache(data.bitcoin);
     await logEdgeFunctionEvent('cache_updated');
+    
+    console.log("Returning fresh rates from CoinGecko and updating cache");
     
     return new Response(JSON.stringify({ 
       ...data, 
