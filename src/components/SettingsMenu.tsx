@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ const MIN_CURRENCY_COUNT = 2;
 const MAX_CURRENCY_COUNT = 6;
 
 const SettingsMenu: React.FC = () => {
-  const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies } = useSettings();
+  const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
 

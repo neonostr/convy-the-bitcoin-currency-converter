@@ -20,8 +20,8 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
   const { settings } = useSettings();
 
   const formatForCopy = (value: number) => {
-    // Remove thousand separators and use the preferred decimal separator
-    const formatted = value.toFixed(2);
+    // Format as raw number with the correct decimal separator
+    const formatted = value.toString();
     return settings.decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
   };
 
