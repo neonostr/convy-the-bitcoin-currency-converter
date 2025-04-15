@@ -23,27 +23,42 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // 1. Try CoinGecko API first (with API key if available)
+    // Fallback chain in priority order
     let data = null
-    let source = 'coingecko'
+    let source = ''
     let apiSuccess = false
     
+    // 1. Try CoinGecko public API first
     try {
-      data = await fetchFromCoinGecko()
+      console.log('Attempting CoinGecko public API first...')
+      data = await fetchFromCoinGeckoPublic()
       apiSuccess = true
-      console.log('Successfully fetched data from CoinGecko')
+      source = 'coingecko_public'
+      console.log('Successfully fetched data from CoinGecko public API')
     } catch (error) {
-      console.error('CoinGecko API error:', error)
-      source = 'coindesk'
+      console.error('CoinGecko public API error:', error)
       
+      // 2. Try CoinGecko with API key as first fallback
       try {
-        // 2. Try CoinDesk as fallback
-        data = await fetchFromCoinDesk()
+        console.log('Falling back to CoinGecko with API key...')
+        data = await fetchFromCoinGeckoWithKey()
         apiSuccess = true
-        console.log('Successfully fetched data from CoinDesk (fallback)')
-      } catch (coindeskError) {
-        console.error('CoinDesk API error:', coindeskError)
-        throw new Error('Both CoinGecko and CoinDesk APIs failed')
+        source = 'coingecko_api_key'
+        console.log('Successfully fetched data from CoinGecko with API key')
+      } catch (coinGeckoKeyError) {
+        console.error('CoinGecko API with key error:', coinGeckoKeyError)
+        
+        // 3. Try CoinDesk as final fallback
+        try {
+          console.log('Falling back to CoinDesk API...')
+          data = await fetchFromCoinDesk()
+          apiSuccess = true
+          source = 'coindesk'
+          console.log('Successfully fetched data from CoinDesk (fallback)')
+        } catch (coindeskError) {
+          console.error('CoinDesk API error:', coindeskError)
+          throw new Error('All API attempts failed')
+        }
       }
     }
     
@@ -93,41 +108,13 @@ Deno.serve(async (req) => {
   }
 })
 
-async function fetchFromCoinGecko() {
-  const apiKey = Deno.env.get('COINGECKO_API_KEY')
-  console.log('Using CoinGecko API Key:', apiKey ? 'Key present' : 'No key found')
-  
+// Function to fetch from CoinGecko public API (no key)
+async function fetchFromCoinGeckoPublic() {
+  console.log('Attempting CoinGecko public API call...')
   const currenciesParam = supportedCurrencies.join(',')
   const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currenciesParam}`
   
-  let response
-  
-  // First try with API key if available
-  if (apiKey) {
-    console.log('Attempting CoinGecko API call with API key...')
-    response = await fetch(
-      `${apiUrl}&x_cg_api_key=${apiKey}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }
-    )
-    
-    if (response.ok) {
-      console.log('CoinGecko API call with key successful')
-      const data = await response.json()
-      console.log('CoinGecko Response:', JSON.stringify(data, null, 2))
-      return data
-    }
-    
-    console.log('CoinGecko API call with key failed with status:', response.status)
-  }
-  
-  // If no API key or API key call failed, try without API key
-  console.log('Attempting CoinGecko API call without API key...')
-  response = await fetch(
+  const response = await fetch(
     apiUrl,
     {
       headers: {
@@ -141,12 +128,49 @@ async function fetchFromCoinGecko() {
   
   if (!response.ok) {
     const errorText = await response.text()
-    console.error('CoinGecko API Error:', errorText)
-    throw new Error(`CoinGecko API error: ${response.status} - ${errorText}`)
+    console.error('CoinGecko Public API Error:', errorText)
+    throw new Error(`CoinGecko Public API error: ${response.status} - ${errorText}`)
   }
   
   const data = await response.json()
-  console.log('CoinGecko Response:', JSON.stringify(data, null, 2))
+  console.log('CoinGecko Public API Response:', JSON.stringify(data, null, 2))
+  return data
+}
+
+// Function to fetch from CoinGecko with API key
+async function fetchFromCoinGeckoWithKey() {
+  const apiKey = Deno.env.get('COINGECKO_API_KEY')
+  
+  if (!apiKey) {
+    console.log('No CoinGecko API key found, skipping this fallback')
+    throw new Error('No CoinGecko API key available')
+  }
+  
+  console.log('Using CoinGecko API Key: Key present')
+  
+  const currenciesParam = supportedCurrencies.join(',')
+  const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currenciesParam}&x_cg_api_key=${apiKey}`
+  
+  const response = await fetch(
+    apiUrl,
+    {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+  
+  console.log('CoinGecko API with Key Status:', response.status)
+  
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('CoinGecko API with Key Error:', errorText)
+    throw new Error(`CoinGecko API with Key error: ${response.status} - ${errorText}`)
+  }
+  
+  const data = await response.json()
+  console.log('CoinGecko API with Key Response:', JSON.stringify(data, null, 2))
   return data
 }
 
