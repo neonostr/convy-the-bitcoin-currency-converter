@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -278,3 +279,4 @@ async function fetchFromCryptoCompareWithKey() {
   console.log('Transformed CryptoCompare Response:', JSON.stringify(transformedData, null, 2))
   return transformedData
 }
+
