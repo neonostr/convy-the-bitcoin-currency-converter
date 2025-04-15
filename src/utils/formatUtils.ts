@@ -1,21 +1,41 @@
-
-export function formatCurrency(value: number, currency: string): string {
+export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
+  let formatted: string;
   if (currency === 'btc') {
     // Format BTC with up to 8 decimal places, trim trailing zeros
-    return value.toLocaleString('en-US', { 
+    formatted = value.toLocaleString('en-US', { 
       maximumFractionDigits: 8,
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
+      useGrouping: true
     });
   } else if (currency === 'sats') {
     // Format satoshis as integers
-    return Math.round(value).toLocaleString('en-US');
+    formatted = Math.round(value).toLocaleString('en-US');
   } else {
     // Format fiat currencies with 2 decimal places
-    return value.toLocaleString('en-US', { 
+    formatted = value.toLocaleString('en-US', { 
       maximumFractionDigits: 2,
-      minimumFractionDigits: 2
+      minimumFractionDigits: 2,
+      useGrouping: true
     });
   }
+  
+  return decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
+}
+
+export function formatForCopy(value: number, currency: string, decimalSeparator: string = '.'): string {
+  let formatted: string;
+  if (currency === 'btc') {
+    // Format BTC with up to 8 decimal places
+    formatted = value.toFixed(8).replace(/\.?0+$/, '');
+  } else if (currency === 'sats') {
+    // Format satoshis as integers
+    formatted = Math.round(value).toString();
+  } else {
+    // Format fiat with 2 decimal places
+    formatted = value.toFixed(2);
+  }
+  
+  return decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
 }
 
 export function getCurrencySymbol(currency: string): string {

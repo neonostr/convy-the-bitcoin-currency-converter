@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -94,25 +93,6 @@ const SettingsMenu: React.FC = () => {
           </div>
         </div>
         
-        <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">Copy Format</h3>
-          <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="decimal-separator">
-              Use comma as decimal separator when copying
-            </Label>
-            <Switch
-              id="decimal-separator"
-              checked={settings.decimalSeparator === ','}
-              onCheckedChange={(checked) => 
-                updateSettings({ decimalSeparator: checked ? ',' : '.' })
-              }
-            />
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Example: {settings.decimalSeparator === ',' ? '1234,56' : '1234.56'}
-          </p>
-        </div>
-        
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">Display Currencies</h3>
           <p className="text-sm text-muted-foreground mb-4">
@@ -182,6 +162,27 @@ const SettingsMenu: React.FC = () => {
             </div>
           </div>
         </div>
+
+      <div className="py-4 border-t">
+        <h3 className="text-lg font-medium mb-4">Number Format</h3>
+        <div className="flex items-center justify-between space-x-2">
+          <Label htmlFor="decimal-separator">
+            Use comma as decimal separator
+          </Label>
+          <Switch
+            id="decimal-separator"
+            checked={settings.decimalSeparator === ','}
+            onCheckedChange={(checked) => 
+              updateSettings({ decimalSeparator: checked ? ',' : '.' })
+            }
+          />
+        </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          Example with thousand separator: {settings.decimalSeparator === ',' ? '1.234,56' : '1,234.56'}
+          <br />
+          When copying: {settings.decimalSeparator === ',' ? '1234,56' : '1234.56'}
+        </p>
+      </div>
       </SheetContent>
     </Sheet>
   );

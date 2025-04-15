@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Currency } from '@/types/currency.types';
-import { formatCurrency, getCurrencySymbol } from '@/utils/formatUtils';
+import { formatCurrency, formatForCopy, getCurrencySymbol } from '@/utils/formatUtils';
 import { useSettings } from '@/hooks/useSettings';
 
 interface ConversionResultsProps {
@@ -19,12 +19,6 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
 }) => {
   const { settings } = useSettings();
 
-  const formatForCopy = (value: number) => {
-    // Format as raw number with the correct decimal separator
-    const formatted = value.toString();
-    return settings.decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
-  };
-
   return (
     <div className="w-full space-y-4 mb-4">
       {displayCurrencies
@@ -35,14 +29,14 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
             <div
               key={currency}
               className="bg-secondary p-4 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors"
-              onClick={() => onResultClick(formatForCopy(value))}
+              onClick={() => onResultClick(formatForCopy(value, currency, settings.decimalSeparator))}
             >
               <div className="flex justify-between">
                 <span className="uppercase font-medium">
                   {currency === 'sats' ? 'SATS' : currency}
                 </span>
                 <span className="font-bold">
-                  {formatCurrency(value, currency)} {getCurrencySymbol(currency)}
+                  {formatCurrency(value, currency, settings.decimalSeparator)} {getCurrencySymbol(currency)}
                 </span>
               </div>
             </div>
