@@ -1,3 +1,4 @@
+
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Cache settings
@@ -41,7 +42,7 @@ export let initialRates: CoinRates = { ...DEFAULT_INITIAL_RATES };
 
 // Cache state
 let cachedRates: CoinRates = loadRatesFromStorage();
-let lastFetchTime: number = 0;
+let lastFetchTime: number = parseInt(localStorage.getItem('bitcoin-converter-last-fetch-time') || '0', 10);
 let isFetchingData: boolean = false;
 let fetchPromise: Promise<CoinRates> | null = null;
 
@@ -59,6 +60,9 @@ export function getCachedRates(): CoinRates {
 export function updateCachedRates(rates: CoinRates): void {
   cachedRates = { ...rates };
   lastFetchTime = Date.now();
+  
+  // Save last fetch time for cross-tab coordination
+  localStorage.setItem('bitcoin-converter-last-fetch-time', lastFetchTime.toString());
   
   // Save to localStorage for offline access
   try {
@@ -87,7 +91,14 @@ export function resetInitialRates(): void {
 }
 
 export function isCacheStale(): boolean {
-  return Date.now() - lastFetchTime >= CACHE_EXPIRY_TIME;
+  // Check local memory cache first
+  if (Date.now() - lastFetchTime < CACHE_EXPIRY_TIME) {
+    return false;
+  }
+  
+  // Also check localStorage in case another tab updated the rates
+  const storedLastFetchTime = parseInt(localStorage.getItem('bitcoin-converter-last-fetch-time') || '0', 10);
+  return Date.now() - storedLastFetchTime >= CACHE_EXPIRY_TIME;
 }
 
 export function setFetchingState(state: boolean, promise: Promise<CoinRates> | null = null): void {
@@ -104,7 +115,9 @@ export function getActiveFetchPromise(): Promise<CoinRates> | null {
 }
 
 export function getLastFetchTime(): number {
-  return lastFetchTime;
+  // Check both local memory and localStorage
+  const storedLastFetchTime = parseInt(localStorage.getItem('bitcoin-converter-last-fetch-time') || '0', 10);
+  return Math.max(lastFetchTime, storedLastFetchTime);
 }
 
 export function convertCurrency(amount: number, fromCurrency: Currency, rates: CoinRates): Record<string, number> {

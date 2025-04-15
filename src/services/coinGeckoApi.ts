@@ -8,19 +8,35 @@ import {
   updateInitialRates, 
   isFetching, 
   setFetchingState,
-  getActiveFetchPromise
+  getActiveFetchPromise,
+  getLastFetchTime
 } from "./ratesService";
 import { supabase } from "@/integrations/supabase/client";
 import { logEvent } from "./usageTracker";
 
 // Increased cache time to reduce API calls
 const FETCH_COOLDOWN = 60000; // 60 seconds (1 minute)
-let lastFetchTimestamp = 0;
+const GLOBAL_FETCH_LOCK_KEY = 'bitcoin-converter-fetch-lock';
+
+// Use localStorage to coordinate fetches across tabs/windows
+function acquireFetchLock(): boolean {
+  const now = Date.now();
+  const lastFetch = parseInt(localStorage.getItem(GLOBAL_FETCH_LOCK_KEY) || '0', 10);
+  
+  if (now - lastFetch < FETCH_COOLDOWN) {
+    return false; // Another tab fetched recently
+  }
+  
+  // Set the lock
+  localStorage.setItem(GLOBAL_FETCH_LOCK_KEY, now.toString());
+  return true;
+}
 
 export async function fetchCoinRates(): Promise<CoinRates> {
   // First, check if we have valid rates that are fresh enough (less than FETCH_COOLDOWN old)
   const cachedRates = getCachedRates();
   const now = Date.now();
+  const lastFetchTime = getLastFetchTime();
   
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
@@ -29,13 +45,14 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   }
   
   // Add an additional time-based throttle to prevent too frequent API calls
-  if (now - lastFetchTimestamp < FETCH_COOLDOWN) {
-    console.log(`Throttling API call - last fetch was ${(now - lastFetchTimestamp)/1000}s ago`);
+  // This uses localStorage to coordinate between tabs/windows
+  if (now - lastFetchTime < FETCH_COOLDOWN || !acquireFetchLock()) {
+    console.log(`Throttling API call - last fetch was ${(now - lastFetchTime)/1000}s ago or another tab is fetching`);
     await logEvent('provided_cached_data_throttled');
     return { ...cachedRates };
   }
   
-  // Check if another request is already fetching fresh data
+  // Check if another request is already fetching fresh data in this tab
   if (isFetching()) {
     console.log('Another request is already fetching data, waiting for that result');
     await logEvent('provided_cached_data_concurrent');
@@ -53,7 +70,6 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   // Set up the fetch promise that multiple concurrent requests can use
   const fetchPromise = performFetch();
   setFetchingState(true, fetchPromise);
-  lastFetchTimestamp = now;
   
   try {
     const result = await fetchPromise;

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 const DAILY_USAGE_KEY = 'bitcoin-converter-daily-usage';
 const API_CALLS_KEY = 'bitcoin-converter-api-calls';
 const LAST_EVENT_LOG_KEY = 'bitcoin-converter-last-event-log';
+const APP_OPEN_LOGGED_KEY = 'bitcoin-converter-app-open-logged';
 
 interface UsageStats {
   date: string;
@@ -47,7 +48,15 @@ export const logEvent = async (eventType: string) => {
   }
 };
 
+// This function is called once per app session to track app usage
 export const trackAppUsage = async () => {
+  // Check if we've already logged an app open event for this session
+  const hasLoggedAppOpen = sessionStorage.getItem(APP_OPEN_LOGGED_KEY);
+  if (hasLoggedAppOpen === 'true') {
+    console.log('App open event already logged for this session');
+    return { alreadyLogged: true };
+  }
+
   const today = new Date().toISOString().split('T')[0];
   
   // Retrieve or initialize usage stats
@@ -82,6 +91,9 @@ export const trackAppUsage = async () => {
   
   console.log(`Logging app open event: ${eventType}`);
   await logEvent(eventType);
+  
+  // Mark that we've logged this session's app open event
+  sessionStorage.setItem(APP_OPEN_LOGGED_KEY, 'true');
 
   return stats;
 };

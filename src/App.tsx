@@ -21,15 +21,19 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Track app usage on initial load
+  // Track app usage on initial load - only once per session
   useEffect(() => {
-    // Make sure this only runs once on app load
+    // This ensures the tracking only happens once per app session
     const trackUsage = async () => {
       console.log('App mounted - tracking app usage');
       try {
-        // Ensure we wait for the tracking to complete
-        await trackAppUsage();
-        console.log('App usage tracking completed');
+        // Tracking is now handled with session storage to prevent duplicate logs
+        const result = await trackAppUsage();
+        if (result && !result.alreadyLogged) {
+          console.log('App usage tracking completed');
+        } else {
+          console.log('App usage already tracked for this session');
+        }
       } catch (error) {
         console.error('Error tracking app usage:', error);
       }

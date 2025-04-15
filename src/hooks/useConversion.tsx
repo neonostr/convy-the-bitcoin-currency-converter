@@ -28,15 +28,25 @@ export const useConversion = () => {
   const { settings } = useSettings();
   const isInitialFetch = useRef<boolean>(true);
   const lastManualFetchTimestamp = useRef<number>(0);
+  const fetchController = useRef<AbortController | null>(null);
 
   // Fetch rates initially when component mounts
   useEffect(() => {
+    // Get initial rates
     fetchRates();
+    
     // Initial conversion with default values
     if (rates) {
       const newConversions = convertCurrency(1, 'btc', rates);
       setConversions(newConversions);
     }
+    
+    // Cleanup function to abort any in-progress fetches when component unmounts
+    return () => {
+      if (fetchController.current) {
+        fetchController.current.abort();
+      }
+    };
   }, []);
 
   // Update conversions when amount, selected currency, or rates change
@@ -70,6 +80,14 @@ export const useConversion = () => {
   }, [settings]);
 
   const fetchRates = async (forceRefresh = false) => {
+    // Cancel any previous fetch
+    if (fetchController.current) {
+      fetchController.current.abort();
+    }
+    
+    // Create new abort controller for this fetch
+    fetchController.current = new AbortController();
+    
     // Prevent too frequent manual refreshes (30 second cooldown)
     const now = Date.now();
     if (forceRefresh && now - lastManualFetchTimestamp.current < 30000) {
@@ -83,8 +101,8 @@ export const useConversion = () => {
       return;
     }
     
-    // For initial fetch, always try to get fresh data
-    // For subsequent fetches, only fetch if the cache is stale (> 60s)
+    // For initial fetch, always try to get fresh data if cache is stale
+    // For subsequent fetches, only fetch if manually requested or cache is stale
     if (!forceRefresh && !isInitialFetch.current && !isCacheStale() && rates !== null) {
       console.log('Skipping API call - using cached rates (< 60s old)');
       await logEvent('conversion_used_cached_data');
@@ -124,7 +142,8 @@ export const useConversion = () => {
       }
       
       // Only show a toast notification if we actually fetched fresh data from the API
-      if (isCacheStale() || forceRefresh) {
+      // and it was a manual refresh
+      if (forceRefresh) {
         toast({
           title: "Currency Rates Updated",
           description: "Latest exchange rates have been fetched.",
@@ -132,22 +151,28 @@ export const useConversion = () => {
         });
       }
     } catch (error) {
-      console.error('Failed to fetch rates:', error);
-      await logEvent('conversion_fetch_error');
-      
-      // If API fails but we have cached rates, use those
-      if (!rates) {
-        const cachedRates = getCachedRates();
-        setRates(cachedRates);
-        await logEvent('conversion_fallback_to_cache');
+      // Don't show error if it was just an abort
+      if (error.name !== 'AbortError') {
+        console.error('Failed to fetch rates:', error);
+        await logEvent('conversion_fetch_error');
+        
+        // If API fails but we have cached rates, use those
+        if (!rates) {
+          const cachedRates = getCachedRates();
+          setRates(cachedRates);
+          await logEvent('conversion_fallback_to_cache');
+        }
+        
+        // Only show error toast for manual refreshes
+        if (forceRefresh) {
+          toast({
+            title: "Oops! Rate update failed",
+            description: "We're using cached rates. Please try again later.",
+            variant: "destructive",
+            duration: 3000,
+          });
+        }
       }
-      
-      toast({
-        title: "Oops! Rate update failed",
-        description: "We're using cached rates. Please try again later.",
-        variant: "destructive",
-        duration: 3000,
-      });
     } finally {
       setIsRefreshing(false);
     }
