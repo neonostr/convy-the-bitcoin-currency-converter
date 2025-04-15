@@ -80,7 +80,9 @@ Deno.serve(async (req) => {
       'coingecko_api_with_key_success',
       'coingecko_api_public_success',
       'cryptocompare_api_with_key_success',
-      'cryptocompare_api_public_success'
+      'cryptocompare_api_public_success',
+      'cache_hit_coingecko',
+      'cache_hit_cryptocompare'
     ];
     
     // Allow error codes to be appended to failure events

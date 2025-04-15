@@ -1,4 +1,3 @@
-
 import { corsHeaders } from '../_shared/cors.ts'
 import { logApiCall, logApiError } from '../_shared/logging.ts'
 import { 
@@ -42,13 +41,16 @@ Deno.serve(async (req) => {
     let data = null
     let source = ''
     let apiSuccess = false
+    let fromCache = false
     
     // 1. Try CoinGecko public API first
     try {
       data = await fetchFromCoinGeckoPublic()
       apiSuccess = true
       source = 'coingecko_public'
-      console.log('Successfully fetched data from CoinGecko public API')
+      // Check if this was a cache hit (we can tell by looking at the console logs)
+      fromCache = console.logs && console.logs.some(log => log.includes('Using cached rates'));
+      console.log('Successfully fetched data from CoinGecko public API' + (fromCache ? ' (from cache)' : ''));
     } catch (error) {
       console.error('CoinGecko public API error:', error)
       const errorCode = error.message.includes('status:') ? error.message.split('status:')[1].trim() : 'unknown';
@@ -102,9 +104,10 @@ Deno.serve(async (req) => {
       throw new Error('Failed to fetch data from any API source')
     }
     
-    // Log the successful API call - but prevent duplicates
+    // Log the successful API call - but prevent duplicates and only if it's not a cache hit
+    // Cache hits are now logged in the provider's getFromCache method
     const logKey = `${source}_${Math.floor(requestTime / LOG_DEDUPLICATION_TIMEOUT)}`;
-    if (!recentSuccessLogs.has(logKey)) {
+    if (!recentSuccessLogs.has(logKey) && !fromCache) {
       await logApiCall(source, data)
       recentSuccessLogs.set(logKey, true);
       
@@ -112,6 +115,8 @@ Deno.serve(async (req) => {
       setTimeout(() => {
         recentSuccessLogs.delete(logKey);
       }, LOG_DEDUPLICATION_TIMEOUT);
+    } else if (fromCache) {
+      console.log(`Cache hit for ${source} - already logged separately`);
     } else {
       console.log(`Skipping duplicate log for ${source} - already logged in the last ${LOG_DEDUPLICATION_TIMEOUT/1000} seconds`);
     }

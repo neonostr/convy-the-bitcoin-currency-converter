@@ -59,10 +59,27 @@ async function updateCache(data: any) {
   }
 }
 
+// Add a new function to log cache hits
+async function logCacheHit() {
+  try {
+    await supabase
+      .from('usage_logs')
+      .insert([{ 
+        event_type: 'cache_hit_coingecko',
+        timestamp: new Date().toISOString()
+      }]);
+    console.log('Cache hit logged successfully');
+  } catch (error) {
+    console.error('Failed to log cache hit:', error);
+  }
+}
+
 export async function fetchFromCoinGeckoPublic() {
   // First try to get data from cache
   const cachedData = await getFromCache();
   if (cachedData) {
+    // Log the cache hit
+    await logCacheHit();
     return cachedData;
   }
 
@@ -93,6 +110,8 @@ export async function fetchFromCoinGeckoWithKey() {
   // First try to get data from cache
   const cachedData = await getFromCache();
   if (cachedData) {
+    // Log the cache hit
+    await logCacheHit();
     return cachedData;
   }
 
