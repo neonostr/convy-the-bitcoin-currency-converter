@@ -13,7 +13,7 @@ import {
 } from "./ratesService";
 
 // Secure API key handling - storing it in memory only, not in the codebase
-let apiKey =";
+let apiKey = '';
 
 // Function to set the API key (to be called when the app initializes or when you need to update it)
 export function setCoinGeckoApiKey(key: string): void {
