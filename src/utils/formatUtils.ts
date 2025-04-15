@@ -1,4 +1,3 @@
-
 export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
   const locale = 'en-US';
   let formatted: string;
@@ -50,15 +49,21 @@ export function formatForCopy(
     formatted = value.toFixed(2);
   }
   
+  // Always use the correct decimal separator first
+  formatted = decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
+  
   if (includeThouSep) {
-    const parts = formatted.split('.');
+    // Parse the formatted number with the current decimal separator
+    const parts = decimalSeparator === ',' ? formatted.split(',') : formatted.split('.');
+    
     // Use the appropriate thousand separator based on decimal separator choice
     const thousandSeparator = decimalSeparator === ',' ? '.' : ',';
+    
+    // Apply thousand separators
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
+    
+    // Join back with the correct decimal separator
     formatted = parts.join(decimalSeparator);
-  } else {
-    // Only replace the decimal separator without adding thousand separators
-    formatted = decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
   }
   
   return formatted;

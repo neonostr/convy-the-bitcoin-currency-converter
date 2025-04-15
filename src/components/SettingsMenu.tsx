@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -63,10 +62,16 @@ const SettingsMenu: React.FC = () => {
     updateDisplayCurrencies(newSelection);
   };
 
-  // Helper to generate an example number based on current settings
   const getFormattedExample = () => {
-    // Adjust example based on the current decimal separator choice
-    return settings.decimalSeparator === ',' ? '1.234,56' : '1,234.56';
+    return settings.decimalSeparator === ',' ? '2.009,01' : '2,009.01';
+  };
+
+  const getCopyExample = () => {
+    if (settings.includeThouSepWhenCopying) {
+      return settings.decimalSeparator === ',' ? '2.009,01' : '2,009.01';
+    } else {
+      return settings.decimalSeparator === ',' ? '2009,01' : '2009.01';
+    }
   };
 
   return (
@@ -172,7 +177,7 @@ const SettingsMenu: React.FC = () => {
 
         <div className="py-4 border-t">
           <h3 className="text-lg font-medium mb-4">Number Format</h3>
-          <div className="flex items-center justify-between space-x-2 mb-4">
+          <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="decimal-separator">
               Use comma as decimal separator
             </Label>
@@ -184,11 +189,11 @@ const SettingsMenu: React.FC = () => {
               }
             />
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Example: {getFormattedExample()}
-          </p>
+          <div className="text-sm font-medium text-center mb-4 bg-secondary/50 p-2 rounded-md">
+            {getFormattedExample()}
+          </div>
           
-          <div className="flex items-center justify-between space-x-2">
+          <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="thousand-separator-when-copying">
               Include thousand separators when copying
             </Label>
@@ -199,6 +204,9 @@ const SettingsMenu: React.FC = () => {
                 updateSettings({ includeThouSepWhenCopying: checked })
               }
             />
+          </div>
+          <div className="text-sm font-medium text-center mb-4 bg-secondary/50 p-2 rounded-md">
+            {getCopyExample()}
           </div>
         </div>
       </SheetContent>
