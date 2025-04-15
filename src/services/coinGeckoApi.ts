@@ -1,8 +1,26 @@
+
 import { CoinRates, CoinGeckoResponse } from "@/types/currency.types";
-import { initialRates, updateCachedRates, getCachedRates, getLastFetchTime, canRefreshRates } from "./ratesService";
+import { initialRates, updateCachedRates, getCachedRates, getLastFetchTime, canRefreshRates, updateInitialRates } from "./ratesService";
+
+// Get the API key from environment variables (will be added by the user)
+// This prevents the key from being hardcoded and leaked
+const getApiKey = () => {
+  // Try to get from localStorage for development (user must add it)
+  const localKey = localStorage.getItem('coingecko-api-key');
+  
+  // Return the appropriate key or an empty string if none available
+  return localKey || '';
+};
 
 export async function fetchCoinRates(): Promise<CoinRates> {
   const currentTime = Date.now();
+  
+  // Check if initialRates are fresh (less than 60 seconds old)
+  if (initialRates.lastUpdated && 
+      (new Date().getTime() - new Date(initialRates.lastUpdated).getTime() < 60000)) {
+    console.log('Using fresh initialRates (< 60s old)');
+    return { ...initialRates };
+  }
   
   // Check if we need to throttle the request
   if (!canRefreshRates()) {
@@ -10,9 +28,15 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   }
   
   try {
-    // Using the correct CoinGecko API endpoint with API key parameter
+    // Build the API URL with the API key as a parameter
+    const apiKey = getApiKey();
+    const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub';
+    
+    // Add API key if available
+    const urlWithKey = apiKey ? `${apiUrl}&x_cg_demo_api_key=${apiKey}` : apiUrl;
+    
     const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub',
+      urlWithKey,
       {
         headers: {
           'Accept': 'application/json',
@@ -51,7 +75,10 @@ export async function fetchCoinRates(): Promise<CoinRates> {
       lastUpdated: new Date()
     };
     
+    // Update both cached rates and initialRates with the fresh data
     updateCachedRates(newRates);
+    updateInitialRates(newRates);
+    
     return newRates;
   } catch (error) {
     console.error('Error fetching Bitcoin rates:', error);

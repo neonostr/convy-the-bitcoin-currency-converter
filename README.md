@@ -77,14 +77,6 @@ This project is built with:
 - Tailwind CSS
 - shadcn/ui components
 
-### Creating a Favicon
-
-The app uses custom favicons for better recognition when installed as a PWA. To create your own:
-
-1. Create square images in multiple sizes (192x192 and 512x512 pixels are recommended)
-2. Update the references in manifest.json and index.html
-3. For best compatibility, provide both PNG and ICO formats
-
 ### Running Locally
 
 ```sh

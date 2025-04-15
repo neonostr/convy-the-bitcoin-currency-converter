@@ -1,7 +1,8 @@
+
 import { CoinRates, Currency } from "@/types/currency.types";
 
-// Current market rates as fallback (Updated April 2023)
-export const initialRates: CoinRates = {
+// Current market rates as fallback (will be dynamically updated)
+export let initialRates: CoinRates = {
   btc: 1,
   sats: 100000000, // 1 BTC = 100,000,000 satoshis
   usd: 70123,
@@ -25,6 +26,10 @@ const loadRatesFromStorage = (): CoinRates => {
       const parsedRates = JSON.parse(storedRates);
       // Convert the string date back to a Date object
       parsedRates.lastUpdated = new Date(parsedRates.lastUpdated);
+      
+      // Update initialRates with stored rates on startup
+      initialRates = { ...parsedRates };
+      
       return parsedRates;
     }
   } catch (error) {
@@ -59,6 +64,12 @@ export function updateCachedRates(rates: CoinRates): void {
       payload: rates
     });
   }
+}
+
+// Update the initialRates with fresh data
+export function updateInitialRates(rates: CoinRates): void {
+  initialRates = { ...rates };
+  console.log('Updated initialRates with fresh data:', initialRates);
 }
 
 export function canRefreshRates(): boolean {
