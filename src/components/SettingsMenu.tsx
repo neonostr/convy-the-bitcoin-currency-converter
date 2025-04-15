@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Currency } from '@/types/currency.types';
 import { getCurrencyLabel } from '@/utils/formatUtils';
 
-// Minimum and maximum number of allowed currencies to display
 const MIN_CURRENCY_COUNT = 2;
 const MAX_CURRENCY_COUNT = 6;
 
@@ -19,16 +17,13 @@ const SettingsMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
 
-  // Initialize selected currencies when the menu opens
   useEffect(() => {
     if (isOpen) {
       setSelectedCurrencies([...settings.displayCurrencies]);
     }
   }, [isOpen, settings.displayCurrencies]);
 
-  // Handle menu close with explicit state update
   const handleOpenChange = useCallback((open: boolean) => {
-    // When closing, ensure settings are updated
     if (!open && selectedCurrencies.length >= MIN_CURRENCY_COUNT) {
       updateDisplayCurrencies(selectedCurrencies);
     }
@@ -36,14 +31,12 @@ const SettingsMenu: React.FC = () => {
   }, [selectedCurrencies, updateDisplayCurrencies]);
 
   const handleDragEnd = (result: DropResult) => {
-    // Dropped outside the list
     if (!result.destination) return;
 
     const items = Array.from(selectedCurrencies);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update local state and global settings
     setSelectedCurrencies(items);
     updateDisplayCurrencies(items);
   };
@@ -52,22 +45,19 @@ const SettingsMenu: React.FC = () => {
     let newSelection: Currency[];
     
     if (isEnabled) {
-      // Only add if we have less than MAX_CURRENCY_COUNT
       if (selectedCurrencies.length < MAX_CURRENCY_COUNT) {
         newSelection = [...selectedCurrencies, currency];
       } else {
-        return; // Don't allow more than MAX_CURRENCY_COUNT
+        return;
       }
     } else {
-      // Allow removing currencies as long as we have at least MIN_CURRENCY_COUNT
       if (selectedCurrencies.length > MIN_CURRENCY_COUNT) {
         newSelection = selectedCurrencies.filter(c => c !== currency);
       } else {
-        return; // Don't allow less than MIN_CURRENCY_COUNT
+        return;
       }
     }
     
-    // Update local state and global settings
     setSelectedCurrencies(newSelection);
     updateDisplayCurrencies(newSelection);
   };
@@ -101,6 +91,25 @@ const SettingsMenu: React.FC = () => {
               <Label htmlFor="theme-toggle">Dark</Label>
             </div>
           </div>
+        </div>
+        
+        <div className="py-4 border-t">
+          <h3 className="text-lg font-medium mb-4">Copy Format</h3>
+          <div className="flex items-center justify-between space-x-2">
+            <Label htmlFor="decimal-separator">
+              Use comma as decimal separator when copying
+            </Label>
+            <Switch
+              id="decimal-separator"
+              checked={settings.decimalSeparator === ','}
+              onCheckedChange={(checked) => 
+                updateSettings({ decimalSeparator: checked ? ',' : '.' })
+              }
+            />
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Example: {settings.decimalSeparator === ',' ? '1234,56' : '1234.56'}
+          </p>
         </div>
         
         <div className="py-4">
