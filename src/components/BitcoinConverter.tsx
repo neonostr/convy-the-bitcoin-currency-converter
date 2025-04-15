@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -10,7 +11,7 @@ import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
-import { trackAppUsage } from '@/services/usageTracker';
+import { supabase } from "@/integrations/supabase/client";
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -27,8 +28,20 @@ const BitcoinConverter = () => {
   } = useConversion();
 
   useEffect(() => {
-    const usageStats = trackAppUsage();
-    console.log('Daily App Usage:', usageStats);
+    // Log app usage when component mounts
+    const logAppUsage = async () => {
+      try {
+        await supabase
+          .from('usage_logs')
+          .insert([
+            { event_type: 'app_open' }
+          ]);
+      } catch (error) {
+        console.error('Failed to log app usage:', error);
+      }
+    };
+    
+    logAppUsage();
   }, []);
 
   const { displayCurrencies } = settings;

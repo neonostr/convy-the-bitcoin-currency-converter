@@ -2,34 +2,17 @@ import { CoinRates, CoinGeckoResponse } from "@/types/currency.types";
 import { 
   initialRates, 
   updateCachedRates, 
-  getCachedRates, 
-  getLastFetchTime, 
+  getCachedRates,
   isCacheStale, 
   updateInitialRates, 
   isFetching, 
   setFetchingState,
   getActiveFetchPromise
 } from "./ratesService";
-import { trackApiCall } from "./usageTracker";
-
-// Secure API key handling - storing it in memory only, not in the codebase
-let apiKey = '';
-
-// Function to set the API key (to be called when the app initializes or when you need to update it)
-export function setCoinGeckoApiKey(key: string): void {
-  apiKey = key;
-}
-
-// Get the API key from memory, not from the codebase
-const getApiKey = (): string => {
-  return apiKey;
-};
+import { supabase } from "@/integrations/supabase/client";
 
 export async function fetchCoinRates(): Promise<CoinRates> {
-  // Track API call before fetching
-  trackApiCall();
-
-  // First, check if we already have valid rates that are fresh enough (less than 60 seconds old)
+  // First, check if we have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
@@ -45,7 +28,6 @@ export async function fetchCoinRates(): Promise<CoinRates> {
         return await activePromise;
       } catch (error) {
         console.error('Error while waiting for active fetch:', error);
-        // If the active fetch fails, we'll continue with our own fetch attempt
       }
     }
   }
@@ -61,40 +43,20 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   } catch (error) {
     console.error('Fetch failed:', error);
     setFetchingState(false, null);
-    
-    // Return the most recent data available
     return getLatestAvailableRates();
   }
 }
 
-// Separate function to perform the actual API fetch
 async function performFetch(): Promise<CoinRates> {
   try {
     console.log("Fetching fresh Bitcoin rates from API...");
-    // Build the API URL with the API key as a parameter
-    const apiKeyToUse = getApiKey();
-    const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub';
     
-    // Fix the API key parameter format - it should be x_cg_api_key not x_cg_demo_api_key
-    const urlWithKey = apiKeyToUse ? `${apiUrl}&x_cg_api_key=${apiKeyToUse}` : apiUrl;
+    const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
-    const response = await fetch(
-      urlWithKey,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    
-    if (!response.ok) {
-      console.error('CoinGecko API error:', response.status, response.statusText);
-      throw new Error(`Failed to fetch data from CoinGecko: ${response.status}`);
+    if (error) {
+      throw new Error(`Failed to fetch data: ${error.message}`);
     }
-    
-    const data: CoinGeckoResponse = await response.json();
-    
+
     if (!data.bitcoin) {
       throw new Error('Invalid response from CoinGecko API');
     }
@@ -117,7 +79,6 @@ async function performFetch(): Promise<CoinRates> {
       lastUpdated: new Date()
     };
     
-    // Always update both cached rates and initialRates with fresh data
     updateCachedRates(newRates);
     updateInitialRates(newRates);
     
@@ -125,11 +86,10 @@ async function performFetch(): Promise<CoinRates> {
     return newRates;
   } catch (error) {
     console.error('Error fetching Bitcoin rates:', error);
-    throw error; // Re-throw to be handled by the calling function
+    throw error;
   }
 }
 
-// Helper function to get the most recent rates available when API fetch fails
 function getLatestAvailableRates(): CoinRates {
   const cachedRates = getCachedRates();
   console.log('Using cached rates as fallback:', cachedRates);
