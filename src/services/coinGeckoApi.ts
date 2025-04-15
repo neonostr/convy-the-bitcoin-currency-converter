@@ -11,6 +11,7 @@ import {
   getActiveFetchPromise
 } from "./ratesService";
 import { supabase } from "@/integrations/supabase/client";
+import { logEvent } from "./usageTracker";
 
 // Increased cache time to reduce API calls
 const FETCH_COOLDOWN = 60000; // 60 seconds (1 minute)
@@ -23,12 +24,14 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
+    logEvent('provided_cached_data');
     return { ...cachedRates };
   }
   
   // Add an additional time-based throttle to prevent too frequent API calls
   if (now - lastFetchTimestamp < FETCH_COOLDOWN) {
     console.log(`Throttling API call - last fetch was ${(now - lastFetchTimestamp)/1000}s ago`);
+    logEvent('provided_cached_data');
     return { ...cachedRates };
   }
   
@@ -41,6 +44,7 @@ export async function fetchCoinRates(): Promise<CoinRates> {
         return await activePromise;
       } catch (error) {
         console.error('Error while waiting for active fetch:', error);
+        logEvent('cached_data_update_failed_000');
       }
     }
   }
@@ -57,6 +61,14 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   } catch (error) {
     console.error('Fetch failed:', error);
     setFetchingState(false, null);
+    
+    // Log the specific error type if we can extract it
+    if (error.response && error.response.status) {
+      logEvent(`cached_data_update_failed_${error.response.status}`);
+    } else {
+      logEvent('cached_data_update_failed_000');
+    }
+    
     return getLatestAvailableRates();
   }
 }
@@ -97,6 +109,7 @@ async function performFetch(): Promise<CoinRates> {
     updateCachedRates(newRates);
     updateInitialRates(newRates);
     
+    logEvent('cached_data_updated');
     console.log('Successfully updated rates with fresh data');
     return newRates;
   } catch (error) {
@@ -115,10 +128,12 @@ function getLatestAvailableRates(): CoinRates {
     if (!initialRates.lastUpdated || 
         new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated)) {
       updateInitialRates(cachedRates);
+      logEvent('initial_rates_updated');
     }
     return cachedRates;
   }
   
   // Fallback to initial rates if no cached rates
+  logEvent('provided_initial_rates');
   return { ...initialRates };
 }

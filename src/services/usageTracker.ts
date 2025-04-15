@@ -1,12 +1,48 @@
 
+import { supabase } from "@/integrations/supabase/client";
+
 const DAILY_USAGE_KEY = 'bitcoin-converter-daily-usage';
 const API_CALLS_KEY = 'bitcoin-converter-api-calls';
+const LAST_EVENT_LOG_KEY = 'bitcoin-converter-last-event-log';
 
 interface UsageStats {
   date: string;
   count: number;
   apiCalls: number;
 }
+
+// Log events to our Supabase table
+export const logEvent = async (eventType: string) => {
+  // Rate limit event logging (one per minute per event type)
+  const now = Date.now();
+  const lastEventLogs = localStorage.getItem(LAST_EVENT_LOG_KEY);
+  const eventLogs = lastEventLogs ? JSON.parse(lastEventLogs) : {};
+  
+  // Check if we've logged this event type recently
+  if (eventLogs[eventType] && now - eventLogs[eventType] < 60000) {
+    console.log(`Skipping event log for ${eventType} - logged recently`);
+    return;
+  }
+  
+  try {
+    const { error } = await supabase
+      .from('usage_logs')
+      .insert([{ event_type: eventType }]);
+      
+    if (error) {
+      console.error('Error logging event to Supabase:', error);
+      return;
+    }
+    
+    // Update the last logged time for this event type
+    eventLogs[eventType] = now;
+    localStorage.setItem(LAST_EVENT_LOG_KEY, JSON.stringify(eventLogs));
+    
+    console.log(`Successfully logged event: ${eventType}`);
+  } catch (err) {
+    console.error('Failed to log event:', err);
+  }
+};
 
 export const trackAppUsage = () => {
   const today = new Date().toISOString().split('T')[0];
@@ -29,6 +65,18 @@ export const trackAppUsage = () => {
 
   // Save back to localStorage
   localStorage.setItem(DAILY_USAGE_KEY, JSON.stringify(stats));
+  
+  // Log app open event based on device type
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    logEvent('app_open_brower_mobile');
+  } else {
+    logEvent('app_open_brower_desktop');
+  }
+  
+  // Check if app is running as PWA
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    logEvent('app_open_pwa');
+  }
 
   return stats;
 };

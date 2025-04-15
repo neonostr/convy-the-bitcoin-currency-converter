@@ -37,35 +37,59 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get('COINGECKO_API_KEY')
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     
-    // Only consider it "pro" if the API key exists AND is being used in the request
-    const isProAccess = !!apiKey && apiKey.length > 10;  // Basic validation that it's not empty/default
-    const api_type = isProAccess ? 'pro' : 'public';
+    // Improved API key validation
+    const isValidKey = apiKey && apiKey.length > 10 && !apiKey.includes('YOUR_API_KEY');
     
-    console.log(`Using CoinGecko API type: ${api_type}, API Key exists: ${!!apiKey}, API Key valid: ${isProAccess}`);
+    // First attempt with public API (no key)
+    console.log(`First attempting CoinGecko public API call`);
     
-    // Construct the URL based on whether we have a valid API key
-    const requestUrl = isProAccess ? `${apiUrl}&x_cg_api_key=${apiKey}` : apiUrl;
-    
-    const response = await fetch(
-      requestUrl,
+    let response = await fetch(
+      apiUrl,
       {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
       }
-    )
-
-    if (!response.ok) {
+    );
+    
+    // Track which API we successfully used
+    let api_type = 'public';
+    
+    // If public API fails with rate limit (429) and we have a valid key, try the pro API
+    if (response.status === 429 && isValidKey) {
+      console.log(`Public API rate limited, switching to Pro API with key`);
+      
+      response = await fetch(
+        `${apiUrl}&x_cg_api_key=${apiKey}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.ok) {
+        api_type = 'pro';
+        await logEdgeFunctionEvent(`coingecko_api_pro_success`);
+      } else {
+        const errorCode = response.status;
+        await logEdgeFunctionEvent(`coingecko_api_pro_failure_${errorCode}`);
+        throw new Error(`CoinGecko Pro API error: ${response.status}`);
+      }
+    } else if (response.ok) {
+      // Public API succeeded
+      await logEdgeFunctionEvent(`coingecko_api_public_success`);
+    } else {
+      // Public API failed with error other than rate limit
       const errorCode = response.status;
-      await logEdgeFunctionEvent(`coingecko_api_${api_type}_failure_${errorCode}`);
-      throw new Error(`CoinGecko API error: ${response.status}`);
+      await logEdgeFunctionEvent(`coingecko_api_public_failure_${errorCode}`);
+      throw new Error(`CoinGecko Public API error: ${response.status}`);
     }
 
     const data = await response.json();
     
-    await logEdgeFunctionEvent(`coingecko_api_${api_type}_success`);
-
     return new Response(JSON.stringify({ ...data, api_type }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
