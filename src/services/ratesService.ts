@@ -1,6 +1,25 @@
 
 import { CoinRates, Currency } from "@/types/currency.types";
 
+// Cache settings
+export const CACHE_EXPIRY_TIME = 60000; // 60 seconds in milliseconds
+
+// Try to load rates from localStorage on startup
+const loadRatesFromStorage = (): CoinRates => {
+  try {
+    const storedRates = localStorage.getItem('bitcoin-converter-rates');
+    if (storedRates) {
+      const parsedRates = JSON.parse(storedRates);
+      // Convert the string date back to a Date object
+      parsedRates.lastUpdated = new Date(parsedRates.lastUpdated);
+      return parsedRates;
+    }
+  } catch (error) {
+    console.error('Failed to load rates from localStorage:', error);
+  }
+  return { ...initialRates };
+};
+
 // Current market rates as fallback (will be dynamically updated)
 export let initialRates: CoinRates = {
   btc: 1,
@@ -18,34 +37,18 @@ export let initialRates: CoinRates = {
   lastUpdated: new Date()
 };
 
-// Cache settings
-export const CACHE_EXPIRY_TIME = 60000; // 60 seconds in milliseconds
-
 // Cache state
 let cachedRates: CoinRates = loadRatesFromStorage();
 let lastFetchTime: number = 0;
 let isFetchingData: boolean = false;
 let fetchPromise: Promise<CoinRates> | null = null;
 
-// Try to load rates from localStorage on startup
-const loadRatesFromStorage = (): CoinRates => {
-  try {
-    const storedRates = localStorage.getItem('bitcoin-converter-rates');
-    if (storedRates) {
-      const parsedRates = JSON.parse(storedRates);
-      // Convert the string date back to a Date object
-      parsedRates.lastUpdated = new Date(parsedRates.lastUpdated);
-      
-      // Update initialRates with stored rates on startup
-      initialRates = { ...parsedRates };
-      
-      return parsedRates;
-    }
-  } catch (error) {
-    console.error('Failed to load rates from localStorage:', error);
-  }
-  return { ...initialRates };
-};
+// After initializing cachedRates, update initialRates if needed
+if (cachedRates.lastUpdated) {
+  // If cached rates exist, update initialRates
+  initialRates = { ...cachedRates };
+  console.log('Loaded rates from storage:', initialRates);
+}
 
 export function getCachedRates(): CoinRates {
   return { ...cachedRates };
