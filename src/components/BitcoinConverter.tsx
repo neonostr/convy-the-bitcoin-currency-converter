@@ -33,7 +33,8 @@ const BitcoinConverter = () => {
   };
 
   const copyToClipboard = (value: string) => {
-    const numericValue = value.replace(/[^\d.-]/g, '');
+    // Ensure we handle both comma and dot decimal separators consistently
+    const numericValue = value.replace(/[^\d.,]/g, '').replace(',', '.');
     navigator.clipboard.writeText(numericValue).then(() => {
       toast({
         title: "Copied to clipboard",

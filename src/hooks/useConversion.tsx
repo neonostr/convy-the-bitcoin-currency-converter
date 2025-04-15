@@ -24,6 +24,7 @@ export const useConversion = () => {
   // Update conversions when amount, selected currency, or rates change
   useEffect(() => {
     if (rates && amount !== '') {
+      // Correctly handle both comma and dot as decimal separators
       const normalizedAmount = amount.replace(',', '.');
       const numericAmount = parseFloat(normalizedAmount);
       
@@ -39,6 +40,7 @@ export const useConversion = () => {
   // Update conversions when settings change (to reflect any changes in display currencies)
   useEffect(() => {
     if (rates && amount !== '') {
+      // Ensure consistent handling of decimal separators
       const normalizedAmount = amount.replace(',', '.');
       const numericAmount = parseFloat(normalizedAmount);
       
@@ -59,13 +61,16 @@ export const useConversion = () => {
     
     setIsRefreshing(true);
     try {
+      console.log('fetchCoinRates called, current initialRates:', initialRates);
       const newRates = await fetchCoinRates();
       setRates(newRates);
       isInitialFetch.current = false;
       
       // If this is the first time we're fetching rates, calculate initial conversions
       if (!rates) {
-        const numericAmount = parseFloat(amount);
+        // Ensure we handle comma decimal separators
+        const normalizedAmount = amount.replace(',', '.');
+        const numericAmount = parseFloat(normalizedAmount);
         if (!isNaN(numericAmount)) {
           const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
           setConversions(newConversions);
@@ -119,13 +124,16 @@ export const useConversion = () => {
     
     if (rates) {
       // When changing currency, convert the current amount to the new currency
-      const numericAmount = parseFloat(amount) || 0;
+      // Ensure we properly handle comma decimal separators
+      const normalizedAmount = amount.replace(',', '.'); 
+      const numericAmount = parseFloat(normalizedAmount) || 0;
       const newConversions = convertCurrency(numericAmount, currency, rates);
       setConversions(newConversions);
     }
   };
 
   const handleInputChange = (value: string) => {
+    // Allow both comma and dot as decimal separators
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
       

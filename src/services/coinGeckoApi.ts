@@ -67,12 +67,13 @@ export async function fetchCoinRates(): Promise<CoinRates> {
 // Separate function to perform the actual API fetch
 async function performFetch(): Promise<CoinRates> {
   try {
+    console.log("Fetching fresh Bitcoin rates from API...");
     // Build the API URL with the API key as a parameter
     const apiKeyToUse = getApiKey();
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub';
     
-    // Add API key if available
-    const urlWithKey = apiKeyToUse ? `${apiUrl}&x_cg_demo_api_key=${apiKeyToUse}` : apiUrl;
+    // Fix the API key parameter format - it should be x_cg_api_key not x_cg_demo_api_key
+    const urlWithKey = apiKeyToUse ? `${apiUrl}&x_cg_api_key=${apiKeyToUse}` : apiUrl;
     
     const response = await fetch(
       urlWithKey,
@@ -128,6 +129,7 @@ async function performFetch(): Promise<CoinRates> {
 // Helper function to get the most recent rates available when API fetch fails
 function getLatestAvailableRates(): CoinRates {
   const cachedRates = getCachedRates();
+  console.log('Using cached rates as fallback:', cachedRates);
   
   // Always use the most recent data we have
   if (cachedRates.lastUpdated) {
