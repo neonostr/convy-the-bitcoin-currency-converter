@@ -39,9 +39,6 @@ export const useConversion = () => {
       } else {
         setConversions({});
       }
-    } else {
-      // Clear conversions when amount is empty
-      setConversions({});
     }
   }, [amount, selectedCurrency, rates]);
 
@@ -54,12 +51,7 @@ export const useConversion = () => {
       if (!isNaN(numericAmount)) {
         const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
         setConversions(newConversions);
-      } else {
-        setConversions({});
       }
-    } else {
-      // Clear conversions when amount is empty
-      setConversions({});
     }
   }, [settings]);
 
@@ -123,19 +115,17 @@ export const useConversion = () => {
   };
 
   const handleCurrencySelect = (currency: Currency) => {
-    // Clear conversions immediately when currency changes
-    setConversions({});
-    
-    // Clear the amount field
-    setAmount('');
-    
-    // Set the new selected currency
     setSelectedCurrency(currency);
     
     // Only update rates if cache is stale
     if (isCacheStale()) {
       fetchRates();
     }
+    
+    // When changing currency, convert the current amount to the new currency
+    const numericAmount = parseFloat(amount) || 0;
+    const newConversions = convertCurrency(numericAmount, currency, rates);
+    setConversions(newConversions);
   };
 
   const handleInputChange = (value: string) => {
@@ -145,11 +135,6 @@ export const useConversion = () => {
       // Only fetch new rates if value is not empty and the cache is stale
       if (value !== '' && isCacheStale()) {
         fetchRates();
-      }
-      
-      // If value is empty, reset conversions
-      if (value === '') {
-        setConversions({});
       }
     }
   };
