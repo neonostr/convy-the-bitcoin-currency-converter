@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Coffee } from 'lucide-react';
@@ -21,6 +21,16 @@ const DonationPopup: React.FC = () => {
   const [paymentConfirmed, setPaymentConfirmed] = useState<boolean>(false);
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
+
+  // Clean up any polling intervals when component unmounts
+  useEffect(() => {
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [pollInterval]);
 
   const resetState = () => {
     setAmount(INITIAL_AMOUNT);
@@ -29,17 +39,26 @@ const DonationPopup: React.FC = () => {
     setIsSending(false);
     setPaymentConfirmed(false);
     setIsCopied(false);
+    
+    // Clear any active polling interval
+    if (pollInterval) {
+      clearInterval(pollInterval);
+      setPollInterval(null);
+    }
   };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       // Reset on close
       resetState();
-    } else {
-      // Also reset on open to ensure a fresh state
-      resetState();
     }
     setIsOpen(open);
+  };
+
+  const handleTriggerClick = () => {
+    // Reset state completely when opening the popup
+    resetState();
+    setIsOpen(true);
   };
 
   const generateQR = async (invoice: string) => {
@@ -77,16 +96,28 @@ const DonationPopup: React.FC = () => {
       setInvoice(generatedInvoice);
       await generateQR(generatedInvoice);
       
-      const pollInterval = setInterval(async () => {
+      // Clear any existing interval before creating a new one
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+      
+      // Create a new polling interval
+      const interval = setInterval(async () => {
         if (!verifyUrl) {
-          clearInterval(pollInterval);
+          clearInterval(interval);
           return;
         }
         
         await checkPaymentStatus(verifyUrl);
       }, 2000);
+      
+      setPollInterval(interval);
 
-      setTimeout(() => clearInterval(pollInterval), 300000);
+      // Set a timeout to clear the interval after 5 minutes
+      setTimeout(() => {
+        clearInterval(interval);
+        setPollInterval(null);
+      }, 300000);
 
     } catch (error) {
       console.error('Error generating lightning invoice:', error);
@@ -102,7 +133,7 @@ const DonationPopup: React.FC = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild onClick={() => setIsOpen(true)}>
+      <DialogTrigger asChild onClick={handleTriggerClick}>
         <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
           <Coffee className="h-4 w-4 mr-1" />
           <span>Zap me a coffee</span>
