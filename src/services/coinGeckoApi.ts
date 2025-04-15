@@ -2,14 +2,17 @@
 import { CoinRates, CoinGeckoResponse } from "@/types/currency.types";
 import { initialRates, updateCachedRates, getCachedRates, getLastFetchTime, canRefreshRates, updateInitialRates } from "./ratesService";
 
-// Get the API key from environment variables (will be added by the user)
-// This prevents the key from being hardcoded and leaked
-const getApiKey = () => {
-  // Try to get from localStorage for development (user must add it)
-  const localKey = localStorage.getItem('coingecko-api-key');
-  
-  // Return the appropriate key or an empty string if none available
-  return localKey || '';
+// Secure API key handling - storing it in memory only, not in the codebase
+let apiKey = '';
+
+// Function to set the API key (to be called when the app initializes or when you need to update it)
+export function setCoinGeckoApiKey(key: string): void {
+  apiKey = key;
+}
+
+// Get the API key from memory, not from the codebase
+const getApiKey = (): string => {
+  return apiKey;
 };
 
 export async function fetchCoinRates(): Promise<CoinRates> {
@@ -29,11 +32,11 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   
   try {
     // Build the API URL with the API key as a parameter
-    const apiKey = getApiKey();
+    const apiKeyToUse = getApiKey();
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub';
     
     // Add API key if available
-    const urlWithKey = apiKey ? `${apiUrl}&x_cg_demo_api_key=${apiKey}` : apiUrl;
+    const urlWithKey = apiKeyToUse ? `${apiUrl}&x_cg_demo_api_key=${apiKeyToUse}` : apiUrl;
     
     const response = await fetch(
       urlWithKey,

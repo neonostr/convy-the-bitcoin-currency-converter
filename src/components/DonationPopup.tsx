@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -24,6 +23,7 @@ const DonationPopup: React.FC = () => {
     setQrData('');
     setIsSending(false);
     setPaymentConfirmed(false);
+    setIsCopied(false);
   };
 
   const handleClose = () => {
@@ -103,12 +103,10 @@ const DonationPopup: React.FC = () => {
 
   const setPresetAmount = (value: number) => {
     setAmount(value);
-    resetState();
   };
 
   const handleAmountFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.value = ''; // Clear the input on focus
-    setAmount(0);
+    e.target.select();
   };
 
   return (
@@ -147,7 +145,7 @@ const DonationPopup: React.FC = () => {
                   type="number"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  value={amount || ''}
+                  value={amount}
                   onChange={(e) => setPresetAmount(Number(e.target.value))}
                   onFocus={handleAmountFocus}
                   min={1}
