@@ -33,11 +33,14 @@ Deno.serve(async (req) => {
 
     const data = await response.json()
 
-    // Log the API call
+    // Log the API call with additional metadata
     await supabase
       .from('usage_logs')
       .insert([
-        { event_type: 'coingecko_api_call' }
+        { 
+          event_type: 'coingecko_api_call',
+          metadata: { status: response.status, success: true }
+        }
       ])
 
     return new Response(JSON.stringify(data), {
@@ -46,6 +49,17 @@ Deno.serve(async (req) => {
     })
   } catch (error) {
     console.error('Error:', error)
+    
+    // Log failed API calls
+    await supabase
+      .from('usage_logs')
+      .insert([
+        { 
+          event_type: 'coingecko_api_call_error',
+          metadata: { error: error.message }
+        }
+      ])
+      
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,

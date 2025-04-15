@@ -28,13 +28,19 @@ const BitcoinConverter = () => {
   } = useConversion();
 
   useEffect(() => {
+    // Determine if app is running as PWA or in browser
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
+                 (window.navigator as any).standalone === true;
+    
     // Log app usage when component mounts
     const logAppUsage = async () => {
       try {
         await supabase
           .from('usage_logs')
           .insert([
-            { event_type: 'app_open' }
+            { 
+              event_type: isPwa ? 'app_open_pwa' : 'app_open_browser'
+            }
           ]);
       } catch (error) {
         console.error('Failed to log app usage:', error);
