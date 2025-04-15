@@ -65,6 +65,7 @@ const SettingsMenu: React.FC = () => {
 
   // Helper to generate an example number based on current settings
   const getFormattedExample = () => {
+    // Adjust example based on the current decimal separator choice
     return settings.decimalSeparator === ',' ? '1.234,56' : '1,234.56';
   };
 

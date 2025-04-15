@@ -1,3 +1,4 @@
+
 export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
   const locale = 'en-US';
   let formatted: string;
@@ -18,7 +19,18 @@ export function formatCurrency(value: number, currency: string, decimalSeparator
     });
   }
   
-  return decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
+  // If decimal separator is comma, we need to replace both the decimal point
+  // and adjust the thousand separator to be a dot
+  if (decimalSeparator === ',') {
+    // First replace all commas temporarily to something else
+    formatted = formatted.replace(/,/g, '___TEMP___');
+    // Replace decimal points with commas
+    formatted = formatted.replace(/\./g, ',');
+    // Replace the temporary placeholders with dots (new thousand separator)
+    formatted = formatted.replace(/___TEMP___/g, '.');
+  }
+  
+  return formatted;
 }
 
 export function formatForCopy(
@@ -40,9 +52,12 @@ export function formatForCopy(
   
   if (includeThouSep) {
     const parts = formatted.split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, decimalSeparator === ',' ? '.' : ',');
+    // Use the appropriate thousand separator based on decimal separator choice
+    const thousandSeparator = decimalSeparator === ',' ? '.' : ',';
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
     formatted = parts.join(decimalSeparator);
   } else {
+    // Only replace the decimal separator without adding thousand separators
     formatted = decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
   }
   
