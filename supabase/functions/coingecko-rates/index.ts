@@ -14,9 +14,11 @@ Deno.serve(async (req) => {
 
   try {
     const apiKey = Deno.env.get('COINGECKO_API_KEY')
+    console.log('Using API Key:', apiKey ? 'Key present' : 'No key found')
+    
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     
-    // Make the API call with the secret key
+    // Attempt to make the API call with the secret key
     const response = await fetch(
       `${apiUrl}&x_cg_api_key=${apiKey}`,
       {
@@ -27,19 +29,28 @@ Deno.serve(async (req) => {
       }
     )
 
+    console.log('API Response Status:', response.status)
+
     if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status}`)
+      const errorText = await response.text()
+      console.error('CoinGecko API Error:', errorText)
+      throw new Error(`CoinGecko API error: ${response.status} - ${errorText}`)
     }
 
     const data = await response.json()
+    console.log('API Response Data:', JSON.stringify(data, null, 2))
 
-    // Log the API call with additional metadata
+    // Log the API call
     await supabase
       .from('usage_logs')
       .insert([
         { 
           event_type: 'coingecko_api_call',
-          metadata: { status: response.status, success: true }
+          metadata: { 
+            status: response.status, 
+            success: true,
+            response_data: data 
+          }
         }
       ])
 
@@ -48,7 +59,7 @@ Deno.serve(async (req) => {
       status: 200,
     })
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Complete Error:', error)
     
     // Log failed API calls
     await supabase
@@ -56,7 +67,10 @@ Deno.serve(async (req) => {
       .insert([
         { 
           event_type: 'coingecko_api_call_error',
-          metadata: { error: error.message }
+          metadata: { 
+            error: error.message,
+            full_error: JSON.stringify(error)
+          }
         }
       ])
       
@@ -66,3 +80,4 @@ Deno.serve(async (req) => {
     })
   }
 })
+
