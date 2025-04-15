@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
@@ -126,17 +127,17 @@ export const useConversion = () => {
   const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency);
     
+    // Reset the amount to zero when changing currency
+    setAmount('0');
+    
     // Only update rates if cache is stale
     if (isCacheStale()) {
       fetchRates();
     }
     
     if (rates) {
-      // When changing currency, convert the current amount to the new currency
-      // Ensure we properly handle comma decimal separators
-      const normalizedAmount = amount.replace(',', '.'); 
-      const numericAmount = parseFloat(normalizedAmount) || 0;
-      const newConversions = convertCurrency(numericAmount, currency, rates);
+      // When changing currency, set conversions to zero
+      const newConversions = convertCurrency(0, currency, rates);
       setConversions(newConversions);
     }
   };
