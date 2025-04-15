@@ -35,6 +35,11 @@ const BitcoinConverter = () => {
   // Initialize API keys when component mounts
   useEffect(() => {
     initializeApiKeys();
+    
+    // Ensure 1 is in the input field on initial load
+    if (amount === '') {
+      setAmount('1');
+    }
   }, []);
 
   const handleInputFocus = () => {
