@@ -8,10 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export async function logEvent(eventType: string): Promise<void> {
   try {
+    console.log(`Logging event: ${eventType}`);
     // Call the edge function to log the event
-    await supabase.functions.invoke('log-event', {
+    const { error } = await supabase.functions.invoke('log-event', {
       body: { event_type: eventType }
     });
+    
+    if (error) {
+      console.error('Failed to log event:', error);
+    } else {
+      console.log(`Successfully logged event: ${eventType}`);
+    }
   } catch (error) {
     // Log to console but don't throw so this doesn't break the app experience
     console.error('Failed to log event:', error);

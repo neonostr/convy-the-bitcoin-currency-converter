@@ -79,20 +79,24 @@ Deno.serve(async (req) => {
       'app_open_browser_desktop',
       'app_open_pwa',
       'coingecko_api_with_key_success',
-      'coingecko_api_with_key_failure',
       'coingecko_api_public_success',
-      'coingecko_api_public_failure',
       'cryptocompare_api_with_key_success',
-      'cryptocompare_api_with_key_failure',
-      'cryptocompare_api_public_success',
-      'cryptocompare_api_public_failure'
+      'cryptocompare_api_public_success'
     ];
     
     // Allow error codes to be appended to failure events
-    const baseEventType = event_type.split('_').slice(0, -1).join('_');
-    const isErrorEvent = event_type.includes('_failure_');
+    const baseEventTypes = [
+      'coingecko_api_with_key_failure',
+      'coingecko_api_public_failure',
+      'cryptocompare_api_with_key_failure',
+      'cryptocompare_api_public_failure'
+    ];
     
-    if (!isErrorEvent && !allowedEventTypes.includes(event_type)) {
+    // Check if it's a base event or a failure with error code
+    const isAllowedEvent = allowedEventTypes.includes(event_type) || 
+      baseEventTypes.some(baseType => event_type.startsWith(baseType));
+    
+    if (!isAllowedEvent) {
       return new Response(
         JSON.stringify({ error: 'Invalid event type' }),
         { 
@@ -111,6 +115,42 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
+    }
+    
+    // Create the table if it doesn't exist
+    const { error: tableError } = await supabase.rpc('ensure_usage_logs_table');
+    
+    if (tableError) {
+      console.error('Error ensuring usage_logs table exists:', tableError);
+      
+      // Try to create the table directly as a fallback
+      const { error: createError } = await supabase.from('usage_logs').select('count(*)').limit(1);
+      
+      if (createError) {
+        // Table doesn't exist, create it
+        const createTableQuery = `
+          CREATE TABLE IF NOT EXISTS public.usage_logs (
+            id SERIAL PRIMARY KEY,
+            event_type TEXT NOT NULL,
+            timestamp TIMESTAMPTZ NOT NULL DEFAULT now()
+          );
+        `;
+        
+        const { error: createTableError } = await supabase.rpc('exec_sql', { 
+          sql_query: createTableQuery 
+        });
+        
+        if (createTableError) {
+          console.error('Error creating table:', createTableError);
+          return new Response(
+            JSON.stringify({ error: 'Failed to ensure logs table exists' }),
+            { 
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+      }
     }
     
     // Insert event into the database
