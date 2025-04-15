@@ -59,7 +59,7 @@ async function performFetch(): Promise<CoinRates> {
     }
 
     if (!data.bitcoin) {
-      throw new Error('Invalid response from CoinGecko API');
+      throw new Error('Invalid response from API');
     }
     
     console.log("Bitcoin rates from API:", data.bitcoin);
