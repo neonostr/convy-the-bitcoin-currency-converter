@@ -14,6 +14,10 @@ import {
 const processedRequests = new Map();
 const DEDUPLICATION_TIMEOUT = 2000; // 2 seconds
 
+// Track successful API logs to prevent duplicates within a short time window
+const recentSuccessLogs = new Map();
+const LOG_DEDUPLICATION_TIMEOUT = 10000; // 10 seconds
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -41,7 +45,6 @@ Deno.serve(async (req) => {
     
     // 1. Try CoinGecko public API first
     try {
-      console.log('Attempting CoinGecko public API first...')
       data = await fetchFromCoinGeckoPublic()
       apiSuccess = true
       source = 'coingecko_public'
@@ -99,8 +102,19 @@ Deno.serve(async (req) => {
       throw new Error('Failed to fetch data from any API source')
     }
     
-    // Log the successful API call - we'll only log once per request
-    await logApiCall(source, data)
+    // Log the successful API call - but prevent duplicates
+    const logKey = `${source}_${Math.floor(requestTime / LOG_DEDUPLICATION_TIMEOUT)}`;
+    if (!recentSuccessLogs.has(logKey)) {
+      await logApiCall(source, data)
+      recentSuccessLogs.set(logKey, true);
+      
+      // Clean up old log entries
+      setTimeout(() => {
+        recentSuccessLogs.delete(logKey);
+      }, LOG_DEDUPLICATION_TIMEOUT);
+    } else {
+      console.log(`Skipping duplicate log for ${source} - already logged in the last ${LOG_DEDUPLICATION_TIMEOUT/1000} seconds`);
+    }
     
     // Store the response to prevent duplicate processing
     processedRequests.set(requestId, data);

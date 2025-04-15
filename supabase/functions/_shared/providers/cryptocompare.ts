@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co"
@@ -30,7 +31,9 @@ export async function fetchFromCryptoComparePublic() {
       }
     };
     
-    await logApiSuccess('cryptocompare_api_public_success');
+    // Don't log success here - let the main edge function handle it
+    console.log("Successfully fetched data from CryptoCompare public API");
+    
     return transformedData;
   } catch (error) {
     console.error(`CryptoCompare public API error: ${error.message}`);
@@ -71,7 +74,9 @@ export async function fetchFromCryptoCompareWithKey() {
       }
     };
     
-    await logApiSuccess('cryptocompare_api_with_key_success');
+    // Don't log success here - let the main edge function handle it
+    console.log("Successfully fetched data from CryptoCompare with API key");
+    
     return transformedData;
   } catch (error) {
     console.error(`CryptoCompare API with key error: ${error.message}`);
