@@ -23,16 +23,16 @@ const loadRatesFromStorage = (): CoinRates => {
 export const DEFAULT_INITIAL_RATES: CoinRates = {
   btc: 1,
   sats: 100000000, // 1 BTC = 100,000,000 satoshis
-  usd: 70123,
-  eur: 64852,
-  chf: 62754,
-  cny: 510430,
-  jpy: 10854000,
-  gbp: 55621,
-  aud: 105823,
-  cad: 95241,
-  inr: 5853000,
-  rub: 6423000,
+  usd: 0,
+  eur: 0,
+  chf: 0,
+  cny: 0,
+  jpy: 0,
+  gbp: 0,
+  aud: 0,
+  cad: 0,
+  inr: 0,
+  rub: 0,
   lastUpdated: new Date()
 };
 
