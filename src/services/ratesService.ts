@@ -18,6 +18,15 @@ export let initialRates: CoinRates = {
   lastUpdated: new Date()
 };
 
+// Cache settings
+export const CACHE_EXPIRY_TIME = 60000; // 60 seconds in milliseconds
+
+// Cache state
+let cachedRates: CoinRates = loadRatesFromStorage();
+let lastFetchTime: number = 0;
+let isFetchingData: boolean = false;
+let fetchPromise: Promise<CoinRates> | null = null;
+
 // Try to load rates from localStorage on startup
 const loadRatesFromStorage = (): CoinRates => {
   try {
@@ -37,10 +46,6 @@ const loadRatesFromStorage = (): CoinRates => {
   }
   return { ...initialRates };
 };
-
-let cachedRates: CoinRates = loadRatesFromStorage();
-let lastFetchTime: number = 0;
-export const THROTTLE_TIME = 60000; // 1 minute in milliseconds
 
 export function getCachedRates(): CoinRates {
   return { ...cachedRates };
@@ -72,8 +77,21 @@ export function updateInitialRates(rates: CoinRates): void {
   console.log('Updated initialRates with fresh data:', initialRates);
 }
 
-export function canRefreshRates(): boolean {
-  return Date.now() - lastFetchTime >= THROTTLE_TIME;
+export function isCacheStale(): boolean {
+  return Date.now() - lastFetchTime >= CACHE_EXPIRY_TIME;
+}
+
+export function setFetchingState(state: boolean, promise: Promise<CoinRates> | null = null): void {
+  isFetchingData = state;
+  fetchPromise = promise;
+}
+
+export function isFetching(): boolean {
+  return isFetchingData;
+}
+
+export function getActiveFetchPromise(): Promise<CoinRates> | null {
+  return fetchPromise;
 }
 
 export function getLastFetchTime(): number {

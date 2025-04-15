@@ -1,6 +1,16 @@
 
 import { CoinRates, CoinGeckoResponse } from "@/types/currency.types";
-import { initialRates, updateCachedRates, getCachedRates, getLastFetchTime, canRefreshRates, updateInitialRates } from "./ratesService";
+import { 
+  initialRates, 
+  updateCachedRates, 
+  getCachedRates, 
+  getLastFetchTime, 
+  isCacheStale, 
+  updateInitialRates, 
+  isFetching, 
+  setFetchingState,
+  getActiveFetchPromise
+} from "./ratesService";
 
 // Secure API key handling - storing it in memory only, not in the codebase
 let apiKey = '';
@@ -16,27 +26,46 @@ const getApiKey = (): string => {
 };
 
 export async function fetchCoinRates(): Promise<CoinRates> {
-  const currentTime = Date.now();
-  
-  // Check if initialRates are fresh (less than 60 seconds old)
-  if (initialRates.lastUpdated && 
-      (new Date().getTime() - new Date(initialRates.lastUpdated).getTime() < 60000)) {
-    console.log('Using fresh initialRates (< 60s old)');
-    return { ...initialRates };
+  // First, check if we already have valid rates that are fresh enough (less than 60 seconds old)
+  const cachedRates = getCachedRates();
+  if (!isCacheStale()) {
+    console.log('Using fresh cached rates (< 60s old)');
+    return { ...cachedRates };
   }
   
-  // Check if we need to throttle the request
-  if (!canRefreshRates()) {
-    const cachedRates = getCachedRates();
-    // Update initialRates with cached data if it's newer
-    if (cachedRates.lastUpdated && 
-        (!initialRates.lastUpdated || 
-         new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated))) {
-      updateInitialRates(cachedRates);
+  // Check if another request is already fetching fresh data
+  if (isFetching()) {
+    console.log('Another request is already fetching data, waiting for that result');
+    const activePromise = getActiveFetchPromise();
+    if (activePromise) {
+      try {
+        return await activePromise;
+      } catch (error) {
+        console.error('Error while waiting for active fetch:', error);
+        // If the active fetch fails, we'll continue with our own fetch attempt
+      }
     }
-    return cachedRates;
   }
   
+  // Set up the fetch promise that multiple concurrent requests can use
+  const fetchPromise = performFetch();
+  setFetchingState(true, fetchPromise);
+  
+  try {
+    const result = await fetchPromise;
+    setFetchingState(false, null);
+    return result;
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    setFetchingState(false, null);
+    
+    // Return the most recent data available
+    return getLatestAvailableRates();
+  }
+}
+
+// Separate function to perform the actual API fetch
+async function performFetch(): Promise<CoinRates> {
   try {
     // Build the API URL with the API key as a parameter
     const apiKeyToUse = getApiKey();
@@ -92,22 +121,24 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     return newRates;
   } catch (error) {
     console.error('Error fetching Bitcoin rates:', error);
-    
-    // Get cached rates to check if they're newer than initialRates
-    const cachedRates = getCachedRates();
-    if (cachedRates.lastUpdated && 
-        (!initialRates.lastUpdated || 
-         new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated))) {
-      updateInitialRates(cachedRates);
-      return cachedRates;
-    }
-    
-    // If we have cached rates and this isn't the first fetch, return those
-    if (getLastFetchTime() > 0) {
-      return getCachedRates();
-    }
-    
-    // Otherwise return initial rates
-    return initialRates;
+    throw error; // Re-throw to be handled by the calling function
   }
+}
+
+// Helper function to get the most recent rates available when API fetch fails
+function getLatestAvailableRates(): CoinRates {
+  const cachedRates = getCachedRates();
+  
+  // Always use the most recent data we have
+  if (cachedRates.lastUpdated) {
+    // If cached rates exist and are newer than initialRates, update initialRates
+    if (!initialRates.lastUpdated || 
+        new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated)) {
+      updateInitialRates(cachedRates);
+    }
+    return cachedRates;
+  }
+  
+  // Fallback to initial rates if no cached rates
+  return { ...initialRates };
 }

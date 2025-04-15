@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
-import { convertCurrency, getCachedRates, canRefreshRates } from '@/services/ratesService';
+import { convertCurrency, getCachedRates, isCacheStale } from '@/services/ratesService';
 import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
 
@@ -12,9 +12,9 @@ export const useConversion = () => {
   const [rates, setRates] = useState<CoinRates | null>(null);
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const lastRefreshTime = useRef<number>(0);
   const { toast } = useToast();
   const { settings } = useSettings();
+  const isInitialFetch = useRef<boolean>(true);
 
   // Fetch rates initially when component mounts
   useEffect(() => {
@@ -49,15 +49,11 @@ export const useConversion = () => {
     }
   }, [settings]);
 
-  const shouldRefreshRates = (): boolean => {
-    const currentTime = Date.now();
-    const timeSinceLastRefresh = currentTime - lastRefreshTime.current;
-    return timeSinceLastRefresh >= 60000; // 60 seconds
-  };
-
   const fetchRates = async () => {
-    if (!shouldRefreshRates() && rates !== null) {
-      console.log('Skipping API call - using cached rates (< 60s since last refresh)');
+    // For initial fetch, always try to get fresh data
+    // For subsequent fetches, only fetch if the cache is stale (> 60s)
+    if (!isInitialFetch.current && !isCacheStale() && rates !== null) {
+      console.log('Skipping API call - using cached rates (< 60s old)');
       return;
     }
     
@@ -65,9 +61,9 @@ export const useConversion = () => {
     try {
       const newRates = await fetchCoinRates();
       setRates(newRates);
-      lastRefreshTime.current = Date.now();
+      isInitialFetch.current = false;
       
-      // If rates weren't set before, calculate initial conversions
+      // If this is the first time we're fetching rates, calculate initial conversions
       if (!rates) {
         const numericAmount = parseFloat(amount);
         if (!isNaN(numericAmount)) {
@@ -85,11 +81,14 @@ export const useConversion = () => {
         }
       }
       
-      toast({
-        title: "Currency Rates Updated",
-        description: "Rates will auto-refresh after 60 seconds of inactivity.",
-        duration: 3000,
-      });
+      // Only show a toast notification if we actually fetched fresh data from the API
+      if (isCacheStale()) {
+        toast({
+          title: "Currency Rates Updated",
+          description: "Latest exchange rates have been fetched.",
+          duration: 3000,
+        });
+      }
     } catch (error) {
       console.error('Failed to fetch rates:', error);
       
@@ -101,7 +100,7 @@ export const useConversion = () => {
       
       toast({
         title: "Oops! Rate update failed",
-        description: "We couldn't update the rates. Please check your connection.",
+        description: "We're using cached rates. Please try again later.",
         variant: "destructive",
         duration: 3000,
       });
@@ -113,8 +112,8 @@ export const useConversion = () => {
   const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency);
     
-    // Only update rates if it's been more than 60 seconds
-    if (shouldRefreshRates()) {
+    // Only update rates if cache is stale
+    if (isCacheStale()) {
       fetchRates();
     }
     
@@ -130,8 +129,8 @@ export const useConversion = () => {
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
       
-      // Only fetch new rates if value is not empty and it's been over 60 seconds
-      if (value !== '' && shouldRefreshRates()) {
+      // Only fetch new rates if value is not empty and the cache is stale
+      if (value !== '' && isCacheStale()) {
         fetchRates();
       }
     }
