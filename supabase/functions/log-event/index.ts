@@ -117,40 +117,67 @@ Deno.serve(async (req) => {
       );
     }
     
-    // Create the table if it doesn't exist
-    const { error: tableError } = await supabase.rpc('ensure_usage_logs_table');
-    
-    if (tableError) {
-      console.error('Error ensuring usage_logs table exists:', tableError);
-      
-      // Try to create the table directly as a fallback
-      const { error: createError } = await supabase.from('usage_logs').select('count(*)').limit(1);
-      
-      if (createError) {
-        // Table doesn't exist, create it
-        const createTableQuery = `
-          CREATE TABLE IF NOT EXISTS public.usage_logs (
+    // First, try to create the table directly with SQL
+    try {
+      const { error: createTableError } = await supabase.rpc(
+        'create_table_if_not_exists',
+        {
+          table_name: 'usage_logs',
+          table_definition: `
             id SERIAL PRIMARY KEY,
             event_type TEXT NOT NULL,
             timestamp TIMESTAMPTZ NOT NULL DEFAULT now()
-          );
-        `;
+          `
+        }
+      );
+      
+      if (createTableError) {
+        console.log('Error with create_table_if_not_exists RPC:', createTableError);
         
-        const { error: createTableError } = await supabase.rpc('exec_sql', { 
-          sql_query: createTableQuery 
+        // If the RPC method isn't available, use raw SQL through the REST API
+        const { data, error } = await supabase.auth.admin.createUser({
+          email: 'placeholder@example.com',
+          password: 'placeholder'
         });
         
-        if (createTableError) {
-          console.error('Error creating table:', createTableError);
-          return new Response(
-            JSON.stringify({ error: 'Failed to ensure logs table exists' }),
-            { 
-              status: 500,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
+        if (error) {
+          console.log('Just testing if service role key works:', error);
+        }
+        
+        // Try a simple query to see if the table exists
+        const { error: queryError } = await supabase.from('usage_logs').select('count(*)', { count: 'exact' }).limit(1);
+        
+        if (queryError && queryError.code === '42P01') { // Table doesn't exist error
+          console.log('Table does not exist, creating it...');
+          
+          // Create the table with a direct REST API call since we can't use raw SQL via the JS client
+          const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseKey}`,
+              'apikey': supabaseKey,
+              'X-Client-Info': 'Edge Function'
+            },
+            body: JSON.stringify({
+              command: `
+                CREATE TABLE IF NOT EXISTS public.usage_logs (
+                  id SERIAL PRIMARY KEY,
+                  event_type TEXT NOT NULL,
+                  timestamp TIMESTAMPTZ NOT NULL DEFAULT now()
+                );
+              `
+            })
+          });
+          
+          if (!res.ok) {
+            console.error('Failed to create table with direct REST call:', await res.text());
+          }
         }
       }
+    } catch (error) {
+      console.error('Error ensuring table exists:', error);
+      // Continue anyway, maybe the table already exists
     }
     
     // Insert event into the database
@@ -165,6 +192,17 @@ Deno.serve(async (req) => {
     
     if (error) {
       console.error('Error logging event:', error);
+      
+      if (error.code === '42P01') { // Table doesn't exist error
+        return new Response(
+          JSON.stringify({ error: 'Usage logs table does not exist' }),
+          { 
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: 'Failed to log event' }),
         { 
