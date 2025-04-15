@@ -16,9 +16,12 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get('COINGECKO_API_KEY')
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     
-    // Make the API call with the secret key
+    // Determine which API endpoint we're using
+    const api_type = apiKey ? 'pro' : 'public';
+    
+    // Make the API call with the secret key if available
     const response = await fetch(
-      `${apiUrl}&x_cg_api_key=${apiKey}`,
+      apiKey ? `${apiUrl}&x_cg_api_key=${apiKey}` : apiUrl,
       {
         headers: {
           'Accept': 'application/json',
@@ -38,12 +41,18 @@ Deno.serve(async (req) => {
       .from('usage_logs')
       .insert([
         { 
-          event_type: 'coingecko_api_call',
-          metadata: { status: response.status, success: true }
+          event_type: 'coingecko_edge_function_call',
+          metadata: { 
+            status: response.status, 
+            success: true,
+            api_type: api_type,
+            timestamp: new Date().toISOString()
+          }
         }
       ])
 
-    return new Response(JSON.stringify(data), {
+    // Include api_type in the response
+    return new Response(JSON.stringify({ ...data, api_type }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
@@ -55,8 +64,11 @@ Deno.serve(async (req) => {
       .from('usage_logs')
       .insert([
         { 
-          event_type: 'coingecko_api_call_error',
-          metadata: { error: error.message }
+          event_type: 'coingecko_edge_function_error',
+          metadata: { 
+            error: error.message,
+            timestamp: new Date().toISOString()
+          }
         }
       ])
       
@@ -66,3 +78,4 @@ Deno.serve(async (req) => {
     })
   }
 })
+

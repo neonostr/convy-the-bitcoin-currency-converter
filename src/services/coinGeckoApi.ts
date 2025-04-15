@@ -12,11 +12,35 @@ import {
 } from "./ratesService";
 import { supabase } from "@/integrations/supabase/client";
 
+async function logUsageEvent(eventType: string, metadata: any = {}) {
+  try {
+    const { error } = await supabase
+      .from('usage_logs')
+      .insert([
+        { 
+          event_type: eventType,
+          metadata: metadata
+        }
+      ]);
+    
+    if (error) {
+      console.error('Error logging usage event:', error);
+    }
+  } catch (error) {
+    console.error('Failed to log usage event:', error);
+  }
+}
+
 export async function fetchCoinRates(): Promise<CoinRates> {
   // First, check if we have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
+    // Log cache hit
+    await logUsageEvent('cache_hit', {
+      timestamp: new Date().toISOString(),
+      cache_age: Date.now() - (cachedRates.lastUpdated?.getTime() || 0)
+    });
     return { ...cachedRates };
   }
   
@@ -55,14 +79,29 @@ async function performFetch(): Promise<CoinRates> {
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
     if (error) {
+      await logUsageEvent('coingecko_api_error', {
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
       throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
     if (!data.bitcoin) {
+      await logUsageEvent('coingecko_api_error', {
+        error: 'Invalid response format',
+        timestamp: new Date().toISOString()
+      });
       throw new Error('Invalid response from CoinGecko API');
     }
     
     console.log("Bitcoin rates from API:", data.bitcoin);
+
+    // Log successful API call
+    await logUsageEvent('coingecko_api_success', {
+      timestamp: new Date().toISOString(),
+      rates_received: true,
+      api_type: data.api_type || 'unknown' // This will be set by the edge function
+    });
     
     const newRates: CoinRates = {
       btc: 1,
@@ -95,6 +134,12 @@ function getLatestAvailableRates(): CoinRates {
   const cachedRates = getCachedRates();
   console.log('Using cached rates as fallback:', cachedRates);
   
+  // Log fallback to cache
+  logUsageEvent('cache_fallback', {
+    timestamp: new Date().toISOString(),
+    cache_age: Date.now() - (cachedRates.lastUpdated?.getTime() || 0)
+  });
+  
   // Always use the most recent data we have
   if (cachedRates.lastUpdated) {
     // If cached rates exist and are newer than initialRates, update initialRates
@@ -108,3 +153,4 @@ function getLatestAvailableRates(): CoinRates {
   // Fallback to initial rates if no cached rates
   return { ...initialRates };
 }
+
