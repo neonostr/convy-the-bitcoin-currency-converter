@@ -11,7 +11,7 @@ interface UsageStats {
   apiCalls: number;
 }
 
-// Log events to our Supabase table, with rate limiting
+// Log events via our Edge Function to avoid RLS issues
 export const logEvent = async (eventType: string) => {
   // Rate limit event logging (one per minute per event type)
   const now = Date.now();
@@ -25,12 +25,13 @@ export const logEvent = async (eventType: string) => {
   }
   
   try {
-    const { error } = await supabase
-      .from('usage_logs')
-      .insert([{ event_type: eventType }]);
+    // Use the edge function to log events instead of direct table access
+    const { data, error } = await supabase.functions.invoke('coingecko-rates', {
+      body: { event_type: eventType }
+    });
       
     if (error) {
-      console.error('Error logging event to Supabase:', error);
+      console.error('Error logging event via edge function:', error);
       return;
     }
     

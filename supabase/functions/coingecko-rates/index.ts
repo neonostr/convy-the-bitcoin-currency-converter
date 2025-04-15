@@ -33,6 +33,29 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // Handle app_open events and other tracking events
+  if (req.method === 'POST') {
+    try {
+      const requestData = await req.json();
+      
+      // Check if this is a tracking request (not a rates request)
+      if (requestData && requestData.event_type) {
+        await logEdgeFunctionEvent(requestData.event_type);
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: `Event ${requestData.event_type} logged successfully` 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+    } catch (error) {
+      // If error occurs here, it's not a tracking request, so continue to rates fetching
+      console.log("Not a tracking request, continuing to rates fetching");
+    }
+  }
+
   try {
     const apiKey = Deno.env.get('COINGECKO_API_KEY')
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'

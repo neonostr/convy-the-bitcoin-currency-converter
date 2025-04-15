@@ -78,6 +78,9 @@ async function performFetch(): Promise<CoinRates> {
   try {
     console.log("Fetching fresh Bitcoin rates from API...");
     
+    // Track API call for our metrics
+    logEvent('api_call_initiated');
+    
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
     if (error) {
@@ -91,12 +94,7 @@ async function performFetch(): Promise<CoinRates> {
     console.log("Bitcoin rates from API:", data.bitcoin);
     console.log("API type used:", data.api_type);
     
-    // Log based on which API was used
-    if (data.api_type === 'pro') {
-      logEvent('api_call_used_pro');
-    } else {
-      logEvent('api_call_used_public');
-    }
+    // We don't need to log API usage here as the edge function already does it
     
     const newRates: CoinRates = {
       btc: 1,
