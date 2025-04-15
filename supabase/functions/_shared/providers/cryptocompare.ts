@@ -1,102 +1,107 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-import { supportedCurrencies } from '../types.ts'
+const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co"
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
 export async function fetchFromCryptoComparePublic() {
-  console.log('Fetching from CryptoCompare public API...')
-  const currenciesParam = supportedCurrencies.map(curr => curr.toUpperCase()).join(',')
-  const apiUrl = `https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=${currenciesParam}`
-  
-  const response = await fetch(
-    apiUrl,
-    {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+  try {
+    const response = await fetch('https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=USD,EUR,CHF,CNY,JPY,GBP,AUD,CAD,INR,RUB');
+    
+    if (!response.ok) {
+      await logApiError('cryptocompare_api_public_failure', response.status);
+      throw new Error(`CryptoCompare public API failed with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Transform the response to match CoinGecko format
+    const transformedData = {
+      bitcoin: {
+        usd: data.BTC.USD,
+        eur: data.BTC.EUR,
+        chf: data.BTC.CHF,
+        cny: data.BTC.CNY,
+        jpy: data.BTC.JPY,
+        gbp: data.BTC.GBP,
+        aud: data.BTC.AUD,
+        cad: data.BTC.CAD,
+        inr: data.BTC.INR,
+        rub: data.BTC.RUB
       }
-    }
-  )
-  
-  console.log('CryptoCompare Public API Status:', response.status)
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('CryptoCompare Public API Error:', errorText)
-    throw new Error(`CryptoCompare Public API error: ${response.status} - ${errorText}`)
+    };
+    
+    await logApiSuccess('cryptocompare_api_public_success');
+    return transformedData;
+  } catch (error) {
+    console.error(`CryptoCompare public API error: ${error.message}`);
+    throw error;
   }
-  
-  const rawData = await response.json()
-  console.log('CryptoCompare Raw Response:', JSON.stringify(rawData, null, 2))
-  
-  // Transform CryptoCompare response to match CoinGecko format
-  const transformedData = {
-    bitcoin: {
-      usd: rawData.BTC.USD,
-      eur: rawData.BTC.EUR,
-      chf: rawData.BTC.CHF,
-      cny: rawData.BTC.CNY,
-      jpy: rawData.BTC.JPY,
-      gbp: rawData.BTC.GBP,
-      aud: rawData.BTC.AUD,
-      cad: rawData.BTC.CAD,
-      inr: rawData.BTC.INR,
-      rub: rawData.BTC.RUB
-    }
-  }
-  
-  console.log('Transformed CryptoCompare Response:', JSON.stringify(transformedData, null, 2))
-  return transformedData
 }
 
 export async function fetchFromCryptoCompareWithKey() {
-  const apiKey = Deno.env.get('CRYPTOCOMPARE_API_KEY')
-  
-  if (!apiKey) {
-    console.log('No CryptoCompare API key found, skipping this fallback')
-    throw new Error('No CryptoCompare API key available')
-  }
-  
-  console.log('Using CryptoCompare API Key: Key present')
-  const currenciesParam = supportedCurrencies.map(curr => curr.toUpperCase()).join(',')
-  const apiUrl = `https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=${currenciesParam}`
-  
-  const response = await fetch(
-    apiUrl,
-    {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Apikey ${apiKey}`
+  try {
+    const apiKey = Deno.env.get('CRYPTOCOMPARE_API_KEY');
+    
+    if (!apiKey) {
+      throw new Error('CRYPTOCOMPARE_API_KEY is not set');
+    }
+    
+    const response = await fetch(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=USD,EUR,CHF,CNY,JPY,GBP,AUD,CAD,INR,RUB&api_key=${apiKey}`);
+    
+    if (!response.ok) {
+      await logApiError('cryptocompare_api_with_key_failure', response.status);
+      throw new Error(`CryptoCompare API with key failed with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Transform the response to match CoinGecko format
+    const transformedData = {
+      bitcoin: {
+        usd: data.BTC.USD,
+        eur: data.BTC.EUR,
+        chf: data.BTC.CHF,
+        cny: data.BTC.CNY,
+        jpy: data.BTC.JPY,
+        gbp: data.BTC.GBP,
+        aud: data.BTC.AUD,
+        cad: data.BTC.CAD,
+        inr: data.BTC.INR,
+        rub: data.BTC.RUB
       }
-    }
-  )
-  
-  console.log('CryptoCompare API with Key Status:', response.status)
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('CryptoCompare API with Key Error:', errorText)
-    throw new Error(`CryptoCompare API with Key error: ${response.status} - ${errorText}`)
+    };
+    
+    await logApiSuccess('cryptocompare_api_with_key_success');
+    return transformedData;
+  } catch (error) {
+    console.error(`CryptoCompare API with key error: ${error.message}`);
+    throw error;
   }
-  
-  const rawData = await response.json()
-  console.log('CryptoCompare API with Key Response:', JSON.stringify(rawData, null, 2))
-  
-  // Transform CryptoCompare response to match CoinGecko format
-  const transformedData = {
-    bitcoin: {
-      usd: rawData.BTC.USD,
-      eur: rawData.BTC.EUR,
-      chf: rawData.BTC.CHF,
-      cny: rawData.BTC.CNY,
-      jpy: rawData.BTC.JPY,
-      gbp: rawData.BTC.GBP,
-      aud: rawData.BTC.AUD,
-      cad: rawData.BTC.CAD,
-      inr: rawData.BTC.INR,
-      rub: rawData.BTC.RUB
-    }
+}
+
+// Add helper functions for logging API calls
+async function logApiSuccess(eventType: string) {
+  try {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    await supabase
+      .from('usage_logs')
+      .insert([{ event_type: eventType, timestamp: new Date().toISOString() }]);
+  } catch (error) {
+    console.error(`Failed to log API success event (${eventType}):`, error);
   }
-  
-  console.log('Transformed CryptoCompare Response:', JSON.stringify(transformedData, null, 2))
-  return transformedData
+}
+
+async function logApiError(baseEventType: string, errorCode: number) {
+  try {
+    const eventType = `${baseEventType}_${errorCode}`;
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    await supabase
+      .from('usage_logs')
+      .insert([{ event_type: eventType, timestamp: new Date().toISOString() }]);
+  } catch (error) {
+    console.error(`Failed to log API error event (${baseEventType}):`, error);
+  }
 }

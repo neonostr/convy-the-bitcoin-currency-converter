@@ -8,17 +8,27 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function logApiCall(source: string, data: any) {
   try {
+    // Format the event type according to our new naming convention
+    let eventType = '';
+    
+    if (source === 'coingecko_public') {
+      eventType = 'coingecko_api_public_success';
+    } else if (source === 'coingecko_api_key') {
+      eventType = 'coingecko_api_with_key_success';
+    } else if (source === 'cryptocompare_public') {
+      eventType = 'cryptocompare_api_public_success';
+    } else if (source === 'cryptocompare_api_key') {
+      eventType = 'cryptocompare_api_with_key_success';
+    } else {
+      eventType = `${source}_success`;
+    }
+    
     await supabase
       .from('usage_logs')
       .insert([
         { 
-          event_type: `${source}_api_call`,
-          metadata: { 
-            status: 200, 
-            success: true,
-            source: source,
-            response_data: data 
-          }
+          event_type: eventType,
+          timestamp: new Date().toISOString()
         }
       ])
   } catch (error) {
@@ -26,20 +36,32 @@ export async function logApiCall(source: string, data: any) {
   }
 }
 
-export async function logApiError(error: Error) {
+export async function logApiError(source: string, errorCode: number | string) {
   try {
+    // Format the event type according to our new naming convention
+    let eventType = '';
+    
+    if (source === 'coingecko_public') {
+      eventType = `coingecko_api_public_failure_${errorCode}`;
+    } else if (source === 'coingecko_api_key') {
+      eventType = `coingecko_api_with_key_failure_${errorCode}`;
+    } else if (source === 'cryptocompare_public') {
+      eventType = `cryptocompare_api_public_failure_${errorCode}`;
+    } else if (source === 'cryptocompare_api_key') {
+      eventType = `cryptocompare_api_with_key_failure_${errorCode}`;
+    } else {
+      eventType = `${source}_failure_${errorCode}`;
+    }
+    
     await supabase
       .from('usage_logs')
       .insert([
         { 
-          event_type: 'api_call_error',
-          metadata: { 
-            error: error.message,
-            full_error: JSON.stringify(error)
-          }
+          event_type: eventType,
+          timestamp: new Date().toISOString()
         }
       ])
-  } catch (logError) {
-    console.error('Error logging API error:', logError)
+  } catch (error) {
+    console.error('Error logging API error:', error)
   }
 }

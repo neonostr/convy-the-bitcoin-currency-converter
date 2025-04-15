@@ -1,66 +1,75 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-import { supportedCurrencies } from '../types.ts'
+// Keep your existing imports and configurations
+const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co";
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function fetchFromCoinGeckoPublic() {
-  console.log('Attempting CoinGecko public API call...')
-  const currenciesParam = supportedCurrencies.join(',')
-  const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currenciesParam}`
-  
-  const response = await fetch(
-    apiUrl,
-    {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub');
+    
+    if (!response.ok) {
+      await logApiError('coingecko_api_public_failure', response.status);
+      throw new Error(`CoinGecko public API failed with status: ${response.status}`);
     }
-  )
-  
-  console.log('CoinGecko Public API Status:', response.status)
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('CoinGecko Public API Error:', errorText)
-    throw new Error(`CoinGecko Public API error: ${response.status} - ${errorText}`)
+    
+    const data = await response.json();
+    await logApiSuccess('coingecko_api_public_success');
+    return data;
+  } catch (error) {
+    console.error(`CoinGecko public API error: ${error.message}`);
+    throw error;
   }
-  
-  const data = await response.json()
-  console.log('CoinGecko Public API Response:', JSON.stringify(data, null, 2))
-  return data
 }
 
 export async function fetchFromCoinGeckoWithKey() {
-  const apiKey = Deno.env.get('COINGECKO_API_KEY')
-  
-  if (!apiKey) {
-    console.log('No CoinGecko API key found, skipping this fallback')
-    throw new Error('No CoinGecko API key available')
-  }
-  
-  console.log('Using CoinGecko API Key: Key present')
-  
-  const currenciesParam = supportedCurrencies.join(',')
-  const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currenciesParam}&x_cg_api_key=${apiKey}`
-  
-  const response = await fetch(
-    apiUrl,
-    {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+  try {
+    const coinGeckoApiKey = Deno.env.get('COINGECKO_API_KEY');
+    
+    if (!coinGeckoApiKey) {
+      throw new Error('COINGECKO_API_KEY is not set');
     }
-  )
-  
-  console.log('CoinGecko API with Key Status:', response.status)
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('CoinGecko API with Key Error:', errorText)
-    throw new Error(`CoinGecko API with Key error: ${response.status} - ${errorText}`)
+    
+    const response = await fetch('https://pro-api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub', {
+      headers: {
+        'x-cg-pro-api-key': coinGeckoApiKey
+      }
+    });
+    
+    if (!response.ok) {
+      await logApiError('coingecko_api_with_key_failure', response.status);
+      throw new Error(`CoinGecko API with key failed with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    await logApiSuccess('coingecko_api_with_key_success');
+    return data;
+  } catch (error) {
+    console.error(`CoinGecko API with key error: ${error.message}`);
+    throw error;
   }
-  
-  const data = await response.json()
-  console.log('CoinGecko API with Key Response:', JSON.stringify(data, null, 2))
-  return data
+}
+
+// Add helper functions for logging API calls
+async function logApiSuccess(eventType: string) {
+  try {
+    await supabase
+      .from('usage_logs')
+      .insert([{ event_type: eventType, timestamp: new Date().toISOString() }]);
+  } catch (error) {
+    console.error(`Failed to log API success event (${eventType}):`, error);
+  }
+}
+
+async function logApiError(baseEventType: string, errorCode: number) {
+  try {
+    const eventType = `${baseEventType}_${errorCode}`;
+    
+    await supabase
+      .from('usage_logs')
+      .insert([{ event_type: eventType, timestamp: new Date().toISOString() }]);
+  } catch (error) {
+    console.error(`Failed to log API error event (${baseEventType}):`, error);
+  }
 }

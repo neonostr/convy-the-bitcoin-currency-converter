@@ -30,6 +30,8 @@ Deno.serve(async (req) => {
       console.log('Successfully fetched data from CoinGecko public API')
     } catch (error) {
       console.error('CoinGecko public API error:', error)
+      const errorCode = error.message.includes('status:') ? error.message.split('status:')[1].trim() : 'unknown';
+      await logApiError('coingecko_public', errorCode)
       
       // 2. Try CoinGecko with API key as first fallback
       try {
@@ -40,6 +42,9 @@ Deno.serve(async (req) => {
         console.log('Successfully fetched data from CoinGecko with API key')
       } catch (coinGeckoKeyError) {
         console.error('CoinGecko API with key error:', coinGeckoKeyError)
+        const errorCode = coinGeckoKeyError.message.includes('status:') ? 
+          coinGeckoKeyError.message.split('status:')[1].trim() : 'unknown';
+        await logApiError('coingecko_api_key', errorCode)
         
         // 3. Try CryptoCompare public API as second fallback
         try {
@@ -50,6 +55,9 @@ Deno.serve(async (req) => {
           console.log('Successfully fetched data from CryptoCompare (fallback)')
         } catch (cryptoCompareError) {
           console.error('CryptoCompare public API error:', cryptoCompareError)
+          const errorCode = cryptoCompareError.message.includes('status:') ? 
+            cryptoCompareError.message.split('status:')[1].trim() : 'unknown';
+          await logApiError('cryptocompare_public', errorCode)
           
           // 4. Try CryptoCompare with API key as final fallback
           try {
@@ -60,6 +68,9 @@ Deno.serve(async (req) => {
             console.log('Successfully fetched data from CryptoCompare with API key')
           } catch (cryptoCompareKeyError) {
             console.error('CryptoCompare API with key error:', cryptoCompareKeyError)
+            const errorCode = cryptoCompareKeyError.message.includes('status:') ? 
+              cryptoCompareKeyError.message.split('status:')[1].trim() : 'unknown';
+            await logApiError('cryptocompare_api_key', errorCode)
             throw new Error('All API attempts failed')
           }
         }
@@ -79,8 +90,7 @@ Deno.serve(async (req) => {
     })
   } catch (error) {
     console.error('Complete Error:', error)
-    await logApiError(error)
-      
+    
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
