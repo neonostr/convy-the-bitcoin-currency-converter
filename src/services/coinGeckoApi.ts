@@ -1,16 +1,15 @@
 
 import { CoinRates } from "@/types/currency.types";
 import { 
-  initialRates, 
+  DEFAULT_INITIAL_RATES, 
   updateCachedRates, 
   getCachedRates,
   isCacheStale, 
-  updateInitialRates, 
+  setFetchingState, 
   isFetching, 
-  setFetchingState,
   getActiveFetchPromise,
   getLastFetchTime
-} from "./ratesService";
+} from "./cacheManager";
 import { supabase } from "@/integrations/supabase/client";
 import { logEvent } from "./usageTracker";
 
@@ -121,21 +120,20 @@ async function performFetch(): Promise<CoinRates> {
     const newRates: CoinRates = {
       btc: 1,
       sats: 100000000,
-      usd: data.bitcoin.usd || initialRates.usd,
-      eur: data.bitcoin.eur || initialRates.eur,
-      chf: data.bitcoin.chf || initialRates.chf,
-      cny: data.bitcoin.cny || initialRates.cny,
-      jpy: data.bitcoin.jpy || initialRates.jpy,
-      gbp: data.bitcoin.gbp || initialRates.gbp,
-      aud: data.bitcoin.aud || initialRates.aud,
-      cad: data.bitcoin.cad || initialRates.cad,
-      inr: data.bitcoin.inr || initialRates.inr,
-      rub: data.bitcoin.rub || initialRates.rub,
+      usd: data.bitcoin.usd || DEFAULT_INITIAL_RATES.usd,
+      eur: data.bitcoin.eur || DEFAULT_INITIAL_RATES.eur,
+      chf: data.bitcoin.chf || DEFAULT_INITIAL_RATES.chf,
+      cny: data.bitcoin.cny || DEFAULT_INITIAL_RATES.cny,
+      jpy: data.bitcoin.jpy || DEFAULT_INITIAL_RATES.jpy,
+      gbp: data.bitcoin.gbp || DEFAULT_INITIAL_RATES.gbp,
+      aud: data.bitcoin.aud || DEFAULT_INITIAL_RATES.aud,
+      cad: data.bitcoin.cad || DEFAULT_INITIAL_RATES.cad,
+      inr: data.bitcoin.inr || DEFAULT_INITIAL_RATES.inr,
+      rub: data.bitcoin.rub || DEFAULT_INITIAL_RATES.rub,
       lastUpdated: new Date()
     };
     
     updateCachedRates(newRates);
-    updateInitialRates(newRates);
     
     await logEvent('cached_data_updated');
     console.log('Successfully updated rates with fresh data');
@@ -152,16 +150,11 @@ function getLatestAvailableRates(): CoinRates {
   
   // Always use the most recent data we have
   if (cachedRates.lastUpdated) {
-    // If cached rates exist and are newer than initialRates, update initialRates
-    if (!initialRates.lastUpdated || 
-        new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated)) {
-      updateInitialRates(cachedRates);
-      logEvent('initial_rates_updated_from_cache');
-    }
+    logEvent('provided_cached_data_fallback');
     return cachedRates;
   }
   
   // Fallback to initial rates if no cached rates
   logEvent('provided_initial_rates');
-  return { ...initialRates };
+  return { ...DEFAULT_INITIAL_RATES };
 }
