@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,17 +9,20 @@ import AmountSelector from './donation/AmountSelector';
 import PaymentQR from './donation/PaymentQR';
 import ThankYouMessage from './donation/ThankYouMessage';
 
+const INITIAL_AMOUNT = 1000;
+
 const DonationPopup: React.FC = () => {
-  const [amount, setAmount] = useState<number>(1000);
+  const [amount, setAmount] = useState<number>(INITIAL_AMOUNT);
   const [isSending, setIsSending] = useState<boolean>(false);
   const [invoice, setInvoice] = useState<string>('');
   const [qrData, setQrData] = useState<string>('');
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState<boolean>(false);
   const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
 
   const resetState = () => {
-    setAmount(1000);
+    setAmount(INITIAL_AMOUNT);
     setInvoice('');
     setQrData('');
     setIsSending(false);
@@ -28,8 +30,11 @@ const DonationPopup: React.FC = () => {
     setIsCopied(false);
   };
 
-  const handleClose = () => {
-    resetState();
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      resetState();
+    }
+    setIsOpen(open);
   };
 
   const generateQR = async (invoice: string) => {
@@ -91,7 +96,7 @@ const DonationPopup: React.FC = () => {
   };
 
   return (
-    <Dialog onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
           <Coffee className="h-4 w-4 mr-1" />

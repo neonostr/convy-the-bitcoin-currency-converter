@@ -1,11 +1,10 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
 import { 
   convertCurrency, 
-  getCachedRates, 
-  isCacheStale, 
+  getCachedRates,
+  isCacheStale,
   initialRates 
 } from '@/services/ratesService';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +23,11 @@ export const useConversion = () => {
   // Fetch rates initially when component mounts
   useEffect(() => {
     fetchRates();
+    // Initial conversion with default values
+    if (rates) {
+      const newConversions = convertCurrency(1, 'btc', rates);
+      setConversions(newConversions);
+    }
   }, []);
 
   // Update conversions when amount, selected currency, or rates change
