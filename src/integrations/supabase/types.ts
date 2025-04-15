@@ -13,16 +13,19 @@ export type Database = {
         Row: {
           event_type: string
           id: string
+          metadata: Json | null
           timestamp: string
         }
         Insert: {
           event_type: string
           id?: string
+          metadata?: Json | null
           timestamp?: string
         }
         Update: {
           event_type?: string
           id?: string
+          metadata?: Json | null
           timestamp?: string
         }
         Relationships: []

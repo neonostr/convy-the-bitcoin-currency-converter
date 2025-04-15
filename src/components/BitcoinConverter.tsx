@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -37,22 +36,20 @@ const BitcoinConverter = () => {
         console.log('Logging app open event');
         const { data, error } = await supabase
           .from('usage_logs')
-          .insert([
-            { 
-              event_type: isPwa ? 'app_open_pwa' : 'app_open_browser',
-              metadata: {
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent
-              }
+          .insert([{
+            event_type: isPwa ? 'app_open_pwa' : 'app_open_browser',
+            metadata: {
+              timestamp: new Date().toISOString(),
+              userAgent: navigator.userAgent
             }
-          ])
+          }])
           .select();
         
         if (error) {
           console.error('Failed to log app usage:', error);
-        } else {
-          console.log('Successfully logged app usage:', data);
+          throw error;
         }
+        console.log('Successfully logged app usage:', data);
       } catch (error) {
         console.error('Unexpected error logging app usage:', error);
       }
