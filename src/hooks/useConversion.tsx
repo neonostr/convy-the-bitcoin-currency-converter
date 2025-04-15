@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
@@ -166,6 +167,7 @@ export const useConversion = () => {
     selectedCurrency,
     rates,
     conversions,
+    setConversions, // Add setConversions to the returned object
     isRefreshing,
     handleCurrencySelect,
     handleInputChange,
