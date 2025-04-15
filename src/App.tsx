@@ -29,10 +29,10 @@ const App = () => {
       try {
         // Tracking is now handled with session storage to prevent duplicate logs
         const result = await trackAppUsage();
-        if (result && !result.alreadyLogged) {
-          console.log('App usage tracking completed');
-        } else {
+        if (result && result.alreadyLogged) {
           console.log('App usage already tracked for this session');
+        } else {
+          console.log('App usage tracking completed');
         }
       } catch (error) {
         console.error('Error tracking app usage:', error);

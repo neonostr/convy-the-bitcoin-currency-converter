@@ -6,10 +6,11 @@ const API_CALLS_KEY = 'bitcoin-converter-api-calls';
 const LAST_EVENT_LOG_KEY = 'bitcoin-converter-last-event-log';
 const APP_OPEN_LOGGED_KEY = 'bitcoin-converter-app-open-logged';
 
-interface UsageStats {
+export interface UsageStats {
   date: string;
   count: number;
   apiCalls: number;
+  alreadyLogged?: boolean; // Add this optional property to the interface
 }
 
 // Log events via our Edge Function to avoid RLS issues
@@ -49,12 +50,12 @@ export const logEvent = async (eventType: string) => {
 };
 
 // This function is called once per app session to track app usage
-export const trackAppUsage = async () => {
+export const trackAppUsage = async (): Promise<UsageStats> => {
   // Check if we've already logged an app open event for this session
   const hasLoggedAppOpen = sessionStorage.getItem(APP_OPEN_LOGGED_KEY);
   if (hasLoggedAppOpen === 'true') {
     console.log('App open event already logged for this session');
-    return { alreadyLogged: true };
+    return { date: '', count: 0, apiCalls: 0, alreadyLogged: true };
   }
 
   const today = new Date().toISOString().split('T')[0];
