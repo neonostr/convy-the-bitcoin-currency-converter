@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,10 @@ const DonationPopup: React.FC = () => {
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+      // Reset on close
+      resetState();
+    } else {
+      // Also reset on open to ensure a fresh state
       resetState();
     }
     setIsOpen(open);
@@ -97,7 +102,7 @@ const DonationPopup: React.FC = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild onClick={() => setIsOpen(true)}>
         <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
           <Coffee className="h-4 w-4 mr-1" />
           <span>Zap me a coffee</span>
