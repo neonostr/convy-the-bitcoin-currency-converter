@@ -1,21 +1,17 @@
 
 import { useEffect } from "react";
 import BitcoinConverter from "@/components/BitcoinConverter";
-import { useTheme } from "@/hooks/useTheme";
 
 const Index = () => {
-  const { theme } = useTheme();
-
-  // Apply theme on initial page load
+  // Apply the theme saved in local storage on initial page load
   useEffect(() => {
-    document.documentElement.classList.add(theme);
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.classList.add(savedTheme);
   }, []);
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-4 mx-auto">
-        <BitcoinConverter />
-      </div>
+    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <BitcoinConverter />
     </div>
   );
 };

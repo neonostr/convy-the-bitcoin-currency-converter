@@ -33,14 +33,14 @@ const AmountSelector = ({ amount, onAmountChange, disabled }: AmountSelectorProp
         disabled={disabled}
       />
       
-      <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 mt-2">
+      <div className="flex gap-2 mt-2">
         {presetAmounts.map((value) => (
           <Button
             key={value}
             type="button"
             variant={amount === value ? "default" : "outline"}
             size="sm"
-            className="w-full sm:flex-1"
+            className="flex-1"
             onClick={() => onAmountChange(value)}
             disabled={disabled}
           >
