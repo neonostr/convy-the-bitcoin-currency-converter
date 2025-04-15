@@ -1,17 +1,7 @@
 
-export interface CoinRates {
-  usd: number;
-  eur: number;
-  chf: number;
-  cny: number;
-  jpy: number;
-  gbp: number;
-  aud: number;
-  cad: number;
-  inr: number;
-  rub: number;
-  lastUpdated: number;
-}
+import { CoinRates as CurrencyTypes } from '@/types/currency.types';
+
+export type CoinRates = CurrencyTypes;
 
 const saveRatesToCache = (rates: CoinRates) => {
   localStorage.setItem('bitcoinRates', JSON.stringify(rates));
@@ -33,6 +23,8 @@ export const fetchCoinRates = async () => {
     const data = await response.json();
     
     const rates: CoinRates = {
+      btc: 1,
+      sats: 100000000, // 1 BTC = 100,000,000 satoshis
       usd: data.bitcoin.usd,
       eur: data.bitcoin.eur,
       chf: data.bitcoin.chf,

@@ -1,4 +1,3 @@
-
 export function formatCurrency(value: number, currency: string): string {
   if (currency === 'btc') {
     // Format BTC with up to 8 decimal places, trim trailing zeros
@@ -49,13 +48,16 @@ export function getCurrencySymbol(currency: string): string {
   }
 }
 
-export function getLastUpdatedFormatted(timestamp: Date): string {
+export function getLastUpdatedFormatted(timestamp: Date | number): string {
+  // Convert to Date object if timestamp is a number
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  
   // Format as YYYY-MM-DD HH:MM in UTC, without seconds
-  const year = timestamp.getUTCFullYear();
-  const month = String(timestamp.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(timestamp.getUTCDate()).padStart(2, '0');
-  const hours = String(timestamp.getUTCHours()).padStart(2, '0');
-  const minutes = String(timestamp.getUTCMinutes()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
   
   return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
 }

@@ -73,7 +73,8 @@ export const useConversion = () => {
     try {
       console.log('fetchCoinRates called, current initialRates:', initialRates);
       const newRates = await fetchCoinRates();
-      setRates(newRates);
+      // Type assertion to ensure compatibility
+      setRates(newRates as CoinRates);
       isInitialFetch.current = false;
       
       // If this is the first time we're fetching rates, calculate initial conversions
@@ -82,7 +83,7 @@ export const useConversion = () => {
         const normalizedAmount = amount.replace(',', '.');
         const numericAmount = parseFloat(normalizedAmount);
         if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
+          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates as CoinRates);
           setConversions(newConversions);
         }
       } else {
@@ -91,7 +92,7 @@ export const useConversion = () => {
         const numericAmount = parseFloat(normalizedAmount);
         
         if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
+          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates as CoinRates);
           setConversions(newConversions);
         }
       }
