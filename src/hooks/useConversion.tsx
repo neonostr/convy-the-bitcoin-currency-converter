@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
@@ -12,7 +11,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
 
 export const useConversion = () => {
-  const [amount, setAmount] = useState<string>('1');
+  const getInitialAmount = () => {
+    // Try to get saved amount from localStorage, default to '1'
+    const savedAmount = localStorage.getItem('bitcoin-converter-default-amount');
+    return savedAmount || '1';
+  };
+
+  const [amount, setAmount] = useState<string>(getInitialAmount());
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
   const [rates, setRates] = useState<CoinRates | null>(null);
   const [conversions, setConversions] = useState<Record<string, number>>({});
@@ -73,8 +78,7 @@ export const useConversion = () => {
     try {
       console.log('fetchCoinRates called, current initialRates:', initialRates);
       const newRates = await fetchCoinRates();
-      // Type assertion to ensure compatibility
-      setRates(newRates as CoinRates);
+      setRates(newRates);
       isInitialFetch.current = false;
       
       // If this is the first time we're fetching rates, calculate initial conversions
@@ -83,7 +87,7 @@ export const useConversion = () => {
         const normalizedAmount = amount.replace(',', '.');
         const numericAmount = parseFloat(normalizedAmount);
         if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates as CoinRates);
+          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
           setConversions(newConversions);
         }
       } else {
@@ -92,7 +96,7 @@ export const useConversion = () => {
         const numericAmount = parseFloat(normalizedAmount);
         
         if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates as CoinRates);
+          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
           setConversions(newConversions);
         }
       }
@@ -147,8 +151,9 @@ export const useConversion = () => {
     // Allow both comma and dot as decimal separators
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
+      // Save to localStorage
+      localStorage.setItem('bitcoin-converter-default-amount', value);
       
-      // Only fetch new rates if value is not empty and the cache is stale
       if (value !== '' && isCacheStale()) {
         fetchRates();
       }

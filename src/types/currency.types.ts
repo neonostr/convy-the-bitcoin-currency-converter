@@ -14,7 +14,7 @@ export interface CoinRates {
   cad: number;
   inr: number;
   rub: number;
-  lastUpdated: Date | number;
+  lastUpdated: Date;
 }
 
 export interface CoinGeckoResponse {
