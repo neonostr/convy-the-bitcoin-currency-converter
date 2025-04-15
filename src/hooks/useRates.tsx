@@ -1,9 +1,9 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
 import { useToast } from '@/hooks/use-toast';
-import { isCacheStale } from '@/services/ratesService';
+import { isCacheStale, getCachedRates } from '@/services/ratesService';
 import { logEvent } from '@/services/usageTracker';
 
 export const useRates = () => {
@@ -13,6 +13,19 @@ export const useRates = () => {
   const lastManualFetchTimestamp = useRef<number>(0);
   const fetchController = useRef<AbortController | null>(null);
   const initialFetchDone = useRef<boolean>(false);
+
+  // Initialize rates from cache on mount
+  useEffect(() => {
+    // Check if we have valid cached rates and set them
+    if (!initialFetchDone.current) {
+      const cachedRates = getCachedRates();
+      if (cachedRates && Object.keys(cachedRates).length > 0) {
+        console.log('Initializing with cached rates');
+        setRates(cachedRates);
+        initialFetchDone.current = true;
+      }
+    }
+  }, []);
 
   const fetchRates = async (forceRefresh = false) => {
     if (fetchController.current) {
@@ -33,9 +46,11 @@ export const useRates = () => {
       return;
     }
     
-    if (!forceRefresh && !initialFetchDone.current && !isCacheStale() && rates !== null) {
+    // Simplified caching check - only check if cache is fresh and we have rates
+    if (!forceRefresh && !isCacheStale() && rates !== null) {
       console.log('Using cached rates - skipping API call');
       await logEvent('conversion_used_cached_data');
+      initialFetchDone.current = true; // Mark initial fetch as done when using cache
       return;
     }
     
@@ -46,7 +61,7 @@ export const useRates = () => {
     
     setIsRefreshing(true);
     try {
-      console.log('Fetching rates, isInitialFetch:', initialFetchDone.current, 'forceRefresh:', forceRefresh);
+      console.log('Fetching rates, forceRefresh:', forceRefresh, 'cache stale:', isCacheStale());
       const newRates = await fetchCoinRates();
       setRates(newRates);
       initialFetchDone.current = true;

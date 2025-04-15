@@ -14,9 +14,14 @@ export const useConversion = () => {
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const { settings } = useSettings();
 
-  // Initial fetch on mount
+  // Initial fetch on mount only if cache is stale
   useEffect(() => {
-    fetchRates();
+    if (isCacheStale()) {
+      console.log('Cache is stale, fetching fresh rates on mount');
+      fetchRates();
+    } else {
+      console.log('Cache is fresh, using cached rates on mount');
+    }
   }, []);
 
   // Update conversions when amount, selected currency, or rates change
@@ -53,8 +58,12 @@ export const useConversion = () => {
     
     setAmount('0');
     
+    // Only fetch rates if cache is stale
     if (isCacheStale()) {
+      console.log('Cache is stale, fetching fresh rates on currency change');
       fetchRates();
+    } else {
+      console.log('Cache is fresh, using cached rates on currency change');
     }
     
     if (rates) {

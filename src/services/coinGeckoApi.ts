@@ -24,7 +24,7 @@ function acquireFetchLock(): boolean {
   const lastFetch = parseInt(localStorage.getItem(GLOBAL_FETCH_LOCK_KEY) || '0', 10);
   
   if (now - lastFetch < FETCH_COOLDOWN) {
-    console.log(`Cannot acquire fetch lock, last fetch was ${now - lastFetch}ms ago`);
+    console.log(`Cannot acquire fetch lock, last fetch was ${(now - lastFetch)/1000}s ago`);
     return false; // Another tab fetched recently
   }
   
@@ -39,6 +39,9 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   const cachedRates = getCachedRates();
   const now = Date.now();
   const lastFetchTime = getLastFetchTime();
+  
+  // Log cache state for debugging
+  console.log(`Cache state: stale=${isCacheStale()}, time since last fetch=${(now - lastFetchTime)/1000}s`);
   
   // If cache is not stale (less than 60s old), use cached rates
   if (!isCacheStale()) {
@@ -114,8 +117,6 @@ async function performFetch(): Promise<CoinRates> {
     
     console.log("Bitcoin rates from API:", data.bitcoin);
     console.log("API type used:", data.api_type);
-    
-    // We don't need to log API usage here as the edge function already does it
     
     const newRates: CoinRates = {
       btc: 1,

@@ -1,3 +1,4 @@
+
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Cache settings
@@ -115,6 +116,10 @@ export function isCacheStale(): boolean {
   
   console.log(`Cache status from localStorage: Last fetch was ${(now - storedLastFetchTime)/1000}s ago, is fresh: ${isFresh}`);
   return !isFresh;
+}
+
+export function hasCachedRates(): boolean {
+  return cachedRates && Object.keys(cachedRates).length > 0 && cachedRates.usd > 0;
 }
 
 export function setFetchingState(state: boolean, promise: Promise<CoinRates> | null = null): void {
