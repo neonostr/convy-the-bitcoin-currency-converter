@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +23,7 @@ const BitcoinConverter = () => {
     selectedCurrency, 
     rates, 
     conversions, 
+    setConversions,
     handleCurrencySelect, 
     handleInputChange 
   } = useConversion();
@@ -51,6 +53,14 @@ const BitcoinConverter = () => {
 
   const handleInputFocus = () => {
     setAmount('');
+    // Reset conversions to 0 when input field is focused
+    if (rates) {
+      const resetConversions: Record<string, number> = {};
+      Object.keys(conversions).forEach(currency => {
+        resetConversions[currency] = 0;
+      });
+      setConversions(resetConversions);
+    }
   };
 
   const copyToClipboard = (value: string) => {
