@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Coffee, Copy, Check, HeartHandshake } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Coffee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createCoinosInvoice } from '@/services/coinosService';
 import QRCode from 'qrcode';
+import AmountSelector from './donation/AmountSelector';
+import PaymentQR from './donation/PaymentQR';
+import ThankYouMessage from './donation/ThankYouMessage';
 
 const DonationPopup: React.FC = () => {
   const [amount, setAmount] = useState<number>(1000);
@@ -88,27 +90,6 @@ const DonationPopup: React.FC = () => {
     }
   };
 
-  const copyInvoice = () => {
-    if (invoice) {
-      navigator.clipboard.writeText(invoice).then(() => {
-        setIsCopied(true);
-        toast({
-          title: "Copied!",
-          description: "Lightning invoice copied to clipboard",
-        });
-        setTimeout(() => setIsCopied(false), 2000);
-      });
-    }
-  };
-
-  const setPresetAmount = (value: number) => {
-    setAmount(value);
-  };
-
-  const handleAmountFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.select();
-  };
-
   return (
     <Dialog onOpenChange={(open) => !open && handleClose()}>
       <DialogTrigger asChild>
@@ -132,44 +113,14 @@ const DonationPopup: React.FC = () => {
         
         <div className="flex flex-col gap-4 py-4">
           {paymentConfirmed ? (
-            <div className="flex flex-col items-center gap-4 py-8 animate-fade-in">
-              <HeartHandshake className="h-16 w-16 text-bitcoin-orange animate-scale-in" />
-              <h2 className="text-2xl font-bold text-center">Thank you for your support! ⚡️</h2>
-            </div>
+            <ThankYouMessage />
           ) : !invoice ? (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount (sats)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={amount}
-                  onChange={(e) => setPresetAmount(Number(e.target.value))}
-                  onFocus={handleAmountFocus}
-                  min={1}
-                  className="text-center text-lg font-bold"
-                  disabled={isSending}
-                />
-                
-                <div className="flex gap-2 mt-2">
-                  {[1000, 5000, 10000, 21000].map((value) => (
-                    <Button
-                      key={value}
-                      type="button"
-                      variant={amount === value ? "default" : "outline"}
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => setPresetAmount(value)}
-                      disabled={isSending}
-                    >
-                      {value.toLocaleString()}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
+              <AmountSelector
+                amount={amount}
+                onAmountChange={setAmount}
+                disabled={isSending}
+              />
               <Button 
                 onClick={handleZap} 
                 className="w-full font-bold mt-2"
@@ -179,31 +130,12 @@ const DonationPopup: React.FC = () => {
               </Button>
             </>
           ) : (
-            <div className="flex flex-col items-center space-y-4">
-              <div className="bg-white p-2 rounded-md">
-                {qrData && <img src={qrData} alt="Lightning QR Code" className="max-w-full h-auto" />}
-              </div>
-              
-              <div className="flex items-center w-full">
-                <Input
-                  value={invoice.length > 30 ? `${invoice.substring(0, 15)}...${invoice.substring(invoice.length - 15)}` : invoice}
-                  readOnly
-                  className="pr-10 font-mono text-sm"
-                />
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="absolute right-8"
-                  onClick={copyInvoice}
-                >
-                  {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-              
-              <p className="text-sm text-center text-muted-foreground">
-                Scan this QR code with your Lightning wallet to pay
-              </p>
-            </div>
+            <PaymentQR
+              invoice={invoice}
+              qrData={qrData}
+              onCopy={() => setIsCopied(true)}
+              isCopied={isCopied}
+            />
           )}
         </div>
       </DialogContent>
