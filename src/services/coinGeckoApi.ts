@@ -1,4 +1,3 @@
-
 import { CoinRates, CoinGeckoResponse } from "@/types/currency.types";
 import { 
   initialRates, 
@@ -11,6 +10,7 @@ import {
   setFetchingState,
   getActiveFetchPromise
 } from "./ratesService";
+import { trackApiCall } from "./usageTracker";
 
 // Secure API key handling - storing it in memory only, not in the codebase
 let apiKey = '';
@@ -26,6 +26,9 @@ const getApiKey = (): string => {
 };
 
 export async function fetchCoinRates(): Promise<CoinRates> {
+  // Track API call before fetching
+  trackApiCall();
+
   // First, check if we already have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
   if (!isCacheStale()) {

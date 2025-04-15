@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
@@ -12,7 +11,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
 
 export const useConversion = () => {
-  const [amount, setAmount] = useState<string>('1');
+  const getInitialAmount = () => {
+    // Try to get saved amount from localStorage, default to '1'
+    const savedAmount = localStorage.getItem('bitcoin-converter-default-amount');
+    return savedAmount || '1';
+  };
+
+  const [amount, setAmount] = useState<string>(getInitialAmount());
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
   const [rates, setRates] = useState<CoinRates | null>(null);
   const [conversions, setConversions] = useState<Record<string, number>>({});
@@ -146,8 +151,9 @@ export const useConversion = () => {
     // Allow both comma and dot as decimal separators
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
+      // Save to localStorage
+      localStorage.setItem('bitcoin-converter-default-amount', value);
       
-      // Only fetch new rates if value is not empty and the cache is stale
       if (value !== '' && isCacheStale()) {
         fetchRates();
       }
