@@ -37,11 +37,17 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get('COINGECKO_API_KEY')
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     
-    const api_type = apiKey ? 'pro' : 'public';
-    console.log(`Using CoinGecko API type: ${api_type}`);
+    // Only consider it "pro" if the API key exists AND is being used in the request
+    const isProAccess = !!apiKey && apiKey.length > 10;  // Basic validation that it's not empty/default
+    const api_type = isProAccess ? 'pro' : 'public';
+    
+    console.log(`Using CoinGecko API type: ${api_type}, API Key exists: ${!!apiKey}, API Key valid: ${isProAccess}`);
+    
+    // Construct the URL based on whether we have a valid API key
+    const requestUrl = isProAccess ? `${apiUrl}&x_cg_api_key=${apiKey}` : apiUrl;
     
     const response = await fetch(
-      apiKey ? `${apiUrl}&x_cg_api_key=${apiKey}` : apiUrl,
+      requestUrl,
       {
         headers: {
           'Accept': 'application/json',

@@ -26,6 +26,7 @@ export const useConversion = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
   const isInitialFetch = useRef<boolean>(true);
+  const lastManualFetchTimestamp = useRef<number>(0);
 
   // Fetch rates initially when component mounts
   useEffect(() => {
@@ -67,12 +68,27 @@ export const useConversion = () => {
     }
   }, [settings]);
 
-  const fetchRates = async () => {
+  const fetchRates = async (forceRefresh = false) => {
+    // Prevent too frequent manual refreshes (30 second cooldown)
+    const now = Date.now();
+    if (forceRefresh && now - lastManualFetchTimestamp.current < 30000) {
+      toast({
+        title: "Please wait",
+        description: "You can refresh rates again in a few seconds.",
+        duration: 3000,
+      });
+      return;
+    }
+    
     // For initial fetch, always try to get fresh data
     // For subsequent fetches, only fetch if the cache is stale (> 60s)
-    if (!isInitialFetch.current && !isCacheStale() && rates !== null) {
+    if (!forceRefresh && !isInitialFetch.current && !isCacheStale() && rates !== null) {
       console.log('Skipping API call - using cached rates (< 60s old)');
       return;
+    }
+    
+    if (forceRefresh) {
+      lastManualFetchTimestamp.current = now;
     }
     
     setIsRefreshing(true);
@@ -103,7 +119,7 @@ export const useConversion = () => {
       }
       
       // Only show a toast notification if we actually fetched fresh data from the API
-      if (isCacheStale()) {
+      if (isCacheStale() || forceRefresh) {
         toast({
           title: "Currency Rates Updated",
           description: "Latest exchange rates have been fetched.",
@@ -167,9 +183,10 @@ export const useConversion = () => {
     selectedCurrency,
     rates,
     conversions,
-    setConversions, // Add setConversions to the returned object
+    setConversions,
     isRefreshing,
     handleCurrencySelect,
     handleInputChange,
+    fetchRates, // Expose fetchRates with forceRefresh parameter
   };
 };
