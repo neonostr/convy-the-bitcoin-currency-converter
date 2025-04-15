@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      rate_cache: {
+        Row: {
+          created_at: string | null
+          id: string
+          provider: string
+          rates: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          provider: string
+          rates: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          provider?: string
+          rates?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       usage_logs: {
         Row: {
           event_type: string
