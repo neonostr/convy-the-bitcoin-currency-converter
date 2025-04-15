@@ -4,6 +4,7 @@ import { corsHeaders } from '../_shared/cors.ts'
 
 const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co"
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+const CACHE_DURATION = 60 // 60 seconds
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -30,6 +31,42 @@ async function logEdgeFunctionEvent(eventType: string) {
   }
 }
 
+async function getRecentCache() {
+  const { data, error } = await supabase
+    .from('rate_cache')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error('Error fetching cache:', error);
+    return null;
+  }
+
+  // Check if cache is still fresh (less than CACHE_DURATION seconds old)
+  if (data) {
+    const cacheAge = (Date.now() - new Date(data.created_at).getTime()) / 1000;
+    if (cacheAge < CACHE_DURATION) {
+      console.log(`Using cached rates, age: ${cacheAge}s`);
+      return data.rates;
+    }
+  }
+
+  return null;
+}
+
+async function updateCache(rates: any) {
+  const { error } = await supabase
+    .from('rate_cache')
+    .insert({ rates });
+
+  if (error) {
+    console.error('Error updating cache:', error);
+    throw error;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -40,7 +77,6 @@ Deno.serve(async (req) => {
     try {
       const requestData = await req.json();
       
-      // Check if this is a tracking request (not a rates request)
       if (requestData && requestData.event_type) {
         console.log(`Received event logging request for: ${requestData.event_type}`);
         await logEdgeFunctionEvent(requestData.event_type);
@@ -54,19 +90,31 @@ Deno.serve(async (req) => {
         });
       }
     } catch (error) {
-      // If error occurs here, it's not a tracking request, so continue to rates fetching
       console.log("Not a tracking request, continuing to rates fetching");
     }
   }
 
   try {
+    // First, try to get cached rates
+    const cachedRates = await getRecentCache();
+    if (cachedRates) {
+      await logEdgeFunctionEvent('provided_cached_rates');
+      return new Response(JSON.stringify({ 
+        bitcoin: cachedRates,
+        api_type: 'cached',
+        cache_hit: true
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // No fresh cache, fetch from CoinGecko
     const apiKey = Deno.env.get('COINGECKO_API_KEY')
     const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub'
     
-    // Improved API key validation
     const isValidKey = apiKey && apiKey.length > 10 && !apiKey.includes('YOUR_API_KEY');
     
-    // First attempt with public API (no key)
     console.log(`First attempting CoinGecko public API call`);
     
     let response = await fetch(
@@ -79,11 +127,9 @@ Deno.serve(async (req) => {
       }
     );
     
-    // Track which API we successfully used
     let api_type = 'public';
     let pro_attempted = false;
     
-    // If public API fails with rate limit (429) and we have a valid key, try the pro API
     if (response.status === 429 && isValidKey) {
       console.log(`Public API rate limited, switching to Pro API with key`);
       pro_attempted = true;
@@ -107,10 +153,8 @@ Deno.serve(async (req) => {
         throw new Error(`CoinGecko Pro API error: ${response.status}`);
       }
     } else if (response.ok) {
-      // Public API succeeded - make sure we log it as public
       await logEdgeFunctionEvent(`coingecko_api_public_success`);
     } else {
-      // Public API failed with error other than rate limit
       const errorCode = response.status;
       await logEdgeFunctionEvent(`coingecko_api_public_failure_${errorCode}`);
       throw new Error(`CoinGecko Public API error: ${response.status}`);
@@ -118,20 +162,24 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
     
-    // Make sure we explicitly indicate which API was used
+    // Update cache with new rates
+    await updateCache(data.bitcoin);
+    await logEdgeFunctionEvent('cache_updated');
+    
     return new Response(JSON.stringify({ 
       ...data, 
       api_type: api_type,
-      pro_attempted: pro_attempted 
+      pro_attempted: pro_attempted,
+      cache_hit: false
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    })
+    });
   } catch (error) {
     console.error('Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
-    })
+    });
   }
 })
