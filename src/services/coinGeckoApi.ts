@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 async function logUsageEvent(eventType: string, metadata: any = {}) {
   try {
+    console.log(`Logging event: ${eventType}`, metadata);
     const { error } = await supabase
       .from('usage_logs')
       .insert([
@@ -25,6 +26,8 @@ async function logUsageEvent(eventType: string, metadata: any = {}) {
     
     if (error) {
       console.error('Error logging usage event:', error);
+    } else {
+      console.log(`Successfully logged event: ${eventType}`);
     }
   } catch (error) {
     console.error('Failed to log usage event:', error);
@@ -86,15 +89,17 @@ async function performFetch(): Promise<CoinRates> {
       throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
-    if (!data.bitcoin) {
+    if (!data || !data.bitcoin) {
       await logUsageEvent('coingecko_api_error', {
         error: 'Invalid response format',
+        raw_response: JSON.stringify(data),
         timestamp: new Date().toISOString()
       });
       throw new Error('Invalid response from CoinGecko API');
     }
     
     console.log("Bitcoin rates from API:", data.bitcoin);
+    console.log("API type used:", data.api_type);
 
     // Log successful API call
     await logUsageEvent('coingecko_api_success', {
@@ -135,7 +140,7 @@ function getLatestAvailableRates(): CoinRates {
   console.log('Using cached rates as fallback:', cachedRates);
   
   // Log fallback to cache
-  logUsageEvent('cache_fallback', {
+  void logUsageEvent('cache_fallback', {
     timestamp: new Date().toISOString(),
     cache_age: Date.now() - (cachedRates.lastUpdated?.getTime() || 0)
   });
@@ -153,4 +158,3 @@ function getLatestAvailableRates(): CoinRates {
   // Fallback to initial rates if no cached rates
   return { ...initialRates };
 }
-
