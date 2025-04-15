@@ -10,12 +10,30 @@ import {
   fetchFromCryptoCompareWithKey 
 } from '../_shared/providers/cryptocompare.ts'
 
+// Track recently served requests to avoid duplicate processing
+const processedRequests = new Map();
+const DEDUPLICATION_TIMEOUT = 2000; // 2 seconds
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    // Generate a request identifier based on timestamp
+    const requestTime = Date.now();
+    const requestIP = req.headers.get('x-forwarded-for') || 'unknown';
+    const requestId = `${requestIP}-${Math.floor(requestTime / 1000)}`; // Group by seconds
+    
+    // Check if we've recently processed a very similar request
+    if (processedRequests.has(requestId)) {
+      console.log('Duplicate request detected, returning cached response');
+      return new Response(JSON.stringify(processedRequests.get(requestId)), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+    
     // Fallback chain in priority order
     let data = null
     let source = ''
@@ -81,8 +99,16 @@ Deno.serve(async (req) => {
       throw new Error('Failed to fetch data from any API source')
     }
     
-    // Log the successful API call
+    // Log the successful API call - we'll only log once per request
     await logApiCall(source, data)
+    
+    // Store the response to prevent duplicate processing
+    processedRequests.set(requestId, data);
+    
+    // Clean up old entries
+    setTimeout(() => {
+      processedRequests.delete(requestId);
+    }, DEDUPLICATION_TIMEOUT);
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

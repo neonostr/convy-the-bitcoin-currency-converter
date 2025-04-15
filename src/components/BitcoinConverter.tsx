@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -27,8 +28,14 @@ const BitcoinConverter = () => {
     handleInputChange 
   } = useConversion();
 
+  // Use strict dependency tracking to avoid multiple triggers
   useEffect(() => {
-    logAppOpen();
+    // Only log app open once per session
+    const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
+    if (!hasLoggedOpen) {
+      logAppOpen();
+      sessionStorage.setItem('app_open_logged', 'true');
+    }
   }, []);
 
   const { displayCurrencies } = settings;

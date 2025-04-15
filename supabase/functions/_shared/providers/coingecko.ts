@@ -1,9 +1,17 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Keep your existing imports and configurations
 const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co";
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Track successful API calls to avoid duplicate logs
+let lastSuccessfulApiCall = {
+  type: '',
+  timestamp: 0
+};
+const DUPLICATE_LOG_PREVENTION_WINDOW = 5000; // 5 seconds
 
 export async function fetchFromCoinGeckoPublic() {
   try {
@@ -15,7 +23,20 @@ export async function fetchFromCoinGeckoPublic() {
     }
     
     const data = await response.json();
-    await logApiSuccess('coingecko_api_public_success');
+    
+    // Log success only if it's not a duplicate
+    const now = Date.now();
+    if (lastSuccessfulApiCall.type !== 'coingecko_api_public_success' || 
+        now - lastSuccessfulApiCall.timestamp > DUPLICATE_LOG_PREVENTION_WINDOW) {
+      await logApiSuccess('coingecko_api_public_success');
+      lastSuccessfulApiCall = {
+        type: 'coingecko_api_public_success',
+        timestamp: now
+      };
+    } else {
+      console.log('Skipping duplicate success log for CoinGecko public API');
+    }
+    
     return data;
   } catch (error) {
     console.error(`CoinGecko public API error: ${error.message}`);
@@ -43,7 +64,20 @@ export async function fetchFromCoinGeckoWithKey() {
     }
     
     const data = await response.json();
-    await logApiSuccess('coingecko_api_with_key_success');
+    
+    // Log success only if it's not a duplicate
+    const now = Date.now();
+    if (lastSuccessfulApiCall.type !== 'coingecko_api_with_key_success' || 
+        now - lastSuccessfulApiCall.timestamp > DUPLICATE_LOG_PREVENTION_WINDOW) {
+      await logApiSuccess('coingecko_api_with_key_success');
+      lastSuccessfulApiCall = {
+        type: 'coingecko_api_with_key_success',
+        timestamp: now
+      };
+    } else {
+      console.log('Skipping duplicate success log for CoinGecko with key API');
+    }
+    
     return data;
   } catch (error) {
     console.error(`CoinGecko API with key error: ${error.message}`);

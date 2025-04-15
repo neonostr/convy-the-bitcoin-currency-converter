@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
@@ -26,14 +25,20 @@ export const useConversion = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
   const isInitialFetch = useRef<boolean>(true);
-
-  // Fetch rates initially when component mounts
+  const initialFetchDone = useRef<boolean>(false);
+  
+  // Fetch rates initially when component mounts - ensure it only runs once
   useEffect(() => {
-    fetchRates();
-    // Initial conversion with default values
-    if (rates) {
-      const newConversions = convertCurrency(1, 'btc', rates);
-      setConversions(newConversions);
+    if (!initialFetchDone.current) {
+      console.log('Initial fetch of rates');
+      fetchRates();
+      initialFetchDone.current = true;
+      
+      // Initial conversion with default values
+      if (rates) {
+        const newConversions = convertCurrency(1, 'btc', rates);
+        setConversions(newConversions);
+      }
     }
   }, []);
 
@@ -72,6 +77,11 @@ export const useConversion = () => {
     // For subsequent fetches, only fetch if the cache is stale (> 60s)
     if (!isInitialFetch.current && !isCacheStale() && rates !== null) {
       console.log('Skipping API call - using cached rates (< 60s old)');
+      return;
+    }
+    
+    if (isRefreshing) {
+      console.log('Already refreshing rates, skipping redundant API call');
       return;
     }
     
@@ -167,7 +177,7 @@ export const useConversion = () => {
     selectedCurrency,
     rates,
     conversions,
-    setConversions, // Add setConversions to the returned object
+    setConversions,
     isRefreshing,
     handleCurrencySelect,
     handleInputChange,
