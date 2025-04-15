@@ -1,4 +1,5 @@
-import { CoinRates, CoinGeckoResponse } from "@/types/currency.types";
+
+import { CoinRates } from "@/types/currency.types";
 import { 
   initialRates, 
   updateCachedRates, 

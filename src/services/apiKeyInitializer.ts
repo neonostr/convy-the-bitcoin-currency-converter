@@ -1,13 +1,8 @@
 
-import { setCoinGeckoApiKey } from './coinGeckoApi';
-
-// This is a hidden constant that will only exist in memory at runtime
-// Using the correct API key format for CoinGecko
-const COINGECKO_API_KEY = "CG-Xrz4kxHNqEF79t1iGrvFH1UD";
+// This file is now a placeholder since we're using Supabase secrets
+// for storing API keys instead of hardcoding them in the application
 
 export function initializeApiKeys(): void {
-  // Set the CoinGecko API key in memory only
-  setCoinGeckoApiKey(COINGECKO_API_KEY);
-  
-  console.log('API keys initialized');
+  // API keys are now managed through Supabase secrets
+  console.log('API keys are now managed through Supabase secrets');
 }
