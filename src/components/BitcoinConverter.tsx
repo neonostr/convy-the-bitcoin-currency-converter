@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+
+import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin } from 'lucide-react';
@@ -10,7 +11,6 @@ import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
-import { trackAppUsage } from '@/services/usageTracker';
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,11 +26,6 @@ const BitcoinConverter = () => {
     handleInputChange 
   } = useConversion();
 
-  useEffect(() => {
-    const usageStats = trackAppUsage();
-    console.log('Daily App Usage:', usageStats);
-  }, []);
-
   const { displayCurrencies } = settings;
 
   const handleInputFocus = () => {
@@ -38,6 +33,7 @@ const BitcoinConverter = () => {
   };
 
   const copyToClipboard = (value: string) => {
+    // Ensure we handle both comma and dot decimal separators consistently
     const numericValue = value.replace(/[^\d.,]/g, '').replace(',', '.');
     navigator.clipboard.writeText(numericValue).then(() => {
       toast({
