@@ -10,7 +10,6 @@ import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
-import { supabase } from "@/integrations/supabase/client";
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -28,34 +27,8 @@ const BitcoinConverter = () => {
   } = useConversion();
 
   useEffect(() => {
-    const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
-                 (window.navigator as any).standalone === true;
-    
-    const logAppUsage = async () => {
-      try {
-        console.log('Logging app open event');
-        const { data, error } = await supabase
-          .from('usage_logs')
-          .insert([{
-            event_type: isPwa ? 'app_open_pwa' : 'app_open_browser',
-            metadata: {
-              timestamp: new Date().toISOString(),
-              userAgent: navigator.userAgent
-            }
-          }])
-          .select();
-        
-        if (error) {
-          console.error('Failed to log app usage:', error);
-          throw error;
-        }
-        console.log('Successfully logged app usage:', data);
-      } catch (error) {
-        console.error('Unexpected error logging app usage:', error);
-      }
-    };
-    
-    logAppUsage();
+    // We no longer log app usage from the frontend due to RLS restrictions
+    // This will be handled by the edge function instead
   }, []);
 
   const { displayCurrencies } = settings;

@@ -8,16 +8,11 @@ const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Helper function to log events to Supabase
-async function logEdgeFunctionEvent(eventType: string, metadata: any = {}) {
-  console.log(`Attempting to log event: ${eventType}`, metadata);
-  
+async function logEdgeFunctionEvent(eventType: string) {
   try {
     const { data, error } = await supabase
       .from('usage_logs')
-      .insert([{
-        event_type: eventType,
-        metadata: metadata
-      }])
+      .insert([{ event_type: eventType }])
       .select();
 
     if (error) {
@@ -25,7 +20,7 @@ async function logEdgeFunctionEvent(eventType: string, metadata: any = {}) {
       throw error;
     }
 
-    console.log('Successfully logged event:', data);
+    console.log('Successfully logged event:', eventType);
     return data;
   } catch (err) {
     console.error('Failed to log event:', err);
@@ -34,7 +29,6 @@ async function logEdgeFunctionEvent(eventType: string, metadata: any = {}) {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -57,32 +51,21 @@ Deno.serve(async (req) => {
     )
 
     if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status}`)
+      const errorCode = response.status;
+      await logEdgeFunctionEvent(`coingecko_api_${api_type}_failure_${errorCode}`);
+      throw new Error(`CoinGecko API error: ${response.status}`);
     }
 
-    const data = await response.json()
-    const timestamp = new Date().toISOString();
+    const data = await response.json();
     
-    await logEdgeFunctionEvent('coingecko_edge_function_call', { 
-      status: response.status, 
-      success: true,
-      api_type: api_type,
-      timestamp: timestamp
-    });
+    await logEdgeFunctionEvent(`coingecko_api_${api_type}_success`);
 
     return new Response(JSON.stringify({ ...data, api_type }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
-    console.error('Error:', error)
-    const timestamp = new Date().toISOString();
-    
-    await logEdgeFunctionEvent('coingecko_edge_function_error', { 
-      error: error.message,
-      timestamp: timestamp
-    });
-      
+    console.error('Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
