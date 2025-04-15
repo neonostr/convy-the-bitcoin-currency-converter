@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -28,11 +27,9 @@ const BitcoinConverter = () => {
   } = useConversion();
 
   useEffect(() => {
-    // Determine if app is running as PWA or in browser
     const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
                  (window.navigator as any).standalone === true;
     
-    // Log app usage when component mounts
     const logAppUsage = async () => {
       try {
         await supabase
@@ -57,11 +54,10 @@ const BitcoinConverter = () => {
   };
 
   const copyToClipboard = (value: string) => {
-    const numericValue = value.replace(/[^\d.,]/g, '').replace(',', '.');
-    navigator.clipboard.writeText(numericValue).then(() => {
+    navigator.clipboard.writeText(value).then(() => {
       toast({
         title: "Copied to clipboard",
-        description: `Copied ${numericValue}`,
+        description: `Copied ${value}`,
         duration: 2000,
       });
     }).catch(err => {
