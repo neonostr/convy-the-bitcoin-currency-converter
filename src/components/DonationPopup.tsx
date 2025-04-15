@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ const DonationPopup: React.FC = () => {
   const { toast } = useToast();
 
   const resetState = () => {
+    setAmount(1000);
     setInvoice('');
     setQrData('');
     setIsSending(false);
@@ -104,6 +106,11 @@ const DonationPopup: React.FC = () => {
     resetState();
   };
 
+  const handleAmountFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.value = ''; // Clear the input on focus
+    setAmount(0);
+  };
+
   return (
     <Dialog onOpenChange={(open) => !open && handleClose()}>
       <DialogTrigger asChild>
@@ -118,9 +125,11 @@ const DonationPopup: React.FC = () => {
             <Coffee className="h-5 w-5 text-bitcoin-orange" />
             Zap me a coffee
           </DialogTitle>
-          <DialogDescription>
-            Support this project with some sats
-          </DialogDescription>
+          {!paymentConfirmed && (
+            <DialogDescription>
+              Support this project with some sats
+            </DialogDescription>
+          )}
         </DialogHeader>
         
         <div className="flex flex-col gap-4 py-4">
@@ -136,8 +145,11 @@ const DonationPopup: React.FC = () => {
                 <Input
                   id="amount"
                   type="number"
-                  value={amount}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={amount || ''}
                   onChange={(e) => setPresetAmount(Number(e.target.value))}
+                  onFocus={handleAmountFocus}
                   min={1}
                   className="text-center text-lg font-bold"
                   disabled={isSending}
