@@ -1,4 +1,3 @@
-
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Cache settings
@@ -12,6 +11,7 @@ const loadRatesFromStorage = (): CoinRates => {
       const parsedRates = JSON.parse(storedRates);
       // Convert the string date back to a Date object
       parsedRates.lastUpdated = new Date(parsedRates.lastUpdated);
+      console.log('Loaded rates from localStorage, last updated:', parsedRates.lastUpdated);
       return parsedRates;
     }
   } catch (error) {
@@ -63,10 +63,12 @@ export function updateCachedRates(rates: CoinRates): void {
   
   // Save last fetch time for cross-tab coordination
   localStorage.setItem('bitcoin-converter-last-fetch-time', lastFetchTime.toString());
+  console.log('Updated lastFetchTime in localStorage:', lastFetchTime);
   
   // Save to localStorage for offline access
   try {
     localStorage.setItem('bitcoin-converter-rates', JSON.stringify(rates));
+    console.log('Saved rates to localStorage');
   } catch (error) {
     console.error('Failed to save rates to localStorage:', error);
   }
@@ -77,6 +79,7 @@ export function updateCachedRates(rates: CoinRates): void {
       type: 'CACHE_RATES',
       payload: rates
     });
+    console.log('Posted rates to service worker cache');
   }
 }
 
@@ -91,19 +94,33 @@ export function resetInitialRates(): void {
 }
 
 export function isCacheStale(): boolean {
+  // Check if we have cached rates
+  if (!cachedRates || !cachedRates.lastUpdated) {
+    console.log('Cache is stale: No cached rates available');
+    return true;
+  }
+  
   // Check local memory cache first
-  if (Date.now() - lastFetchTime < CACHE_EXPIRY_TIME) {
+  const now = Date.now();
+  const cachedLastFetchTime = lastFetchTime;
+  
+  if (now - cachedLastFetchTime < CACHE_EXPIRY_TIME) {
+    console.log(`Cache is fresh: Last fetch was ${(now - cachedLastFetchTime)/1000}s ago (< 60s)`);
     return false;
   }
   
   // Also check localStorage in case another tab updated the rates
   const storedLastFetchTime = parseInt(localStorage.getItem('bitcoin-converter-last-fetch-time') || '0', 10);
-  return Date.now() - storedLastFetchTime >= CACHE_EXPIRY_TIME;
+  const isFresh = now - storedLastFetchTime < CACHE_EXPIRY_TIME;
+  
+  console.log(`Cache status from localStorage: Last fetch was ${(now - storedLastFetchTime)/1000}s ago, is fresh: ${isFresh}`);
+  return !isFresh;
 }
 
 export function setFetchingState(state: boolean, promise: Promise<CoinRates> | null = null): void {
   isFetchingData = state;
   fetchPromise = promise;
+  console.log('Set fetching state:', state);
 }
 
 export function isFetching(): boolean {
@@ -117,7 +134,9 @@ export function getActiveFetchPromise(): Promise<CoinRates> | null {
 export function getLastFetchTime(): number {
   // Check both local memory and localStorage
   const storedLastFetchTime = parseInt(localStorage.getItem('bitcoin-converter-last-fetch-time') || '0', 10);
-  return Math.max(lastFetchTime, storedLastFetchTime);
+  const latestTime = Math.max(lastFetchTime, storedLastFetchTime);
+  console.log(`Latest fetch time is ${new Date(latestTime).toISOString()}, ${(Date.now() - latestTime)/1000}s ago`);
+  return latestTime;
 }
 
 export function convertCurrency(amount: number, fromCurrency: Currency, rates: CoinRates): Record<string, number> {

@@ -24,11 +24,13 @@ function acquireFetchLock(): boolean {
   const lastFetch = parseInt(localStorage.getItem(GLOBAL_FETCH_LOCK_KEY) || '0', 10);
   
   if (now - lastFetch < FETCH_COOLDOWN) {
+    console.log(`Cannot acquire fetch lock, last fetch was ${now - lastFetch}ms ago`);
     return false; // Another tab fetched recently
   }
   
   // Set the lock
   localStorage.setItem(GLOBAL_FETCH_LOCK_KEY, now.toString());
+  console.log('Acquired fetch lock, setting timestamp:', now);
   return true;
 }
 
@@ -38,6 +40,7 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   const now = Date.now();
   const lastFetchTime = getLastFetchTime();
   
+  // If cache is not stale (less than 60s old), use cached rates
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
     await logEvent('provided_cached_data');
@@ -100,10 +103,12 @@ async function performFetch(): Promise<CoinRates> {
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
     if (error) {
+      console.error('Error invoking edge function:', error);
       throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
     if (!data || !data.bitcoin) {
+      console.error('Invalid response data:', data);
       throw new Error('Invalid response from CoinGecko API');
     }
     

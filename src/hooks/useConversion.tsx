@@ -29,16 +29,15 @@ export const useConversion = () => {
   const isInitialFetch = useRef<boolean>(true);
   const lastManualFetchTimestamp = useRef<number>(0);
   const fetchController = useRef<AbortController | null>(null);
+  const initialFetchDone = useRef<boolean>(false);
 
   // Fetch rates initially when component mounts
   useEffect(() => {
-    // Get initial rates
-    fetchRates();
-    
-    // Initial conversion with default values
-    if (rates) {
-      const newConversions = convertCurrency(1, 'btc', rates);
-      setConversions(newConversions);
+    // Only fetch rates once when the component first mounts
+    if (!initialFetchDone.current) {
+      console.log('Initial rates fetch on component mount');
+      initialFetchDone.current = true;
+      fetchRates();
     }
     
     // Cleanup function to abort any in-progress fetches when component unmounts
@@ -101,10 +100,9 @@ export const useConversion = () => {
       return;
     }
     
-    // For initial fetch, always try to get fresh data if cache is stale
-    // For subsequent fetches, only fetch if manually requested or cache is stale
+    // For initial fetch, use cached data if available and not stale
     if (!forceRefresh && !isInitialFetch.current && !isCacheStale() && rates !== null) {
-      console.log('Skipping API call - using cached rates (< 60s old)');
+      console.log('Using cached rates - skipping API call');
       await logEvent('conversion_used_cached_data');
       return;
     }
@@ -116,25 +114,17 @@ export const useConversion = () => {
     
     setIsRefreshing(true);
     try {
-      console.log('fetchCoinRates called, current initialRates:', initialRates);
+      console.log('Fetching rates, isInitialFetch:', isInitialFetch.current, 'forceRefresh:', forceRefresh);
       const newRates = await fetchCoinRates();
       setRates(newRates);
       isInitialFetch.current = false;
       
-      // If this is the first time we're fetching rates, calculate initial conversions
-      if (!rates) {
+      // If this is the first time we're fetching rates or we're doing a manual refresh, 
+      // recalculate conversions with new rates
+      if (!rates || forceRefresh) {
         // Ensure we handle comma decimal separators
         const normalizedAmount = amount.replace(',', '.');
         const numericAmount = parseFloat(normalizedAmount);
-        if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
-          setConversions(newConversions);
-        }
-      } else {
-        // Recalculate conversions with new rates
-        const normalizedAmount = amount.replace(',', '.');
-        const numericAmount = parseFloat(normalizedAmount);
-        
         if (!isNaN(numericAmount)) {
           const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
           setConversions(newConversions);
