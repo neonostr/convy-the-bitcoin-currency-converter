@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -9,13 +8,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Supported currencies for all APIs
 const supportedCurrencies = ['usd', 'eur', 'chf', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'inr', 'rub']
-
-// Exchange rates for less common currencies if a fallback API doesn't provide them
-// These are relative to USD and will be used to approximate missing currencies
-const fallbackExchangeRates = {
-  chf: 0.823, // Swiss Franc to USD
-  rub: 82.5,  // Russian Ruble to USD
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -48,16 +40,27 @@ Deno.serve(async (req) => {
       } catch (coinGeckoKeyError) {
         console.error('CoinGecko API with key error:', coinGeckoKeyError)
         
-        // 3. Try CoinDesk as final fallback
+        // 3. Try CryptoCompare public API as second fallback
         try {
-          console.log('Falling back to CoinDesk API...')
-          data = await fetchFromCoinDesk()
+          console.log('Falling back to CryptoCompare public API...')
+          data = await fetchFromCryptoComparePublic()
           apiSuccess = true
-          source = 'coindesk'
-          console.log('Successfully fetched data from CoinDesk (fallback)')
-        } catch (coindeskError) {
-          console.error('CoinDesk API error:', coindeskError)
-          throw new Error('All API attempts failed')
+          source = 'cryptocompare_public'
+          console.log('Successfully fetched data from CryptoCompare (fallback)')
+        } catch (cryptoCompareError) {
+          console.error('CryptoCompare public API error:', cryptoCompareError)
+          
+          // 4. Try CryptoCompare with API key as final fallback
+          try {
+            console.log('Falling back to CryptoCompare with API key...')
+            data = await fetchFromCryptoCompareWithKey()
+            apiSuccess = true
+            source = 'cryptocompare_api_key'
+            console.log('Successfully fetched data from CryptoCompare with API key')
+          } catch (cryptoCompareKeyError) {
+            console.error('CryptoCompare API with key error:', cryptoCompareKeyError)
+            throw new Error('All API attempts failed')
+          }
         }
       }
     }
@@ -174,62 +177,104 @@ async function fetchFromCoinGeckoWithKey() {
   return data
 }
 
-async function fetchFromCoinDesk() {
-  console.log('Fetching from CoinDesk API as fallback...')
-  const coinDeskApiKey = Deno.env.get('COINDESK_API_KEY') || ''
-  const headers = {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
+// Function to fetch from CryptoCompare public API
+async function fetchFromCryptoComparePublic() {
+  console.log('Fetching from CryptoCompare public API...')
+  const currenciesParam = supportedCurrencies.map(curr => curr.toUpperCase()).join(',')
+  const apiUrl = `https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=${currenciesParam}`
   
-  // Add API key to headers if available
-  if (coinDeskApiKey) {
-    headers['Authorization'] = `Bearer ${coinDeskApiKey}`
-    console.log('Using CoinDesk API Key: Key present')
-  } else {
-    console.log('No CoinDesk API Key found, using public endpoint')
-  }
-  
-  // CoinDesk only provides USD rates in the free tier, so we'll start with that
   const response = await fetch(
-    'https://api.coindesk.com/v1/bpi/currentprice.json',
-    { headers }
+    apiUrl,
+    {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    }
   )
   
-  console.log('CoinDesk API Status:', response.status)
+  console.log('CryptoCompare Public API Status:', response.status)
   
   if (!response.ok) {
     const errorText = await response.text()
-    console.error('CoinDesk API Error:', errorText)
-    throw new Error(`CoinDesk API error: ${response.status} - ${errorText}`)
+    console.error('CryptoCompare Public API Error:', errorText)
+    throw new Error(`CryptoCompare Public API error: ${response.status} - ${errorText}`)
   }
   
-  const coinDeskData = await response.json()
-  console.log('CoinDesk Raw Response:', JSON.stringify(coinDeskData, null, 2))
+  const rawData = await response.json()
+  console.log('CryptoCompare Raw Response:', JSON.stringify(rawData, null, 2))
   
-  // Convert CoinDesk response to match CoinGecko format
-  // CoinDesk provides USD, GBP, and EUR in their basic endpoint
-  const result = {
+  // Transform CryptoCompare response to match CoinGecko format
+  const transformedData = {
     bitcoin: {
-      usd: parseFloat(coinDeskData.bpi.USD.rate.replace(',', '')),
-      gbp: parseFloat(coinDeskData.bpi.GBP.rate.replace(',', '')),
-      eur: parseFloat(coinDeskData.bpi.EUR.rate.replace(',', ''))
+      usd: rawData.BTC.USD,
+      eur: rawData.BTC.EUR,
+      chf: rawData.BTC.CHF,
+      cny: rawData.BTC.CNY,
+      jpy: rawData.BTC.JPY,
+      gbp: rawData.BTC.GBP,
+      aud: rawData.BTC.AUD,
+      cad: rawData.BTC.CAD,
+      inr: rawData.BTC.INR,
+      rub: rawData.BTC.RUB
     }
   }
   
-  // For other currencies, we'll need to approximate based on common exchange rates
-  // This is not ideal but better than nothing in case of API failures
-  const usdRate = result.bitcoin.usd
+  console.log('Transformed CryptoCompare Response:', JSON.stringify(transformedData, null, 2))
+  return transformedData
+}
+
+// Function to fetch from CryptoCompare with API key
+async function fetchFromCryptoCompareWithKey() {
+  const apiKey = Deno.env.get('CRYPTOCOMPARE_API_KEY')
   
-  // Calculate missing currencies based on USD rate and approximate exchange rates
-  result.bitcoin.chf = usdRate * fallbackExchangeRates.chf
-  result.bitcoin.cny = usdRate / 0.138  // Approximate USD to CNY
-  result.bitcoin.jpy = usdRate / 0.0067 // Approximate USD to JPY
-  result.bitcoin.aud = usdRate / 0.66   // Approximate USD to AUD
-  result.bitcoin.cad = usdRate / 0.73   // Approximate USD to CAD
-  result.bitcoin.inr = usdRate / 0.012  // Approximate USD to INR
-  result.bitcoin.rub = usdRate * fallbackExchangeRates.rub
+  if (!apiKey) {
+    console.log('No CryptoCompare API key found, skipping this fallback')
+    throw new Error('No CryptoCompare API key available')
+  }
   
-  console.log('Transformed CoinDesk Response:', JSON.stringify(result, null, 2))
-  return result
+  console.log('Using CryptoCompare API Key: Key present')
+  const currenciesParam = supportedCurrencies.map(curr => curr.toUpperCase()).join(',')
+  const apiUrl = `https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=${currenciesParam}`
+  
+  const response = await fetch(
+    apiUrl,
+    {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Apikey ${apiKey}`
+      }
+    }
+  )
+  
+  console.log('CryptoCompare API with Key Status:', response.status)
+  
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error('CryptoCompare API with Key Error:', errorText)
+    throw new Error(`CryptoCompare API with Key error: ${response.status} - ${errorText}`)
+  }
+  
+  const rawData = await response.json()
+  console.log('CryptoCompare API with Key Response:', JSON.stringify(rawData, null, 2))
+  
+  // Transform CryptoCompare response to match CoinGecko format
+  const transformedData = {
+    bitcoin: {
+      usd: rawData.BTC.USD,
+      eur: rawData.BTC.EUR,
+      chf: rawData.BTC.CHF,
+      cny: rawData.BTC.CNY,
+      jpy: rawData.BTC.JPY,
+      gbp: rawData.BTC.GBP,
+      aud: rawData.BTC.AUD,
+      cad: rawData.BTC.CAD,
+      inr: rawData.BTC.INR,
+      rub: rawData.BTC.RUB
+    }
+  }
+  
+  console.log('Transformed CryptoCompare Response:', JSON.stringify(transformedData, null, 2))
+  return transformedData
 }
