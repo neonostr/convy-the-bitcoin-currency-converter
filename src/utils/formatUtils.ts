@@ -1,18 +1,17 @@
 export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
+  const locale = 'en-US';
   let formatted: string;
+  
   if (currency === 'btc') {
-    // Format BTC with up to 8 decimal places, trim trailing zeros
-    formatted = value.toLocaleString('en-US', { 
+    formatted = value.toLocaleString(locale, { 
       maximumFractionDigits: 8,
       minimumFractionDigits: 0,
       useGrouping: true
     });
   } else if (currency === 'sats') {
-    // Format satoshis as integers
-    formatted = Math.round(value).toLocaleString('en-US');
+    formatted = Math.round(value).toLocaleString(locale);
   } else {
-    // Format fiat currencies with 2 decimal places
-    formatted = value.toLocaleString('en-US', { 
+    formatted = value.toLocaleString(locale, { 
       maximumFractionDigits: 2,
       minimumFractionDigits: 2,
       useGrouping: true
@@ -22,20 +21,32 @@ export function formatCurrency(value: number, currency: string, decimalSeparator
   return decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
 }
 
-export function formatForCopy(value: number, currency: string, decimalSeparator: string = '.'): string {
+export function formatForCopy(
+  value: number, 
+  currency: string, 
+  decimalSeparator: string = '.', 
+  includeThouSep: boolean = false
+): string {
   let formatted: string;
+  
   if (currency === 'btc') {
-    // Format BTC with up to 8 decimal places
     formatted = value.toFixed(8).replace(/\.?0+$/, '');
+    if (formatted === '') formatted = '0';
   } else if (currency === 'sats') {
-    // Format satoshis as integers
     formatted = Math.round(value).toString();
   } else {
-    // Format fiat with 2 decimal places
     formatted = value.toFixed(2);
   }
   
-  return decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
+  if (includeThouSep) {
+    const parts = formatted.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, decimalSeparator === ',' ? '.' : ',');
+    formatted = parts.join(decimalSeparator);
+  } else {
+    formatted = decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
+  }
+  
+  return formatted;
 }
 
 export function getCurrencySymbol(currency: string): string {
@@ -70,7 +81,6 @@ export function getCurrencySymbol(currency: string): string {
 }
 
 export function getLastUpdatedFormatted(timestamp: Date): string {
-  // Format as YYYY-MM-DD HH:MM in UTC, without seconds
   const year = timestamp.getUTCFullYear();
   const month = String(timestamp.getUTCMonth() + 1).padStart(2, '0');
   const day = String(timestamp.getUTCDate()).padStart(2, '0');

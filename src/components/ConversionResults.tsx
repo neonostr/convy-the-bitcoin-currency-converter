@@ -29,7 +29,14 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
             <div
               key={currency}
               className="bg-secondary p-4 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors"
-              onClick={() => onResultClick(formatForCopy(value, currency, settings.decimalSeparator))}
+              onClick={() => onResultClick(
+                formatForCopy(
+                  value, 
+                  currency, 
+                  settings.decimalSeparator, 
+                  settings.includeThouSepWhenCopying
+                )
+              )}
             >
               <div className="flex justify-between">
                 <span className="uppercase font-medium">

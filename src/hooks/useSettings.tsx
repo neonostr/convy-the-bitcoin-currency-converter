@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { Currency } from '@/types/currency.types';
 
@@ -5,6 +6,7 @@ export interface Settings {
   theme: 'light' | 'dark';
   displayCurrencies: Currency[];
   decimalSeparator: '.' | ',';
+  includeThouSepWhenCopying: boolean;
 }
 
 interface SettingsContextType {
@@ -39,6 +41,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
       displayCurrencies: DEFAULT_CURRENCIES,
       decimalSeparator: '.',  // Default to dot as separator
+      includeThouSepWhenCopying: false, // Default to not including thousand separator when copying
     };
   });
 
