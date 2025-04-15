@@ -10,6 +10,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 // Helper function to log events to Supabase
 async function logEdgeFunctionEvent(eventType: string, metadata: any = {}) {
   try {
+    // Using a simplified insert format that matches the table structure
     const { error } = await supabase
       .from('usage_logs')
       .insert([
@@ -62,7 +63,7 @@ Deno.serve(async (req) => {
     
     const timestamp = new Date().toISOString();
     
-    // Log the API call with additional metadata
+    // Explicitly log the event before responding
     await logEdgeFunctionEvent('coingecko_edge_function_call', { 
       status: response.status, 
       success: true,

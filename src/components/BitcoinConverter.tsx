@@ -34,15 +34,27 @@ const BitcoinConverter = () => {
     
     const logAppUsage = async () => {
       try {
-        await supabase
+        console.log('Logging app open event');
+        const { data, error } = await supabase
           .from('usage_logs')
           .insert([
             { 
-              event_type: isPwa ? 'app_open_pwa' : 'app_open_browser'
+              event_type: isPwa ? 'app_open_pwa' : 'app_open_browser',
+              metadata: {
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+              }
             }
-          ]);
+          ])
+          .select();
+        
+        if (error) {
+          console.error('Failed to log app usage:', error);
+        } else {
+          console.log('Successfully logged app usage:', data);
+        }
       } catch (error) {
-        console.error('Failed to log app usage:', error);
+        console.error('Unexpected error logging app usage:', error);
       }
     };
     
