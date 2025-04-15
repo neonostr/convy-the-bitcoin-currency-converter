@@ -10,6 +10,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 // Helper function to log events to Supabase
 async function logEdgeFunctionEvent(eventType: string) {
   try {
+    console.log(`Edge function logging event: ${eventType}`);
+    
     const { data, error } = await supabase
       .from('usage_logs')
       .insert([{ event_type: eventType }])
@@ -40,6 +42,7 @@ Deno.serve(async (req) => {
       
       // Check if this is a tracking request (not a rates request)
       if (requestData && requestData.event_type) {
+        console.log(`Received event logging request for: ${requestData.event_type}`);
         await logEdgeFunctionEvent(requestData.event_type);
         
         return new Response(JSON.stringify({ 

@@ -79,7 +79,7 @@ export const useConversion = () => {
         duration: 3000,
       });
       
-      logEvent('refresh_rates_throttled');
+      await logEvent('refresh_rates_throttled');
       return;
     }
     
@@ -87,13 +87,13 @@ export const useConversion = () => {
     // For subsequent fetches, only fetch if the cache is stale (> 60s)
     if (!forceRefresh && !isInitialFetch.current && !isCacheStale() && rates !== null) {
       console.log('Skipping API call - using cached rates (< 60s old)');
-      logEvent('conversion_used_cached_data');
+      await logEvent('conversion_used_cached_data');
       return;
     }
     
     if (forceRefresh) {
       lastManualFetchTimestamp.current = now;
-      logEvent('manual_refresh_rates');
+      await logEvent('manual_refresh_rates');
     }
     
     setIsRefreshing(true);
@@ -133,13 +133,13 @@ export const useConversion = () => {
       }
     } catch (error) {
       console.error('Failed to fetch rates:', error);
-      logEvent('conversion_fetch_error');
+      await logEvent('conversion_fetch_error');
       
       // If API fails but we have cached rates, use those
       if (!rates) {
         const cachedRates = getCachedRates();
         setRates(cachedRates);
-        logEvent('conversion_fallback_to_cache');
+        await logEvent('conversion_fallback_to_cache');
       }
       
       toast({
@@ -153,9 +153,9 @@ export const useConversion = () => {
     }
   };
 
-  const handleCurrencySelect = (currency: Currency) => {
+  const handleCurrencySelect = async (currency: Currency) => {
     setSelectedCurrency(currency);
-    logEvent(`currency_selected_${currency}`);
+    await logEvent(`currency_selected_${currency}`);
     
     // Reset the amount to zero when changing currency
     setAmount('0');

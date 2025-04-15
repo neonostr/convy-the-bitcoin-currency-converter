@@ -25,8 +25,14 @@ const App = () => {
   useEffect(() => {
     // Make sure this only runs once on app load
     const trackUsage = async () => {
-      console.log('App mounted - tracking usage');
-      await trackAppUsage();
+      console.log('App mounted - tracking app usage');
+      try {
+        // Ensure we wait for the tracking to complete
+        await trackAppUsage();
+        console.log('App usage tracking completed');
+      } catch (error) {
+        console.error('Error tracking app usage:', error);
+      }
     };
     
     // Call the tracking function

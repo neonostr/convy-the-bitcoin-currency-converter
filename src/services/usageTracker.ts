@@ -25,6 +25,8 @@ export const logEvent = async (eventType: string) => {
   }
   
   try {
+    console.log(`Sending event log for: ${eventType}`);
+    
     // Use the edge function to log events instead of direct table access
     const { data, error } = await supabase.functions.invoke('coingecko-rates', {
       body: { event_type: eventType }
@@ -45,7 +47,7 @@ export const logEvent = async (eventType: string) => {
   }
 };
 
-export const trackAppUsage = () => {
+export const trackAppUsage = async () => {
   const today = new Date().toISOString().split('T')[0];
   
   // Retrieve or initialize usage stats
@@ -68,16 +70,18 @@ export const trackAppUsage = () => {
   localStorage.setItem(DAILY_USAGE_KEY, JSON.stringify(stats));
   
   // Log app open event based on device type
+  let eventType = 'app_open_browser_desktop';
+  
   if (window.matchMedia('(display-mode: standalone)').matches) {
     // This is a PWA
-    logEvent('app_open_pwa');
+    eventType = 'app_open_pwa';
   } else if (window.matchMedia('(max-width: 768px)').matches) {
     // This is a mobile browser
-    logEvent('app_open_browser_mobile');
-  } else {
-    // This is a desktop browser
-    logEvent('app_open_browser_desktop');
+    eventType = 'app_open_browser_mobile';
   }
+  
+  console.log(`Logging app open event: ${eventType}`);
+  await logEvent(eventType);
 
   return stats;
 };

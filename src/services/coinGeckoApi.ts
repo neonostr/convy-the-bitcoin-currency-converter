@@ -24,28 +24,28 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
-    logEvent('provided_cached_data');
+    await logEvent('provided_cached_data');
     return { ...cachedRates };
   }
   
   // Add an additional time-based throttle to prevent too frequent API calls
   if (now - lastFetchTimestamp < FETCH_COOLDOWN) {
     console.log(`Throttling API call - last fetch was ${(now - lastFetchTimestamp)/1000}s ago`);
-    logEvent('provided_cached_data_throttled');
+    await logEvent('provided_cached_data_throttled');
     return { ...cachedRates };
   }
   
   // Check if another request is already fetching fresh data
   if (isFetching()) {
     console.log('Another request is already fetching data, waiting for that result');
-    logEvent('provided_cached_data_concurrent');
+    await logEvent('provided_cached_data_concurrent');
     const activePromise = getActiveFetchPromise();
     if (activePromise) {
       try {
         return await activePromise;
       } catch (error) {
         console.error('Error while waiting for active fetch:', error);
-        logEvent('cached_data_update_failed_000');
+        await logEvent('cached_data_update_failed_000');
       }
     }
   }
@@ -65,9 +65,9 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     
     // Log the specific error type if we can extract it
     if (error.response && error.response.status) {
-      logEvent(`cached_data_update_failed_${error.response.status}`);
+      await logEvent(`cached_data_update_failed_${error.response.status}`);
     } else {
-      logEvent('cached_data_update_failed_000');
+      await logEvent('cached_data_update_failed_000');
     }
     
     return getLatestAvailableRates();
@@ -79,7 +79,7 @@ async function performFetch(): Promise<CoinRates> {
     console.log("Fetching fresh Bitcoin rates from API...");
     
     // Track API call for our metrics
-    logEvent('api_call_initiated');
+    await logEvent('api_call_initiated');
     
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
@@ -115,7 +115,7 @@ async function performFetch(): Promise<CoinRates> {
     updateCachedRates(newRates);
     updateInitialRates(newRates);
     
-    logEvent('cached_data_updated');
+    await logEvent('cached_data_updated');
     console.log('Successfully updated rates with fresh data');
     return newRates;
   } catch (error) {
