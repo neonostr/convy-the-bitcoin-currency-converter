@@ -1,26 +1,20 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
-import { fetchCoinRates, logInitialRatesState } from '@/services/coinGeckoApi';
-import { convertCurrency, getCachedRates, isCacheStale, initialRates } from '@/services/ratesService';
+import { fetchCoinRates } from '@/services/coinGeckoApi';
+import { convertCurrency, getCachedRates, isCacheStale } from '@/services/ratesService';
 import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
 
 export const useConversion = () => {
   const [amount, setAmount] = useState<string>('1');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
-  const [rates, setRates] = useState<CoinRates>({ ...initialRates });
+  const [rates, setRates] = useState<CoinRates | null>(null);
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const { toast } = useToast();
   const { settings } = useSettings();
   const isInitialFetch = useRef<boolean>(true);
-
-  // Debug log the initial rates when component mounts
-  useEffect(() => {
-    console.log('useConversion hook initialized with initialRates:', { ...initialRates });
-    logInitialRatesState();
-  }, []);
 
   // Fetch rates initially when component mounts
   useEffect(() => {
@@ -65,22 +59,26 @@ export const useConversion = () => {
     
     setIsRefreshing(true);
     try {
-      console.log('Fetching new rates...');
       const newRates = await fetchCoinRates();
-      console.log('Received new rates:', newRates);
-      
-      // Important: Set the component state with a NEW object to trigger re-render
-      setRates({ ...newRates });
-      
+      setRates(newRates);
       isInitialFetch.current = false;
       
-      // Recalculate conversions with new rates
-      const normalizedAmount = amount.replace(',', '.');
-      const numericAmount = parseFloat(normalizedAmount);
-      
-      if (!isNaN(numericAmount)) {
-        const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
-        setConversions(newConversions);
+      // If this is the first time we're fetching rates, calculate initial conversions
+      if (!rates) {
+        const numericAmount = parseFloat(amount);
+        if (!isNaN(numericAmount)) {
+          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
+          setConversions(newConversions);
+        }
+      } else {
+        // Recalculate conversions with new rates
+        const normalizedAmount = amount.replace(',', '.');
+        const numericAmount = parseFloat(normalizedAmount);
+        
+        if (!isNaN(numericAmount)) {
+          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
+          setConversions(newConversions);
+        }
       }
       
       // Only show a toast notification if we actually fetched fresh data from the API
@@ -91,17 +89,14 @@ export const useConversion = () => {
           duration: 3000,
         });
       }
-      
-      // Log the current state of initialRates after the fetch
-      console.log('initialRates after fetch:', { ...initialRates });
-      logInitialRatesState();
-      
     } catch (error) {
       console.error('Failed to fetch rates:', error);
       
       // If API fails but we have cached rates, use those
-      const cachedRates = getCachedRates();
-      setRates({ ...cachedRates });
+      if (!rates) {
+        const cachedRates = getCachedRates();
+        setRates(cachedRates);
+      }
       
       toast({
         title: "Oops! Rate update failed",
@@ -122,10 +117,12 @@ export const useConversion = () => {
       fetchRates();
     }
     
-    // When changing currency, convert the current amount to the new currency
-    const numericAmount = parseFloat(amount) || 0;
-    const newConversions = convertCurrency(numericAmount, currency, rates);
-    setConversions(newConversions);
+    if (rates) {
+      // When changing currency, convert the current amount to the new currency
+      const numericAmount = parseFloat(amount) || 0;
+      const newConversions = convertCurrency(numericAmount, currency, rates);
+      setConversions(newConversions);
+    }
   };
 
   const handleInputChange = (value: string) => {
@@ -148,6 +145,5 @@ export const useConversion = () => {
     isRefreshing,
     handleCurrencySelect,
     handleInputChange,
-    refreshRates: fetchRates, // Export the fetchRates function to allow manual refresh
   };
 };

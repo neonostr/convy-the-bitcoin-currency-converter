@@ -1,9 +1,8 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Bitcoin, RefreshCw } from 'lucide-react';
+import { Bitcoin } from 'lucide-react';
 import SettingsMenu from '@/components/SettingsMenu';
 import DonationPopup from '@/components/DonationPopup';
 import { useSettings } from '@/hooks/useSettings';
@@ -12,7 +11,6 @@ import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
-import { initializeApiKeys } from '@/services/apiKeyInitializer';
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -24,18 +22,11 @@ const BitcoinConverter = () => {
     selectedCurrency, 
     rates, 
     conversions, 
-    isRefreshing,
     handleCurrencySelect, 
-    handleInputChange,
-    refreshRates
+    handleInputChange 
   } = useConversion();
 
   const { displayCurrencies } = settings;
-
-  // Initialize API keys when component mounts
-  useEffect(() => {
-    initializeApiKeys();
-  }, []);
 
   const handleInputFocus = () => {
     setAmount('');
@@ -59,10 +50,6 @@ const BitcoinConverter = () => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  };
-
-  const handleRefresh = () => {
-    refreshRates();
   };
 
   return (
@@ -96,20 +83,8 @@ const BitcoinConverter = () => {
       />
 
       {rates && (
-        <div className="flex items-center justify-between w-full mb-4">
-          <div className="text-sm text-muted-foreground">
-            Last updated: {getLastUpdatedFormatted(rates.lastUpdated)}
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1"
-          >
-            <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-            Refresh
-          </Button>
+        <div className="text-sm text-muted-foreground mb-4">
+          Last updated: {getLastUpdatedFormatted(rates.lastUpdated)}
         </div>
       )}
 

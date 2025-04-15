@@ -4,6 +4,7 @@ import {
   initialRates, 
   updateCachedRates, 
   getCachedRates, 
+  getLastFetchTime, 
   isCacheStale, 
   updateInitialRates, 
   isFetching, 
@@ -17,7 +18,6 @@ let apiKey = '';
 // Function to set the API key (to be called when the app initializes or when you need to update it)
 export function setCoinGeckoApiKey(key: string): void {
   apiKey = key;
-  console.log('CoinGecko API key set');
 }
 
 // Get the API key from memory, not from the codebase
@@ -26,8 +26,6 @@ const getApiKey = (): string => {
 };
 
 export async function fetchCoinRates(): Promise<CoinRates> {
-  console.log('fetchCoinRates called, current initialRates:', initialRates);
-  
   // First, check if we already have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
   if (!isCacheStale()) {
@@ -41,9 +39,7 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     const activePromise = getActiveFetchPromise();
     if (activePromise) {
       try {
-        const result = await activePromise;
-        console.log('Got result from active promise:', result);
-        return result;
+        return await activePromise;
       } catch (error) {
         console.error('Error while waiting for active fetch:', error);
         // If the active fetch fails, we'll continue with our own fetch attempt
@@ -78,7 +74,6 @@ async function performFetch(): Promise<CoinRates> {
     // Add API key if available
     const urlWithKey = apiKeyToUse ? `${apiUrl}&x_cg_demo_api_key=${apiKeyToUse}` : apiUrl;
     
-    console.log('Fetching fresh Bitcoin rates from API...');
     const response = await fetch(
       urlWithKey,
       {
@@ -119,13 +114,11 @@ async function performFetch(): Promise<CoinRates> {
     };
     
     // Always update both cached rates and initialRates with fresh data
-    console.log('Before updating rates - initialRates:', { ...initialRates });
     updateCachedRates(newRates);
     updateInitialRates(newRates);
-    console.log('After updating rates - initialRates:', { ...initialRates });
     
     console.log('Successfully updated rates with fresh data');
-    return { ...newRates }; // Return a fresh copy
+    return newRates;
   } catch (error) {
     console.error('Error fetching Bitcoin rates:', error);
     throw error; // Re-throw to be handled by the calling function
@@ -138,22 +131,14 @@ function getLatestAvailableRates(): CoinRates {
   
   // Always use the most recent data we have
   if (cachedRates.lastUpdated) {
-    console.log('Using cached rates as fallback:', cachedRates);
     // If cached rates exist and are newer than initialRates, update initialRates
     if (!initialRates.lastUpdated || 
         new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated)) {
-      console.log('Cached rates are newer than initialRates, updating initialRates');
       updateInitialRates(cachedRates);
     }
-    return { ...cachedRates };
+    return cachedRates;
   }
   
   // Fallback to initial rates if no cached rates
-  console.log('No cached rates available, using initialRates:', initialRates);
   return { ...initialRates };
-}
-
-// Export a debug function to verify initialRates state
-export function logInitialRatesState(): void {
-  console.log('Current initialRates state:', { ...initialRates });
 }
