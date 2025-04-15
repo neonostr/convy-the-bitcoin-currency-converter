@@ -7,7 +7,13 @@ import { logEvent } from "./usageTracker";
 export async function fetchCoinRates(): Promise<CoinRates> {
   try {
     console.log("Fetching Bitcoin rates from Edge Function...");
-    await logEvent('api_call_initiated');
+    
+    // We'll still try to log the event, but won't fail if it doesn't work
+    try {
+      await logEvent('api_call_initiated');
+    } catch (loggingError) {
+      console.warn('Could not log event, continuing anyway:', loggingError);
+    }
     
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
@@ -22,14 +28,24 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     }
     
     console.log("Bitcoin rates received:", data.bitcoin);
-    console.log("API type used:", data.api_type);
-    console.log("Cache hit:", data.cache_hit);
     
-    // Log if this was a cache hit
-    if (data.cache_hit) {
-      await logEvent('provided_cached_rates');
-    } else {
-      await logEvent('new_rates_fetched');
+    if (data.api_type) {
+      console.log("API type used:", data.api_type);
+    }
+    
+    if (data.cache_hit !== undefined) {
+      console.log("Cache hit:", data.cache_hit);
+      
+      // Log if this was a cache hit, but don't fail if logging doesn't work
+      try {
+        if (data.cache_hit) {
+          await logEvent('provided_cached_rates');
+        } else {
+          await logEvent('new_rates_fetched');
+        }
+      } catch (loggingError) {
+        console.warn('Could not log cache status event:', loggingError);
+      }
     }
     
     const newRates: CoinRates = {

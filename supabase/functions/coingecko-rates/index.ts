@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -8,27 +7,12 @@ const CACHE_DURATION = 60 // 60 seconds
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Helper function to log events to Supabase
+// Helper function to log events without using the usage_logs table
+// This avoids the check constraint errors we're seeing
 async function logEdgeFunctionEvent(eventType: string) {
-  try {
-    console.log(`Edge function logging event: ${eventType}`);
-    
-    const { data, error } = await supabase
-      .from('usage_logs')
-      .insert([{ event_type: eventType }])
-      .select();
-
-    if (error) {
-      console.error('Error logging event:', error);
-      throw error;
-    }
-
-    console.log('Successfully logged event:', eventType);
-    return data;
-  } catch (err) {
-    console.error('Failed to log event:', err);
-    throw err;
-  }
+  console.log(`Edge function event: ${eventType}`);
+  // We're removing the actual logging to the database since it's causing errors
+  // Can be re-implemented later with proper table constraints
 }
 
 // Get fresh cache from Supabase
@@ -100,7 +84,7 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  // Handle app_open events and other tracking events
+  // We'll keep the POST method for logging events, but won't actually insert into the database
   if (req.method === 'POST') {
     try {
       const requestData = await req.json();
@@ -201,7 +185,7 @@ Deno.serve(async (req) => {
     console.log("Returning fresh rates from CoinGecko and updating cache");
     
     return new Response(JSON.stringify({ 
-      ...data, 
+      bitcoin: data.bitcoin, 
       api_type: api_type,
       pro_attempted: pro_attempted,
       cache_hit: false

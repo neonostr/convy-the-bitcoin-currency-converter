@@ -42,13 +42,21 @@ export const useRates = () => {
         duration: 3000,
       });
       
-      await logEvent('refresh_rates_throttled');
+      try {
+        await logEvent('refresh_rates_throttled');
+      } catch (error) {
+        console.warn('Failed to log throttle event:', error);
+      }
       return;
     }
     
     if (forceRefresh) {
       lastManualFetchTimestamp.current = now;
-      await logEvent('manual_refresh_rates');
+      try {
+        await logEvent('manual_refresh_rates');
+      } catch (error) {
+        console.warn('Failed to log manual refresh event:', error);
+      }
     }
     
     setIsRefreshing(true);
@@ -68,7 +76,11 @@ export const useRates = () => {
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Failed to fetch rates:', error);
-        await logEvent('conversion_fetch_error');
+        try {
+          await logEvent('conversion_fetch_error');
+        } catch (loggingError) {
+          console.warn('Failed to log fetch error event:', loggingError);
+        }
         
         if (forceRefresh) {
           toast({
