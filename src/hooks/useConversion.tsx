@@ -1,53 +1,97 @@
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Currency, CoinRates } from '@/types/currency.types';
-import { fetchCoinRates } from '@/services/coinGeckoApi';
+import { fetchCoinRates, logInitialRatesState } from '@/services/coinGeckoApi';
 import { convertCurrency, getCachedRates, isCacheStale, initialRates } from '@/services/ratesService';
 import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
 
 export const useConversion = () => {
-  const [amount, setAmount] = useState<string>('1'); // Initialize with '1'
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc'); // Initialize with 'btc'
+  const [amount, setAmount] = useState<string>('1');
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
   const [rates, setRates] = useState<CoinRates>({ ...initialRates });
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const { toast } = useToast();
   const { settings } = useSettings();
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialFetch = useRef<boolean>(true);
 
-  // Clear any existing debounce timer on unmount
+  // Debug log the initial rates when component mounts
   useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+    console.log('useConversion hook initialized with initialRates:', { ...initialRates });
+    logInitialRatesState();
+  }, []);
+
+  // Fetch rates initially when component mounts
+  useEffect(() => {
+    fetchRates();
+  }, []);
+
+  // Update conversions when amount, selected currency, or rates change
+  useEffect(() => {
+    if (rates && amount !== '') {
+      const normalizedAmount = amount.replace(',', '.');
+      const numericAmount = parseFloat(normalizedAmount);
+      
+      if (!isNaN(numericAmount)) {
+        const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
+        setConversions(newConversions);
+      } else {
+        setConversions({});
       }
-    };
-  }, []);
+    } else {
+      // Clear conversions when amount is empty
+      setConversions({});
+    }
+  }, [amount, selectedCurrency, rates]);
 
-  // Initialize the converter with 1 BTC on first load
+  // Update conversions when settings change (to reflect any changes in display currencies)
   useEffect(() => {
-    handleInputChange('1');
-  }, []);
+    if (rates && amount !== '') {
+      const normalizedAmount = amount.replace(',', '.');
+      const numericAmount = parseFloat(normalizedAmount);
+      
+      if (!isNaN(numericAmount)) {
+        const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
+        setConversions(newConversions);
+      } else {
+        setConversions({});
+      }
+    } else {
+      // Clear conversions when amount is empty
+      setConversions({});
+    }
+  }, [settings]);
 
   const fetchRates = async () => {
-    if (!isCacheStale() && rates !== null) {
-      console.log('Using cached rates (< 60s old)');
+    // For initial fetch, always try to get fresh data
+    // For subsequent fetches, only fetch if the cache is stale (> 60s)
+    if (!isInitialFetch.current && !isCacheStale() && rates !== null) {
+      console.log('Skipping API call - using cached rates (< 60s old)');
       return;
     }
     
     setIsRefreshing(true);
     try {
+      console.log('Fetching new rates...');
       const newRates = await fetchCoinRates();
+      console.log('Received new rates:', newRates);
+      
+      // Important: Set the component state with a NEW object to trigger re-render
       setRates({ ...newRates });
       
-      // Recalculate conversions with new rates if there's a valid amount
-      const numericAmount = parseFloat(amount);
+      isInitialFetch.current = false;
+      
+      // Recalculate conversions with new rates
+      const normalizedAmount = amount.replace(',', '.');
+      const numericAmount = parseFloat(normalizedAmount);
+      
       if (!isNaN(numericAmount)) {
         const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
         setConversions(newConversions);
       }
       
+      // Only show a toast notification if we actually fetched fresh data from the API
       if (isCacheStale()) {
         toast({
           title: "Currency Rates Updated",
@@ -56,8 +100,14 @@ export const useConversion = () => {
         });
       }
       
+      // Log the current state of initialRates after the fetch
+      console.log('initialRates after fetch:', { ...initialRates });
+      logInitialRatesState();
+      
     } catch (error) {
       console.error('Failed to fetch rates:', error);
+      
+      // If API fails but we have cached rates, use those
       const cachedRates = getCachedRates();
       setRates({ ...cachedRates });
       
@@ -72,41 +122,37 @@ export const useConversion = () => {
     }
   };
 
-  const handleCurrencySelect = useCallback((currency: Currency) => {
-    setSelectedCurrency(currency);
-    
-    // Clear input and reset conversions
-    setAmount('');
+  const handleCurrencySelect = (currency: Currency) => {
+    // Clear conversions immediately when currency changes
     setConversions({});
+    
+    // Clear the amount field
+    setAmount('');
+    
+    // Set the new selected currency
+    setSelectedCurrency(currency);
     
     // Only update rates if cache is stale
     if (isCacheStale()) {
       fetchRates();
     }
-  }, []);
+  };
 
-  const handleInputChange = useCallback((value: string) => {
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
+  const handleInputChange = (value: string) => {
     if (/^-?\d*([.,]\d*)?$/.test(value)) {
       setAmount(value);
       
-      // Convert immediately for UI feedback
-      const numericAmount = parseFloat(value) || 0;
-      const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
-      setConversions(newConversions);
+      // Only fetch new rates if value is not empty and the cache is stale
+      if (value !== '' && isCacheStale()) {
+        fetchRates();
+      }
       
-      // Set up debounced rate fetch (15 seconds)
-      debounceTimerRef.current = setTimeout(() => {
-        if (value !== '' && isCacheStale()) {
-          fetchRates();
-        }
-      }, 15000);
+      // If value is empty, reset conversions
+      if (value === '') {
+        setConversions({});
+      }
     }
-  }, [selectedCurrency, rates]);
+  };
 
   return {
     amount,
@@ -117,6 +163,6 @@ export const useConversion = () => {
     isRefreshing,
     handleCurrencySelect,
     handleInputChange,
-    refreshRates: fetchRates,
+    refreshRates: fetchRates, // Export the fetchRates function to allow manual refresh
   };
 };

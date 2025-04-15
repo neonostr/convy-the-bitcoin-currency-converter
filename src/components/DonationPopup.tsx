@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,6 @@ import PaymentQR from './donation/PaymentQR';
 import ThankYouMessage from './donation/ThankYouMessage';
 
 const DonationPopup: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState<number>(1000);
   const [isSending, setIsSending] = useState<boolean>(false);
   const [invoice, setInvoice] = useState<string>('');
@@ -28,11 +28,8 @@ const DonationPopup: React.FC = () => {
     setIsCopied(false);
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      resetState();
-    }
-    setIsOpen(open);
+  const handleClose = () => {
+    resetState();
   };
 
   const generateQR = async (invoice: string) => {
@@ -94,7 +91,7 @@ const DonationPopup: React.FC = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={(open) => !open && handleClose()}>
       <DialogTrigger asChild>
         <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
           <Coffee className="h-4 w-4 mr-1" />
