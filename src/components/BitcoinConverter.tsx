@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -77,8 +76,8 @@ const BitcoinConverter = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
-      <div className="flex items-center justify-between w-full mb-6">
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />
           <h1 className="text-2xl font-bold">Bitcoin Currency Converter</h1>
@@ -86,7 +85,7 @@ const BitcoinConverter = () => {
         <SettingsMenu />
       </div>
 
-      <div className="w-full mb-6">
+      <div className="mb-6">
         <Input
           ref={inputRef}
           type="text"
