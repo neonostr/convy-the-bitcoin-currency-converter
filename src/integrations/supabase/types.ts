@@ -9,24 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      rate_cache: {
-        Row: {
-          created_at: string
-          id: string
-          rates: Json
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          rates: Json
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          rates?: Json
-        }
-        Relationships: []
-      }
       usage_logs: {
         Row: {
           event_type: string

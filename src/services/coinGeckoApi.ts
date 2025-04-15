@@ -1,72 +1,110 @@
 
 import { CoinRates } from "@/types/currency.types";
-import { DEFAULT_INITIAL_RATES } from "./cacheManager";
+import { 
+  initialRates, 
+  updateCachedRates, 
+  getCachedRates,
+  isCacheStale, 
+  updateInitialRates, 
+  isFetching, 
+  setFetchingState,
+  getActiveFetchPromise
+} from "./ratesService";
 import { supabase } from "@/integrations/supabase/client";
-import { logEvent } from "./usageTracker";
 
 export async function fetchCoinRates(): Promise<CoinRates> {
-  try {
-    console.log("Fetching Bitcoin rates from Edge Function...");
-    
-    // We'll still try to log the event, but won't fail if it doesn't work
-    try {
-      await logEvent('api_call_initiated');
-    } catch (loggingError) {
-      console.warn('Could not log event, continuing anyway:', loggingError);
+  // First, check if we have valid rates that are fresh enough (less than 60 seconds old)
+  const cachedRates = getCachedRates();
+  if (!isCacheStale()) {
+    console.log('Using fresh cached rates (< 60s old)');
+    return { ...cachedRates };
+  }
+  
+  // Check if another request is already fetching fresh data
+  if (isFetching()) {
+    console.log('Another request is already fetching data, waiting for that result');
+    const activePromise = getActiveFetchPromise();
+    if (activePromise) {
+      try {
+        return await activePromise;
+      } catch (error) {
+        console.error('Error while waiting for active fetch:', error);
+      }
     }
+  }
+  
+  // Set up the fetch promise that multiple concurrent requests can use
+  const fetchPromise = performFetch();
+  setFetchingState(true, fetchPromise);
+  
+  try {
+    const result = await fetchPromise;
+    setFetchingState(false, null);
+    return result;
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    setFetchingState(false, null);
+    return getLatestAvailableRates();
+  }
+}
+
+async function performFetch(): Promise<CoinRates> {
+  try {
+    console.log("Fetching fresh Bitcoin rates from API...");
     
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
     if (error) {
-      console.error('Error invoking edge function:', error);
       throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
-    if (!data || !data.bitcoin) {
-      console.error('Invalid response data:', data);
-      throw new Error('Invalid response from API');
+    if (!data.bitcoin) {
+      throw new Error('Invalid response from CoinGecko API');
     }
     
-    console.log("Bitcoin rates received:", data.bitcoin);
-    
-    if (data.api_type) {
-      console.log("API type used:", data.api_type);
-    }
-    
-    if (data.cache_hit !== undefined) {
-      console.log("Cache hit:", data.cache_hit);
-      
-      // Log if this was a cache hit, but don't fail if logging doesn't work
-      try {
-        if (data.cache_hit) {
-          await logEvent('provided_cached_rates');
-        } else {
-          await logEvent('new_rates_fetched');
-        }
-      } catch (loggingError) {
-        console.warn('Could not log cache status event:', loggingError);
-      }
-    }
+    console.log("Bitcoin rates from API:", data.bitcoin);
     
     const newRates: CoinRates = {
       btc: 1,
       sats: 100000000,
-      usd: data.bitcoin.usd || DEFAULT_INITIAL_RATES.usd,
-      eur: data.bitcoin.eur || DEFAULT_INITIAL_RATES.eur,
-      chf: data.bitcoin.chf || DEFAULT_INITIAL_RATES.chf,
-      cny: data.bitcoin.cny || DEFAULT_INITIAL_RATES.cny,
-      jpy: data.bitcoin.jpy || DEFAULT_INITIAL_RATES.jpy,
-      gbp: data.bitcoin.gbp || DEFAULT_INITIAL_RATES.gbp,
-      aud: data.bitcoin.aud || DEFAULT_INITIAL_RATES.aud,
-      cad: data.bitcoin.cad || DEFAULT_INITIAL_RATES.cad,
-      inr: data.bitcoin.inr || DEFAULT_INITIAL_RATES.inr,
-      rub: data.bitcoin.rub || DEFAULT_INITIAL_RATES.rub,
+      usd: data.bitcoin.usd || initialRates.usd,
+      eur: data.bitcoin.eur || initialRates.eur,
+      chf: data.bitcoin.chf || initialRates.chf,
+      cny: data.bitcoin.cny || initialRates.cny,
+      jpy: data.bitcoin.jpy || initialRates.jpy,
+      gbp: data.bitcoin.gbp || initialRates.gbp,
+      aud: data.bitcoin.aud || initialRates.aud,
+      cad: data.bitcoin.cad || initialRates.cad,
+      inr: data.bitcoin.inr || initialRates.inr,
+      rub: data.bitcoin.rub || initialRates.rub,
       lastUpdated: new Date()
     };
-
+    
+    updateCachedRates(newRates);
+    updateInitialRates(newRates);
+    
+    console.log('Successfully updated rates with fresh data');
     return newRates;
   } catch (error) {
     console.error('Error fetching Bitcoin rates:', error);
     throw error;
   }
+}
+
+function getLatestAvailableRates(): CoinRates {
+  const cachedRates = getCachedRates();
+  console.log('Using cached rates as fallback:', cachedRates);
+  
+  // Always use the most recent data we have
+  if (cachedRates.lastUpdated) {
+    // If cached rates exist and are newer than initialRates, update initialRates
+    if (!initialRates.lastUpdated || 
+        new Date(cachedRates.lastUpdated) > new Date(initialRates.lastUpdated)) {
+      updateInitialRates(cachedRates);
+    }
+    return cachedRates;
+  }
+  
+  // Fallback to initial rates if no cached rates
+  return { ...initialRates };
 }

@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +11,7 @@ import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
+import { supabase } from "@/integrations/supabase/client";
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -27,8 +29,24 @@ const BitcoinConverter = () => {
   } = useConversion();
 
   useEffect(() => {
-    // We no longer log app usage from the frontend due to RLS restrictions
-    // This will be handled by the edge function instead
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
+                 (window.navigator as any).standalone === true;
+    
+    const logAppUsage = async () => {
+      try {
+        await supabase
+          .from('usage_logs')
+          .insert([
+            { 
+              event_type: isPwa ? 'app_open_pwa' : 'app_open_browser'
+            }
+          ]);
+      } catch (error) {
+        console.error('Failed to log app usage:', error);
+      }
+    };
+    
+    logAppUsage();
   }, []);
 
   const { displayCurrencies } = settings;
