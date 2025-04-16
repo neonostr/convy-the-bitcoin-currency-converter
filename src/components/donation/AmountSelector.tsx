@@ -68,7 +68,7 @@ const AmountSelector = ({
             type="button"
             variant={amount === value ? "default" : "outline"}
             size="sm"
-            className="flex-1"
+            className={`flex-1 ${amount === value ? "" : "focus:ring-0 focus:ring-offset-0"}`}
             onClick={() => {
               onAmountChange(value);
               onEditingChange(false);
