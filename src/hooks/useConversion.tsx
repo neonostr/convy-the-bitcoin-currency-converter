@@ -6,8 +6,18 @@ import { useSettings } from './useSettings';
 import { formatForCopy } from '@/utils/formatUtils';
 import { useToast } from './use-toast';
 
+// Base interface for currency rates without index signature
 interface Rates {
-  [currency: string]: number;
+  usd: number;
+  eur: number;
+  chf: number;
+  gbp: number;
+  cny: number;
+  jpy: number;
+  aud: number;
+  cad: number;
+  inr: number;
+  rub: number;
 }
 
 // Extended interface that includes lastUpdated
@@ -99,23 +109,23 @@ export const useConversion = () => {
       newConversions['sats'] = numAmount * 100000000;
       Object.keys(rates).forEach(currency => {
         if (currency !== 'lastUpdated') {
-          newConversions[currency] = numAmount * rates[currency as keyof typeof rates];
+          newConversions[currency] = numAmount * rates[currency as keyof Rates];
         }
       });
     } else if (selectedCurrency === 'sats') {
       newConversions['btc'] = numAmount / 100000000;
       Object.keys(rates).forEach(currency => {
         if (currency !== 'lastUpdated') {
-          newConversions[currency] = (numAmount / 100000000) * rates[currency as keyof typeof rates];
+          newConversions[currency] = (numAmount / 100000000) * rates[currency as keyof Rates];
         }
       });
     }
     else {
-      newConversions['btc'] = numAmount / rates[selectedCurrency];
-      newConversions['sats'] = (numAmount / rates[selectedCurrency]) * 100000000;
+      newConversions['btc'] = numAmount / rates[selectedCurrency as keyof Rates];
+      newConversions['sats'] = (numAmount / rates[selectedCurrency as keyof Rates]) * 100000000;
       Object.keys(rates).forEach(currency => {
         if (currency !== 'lastUpdated' && currency !== selectedCurrency) {
-          newConversions[currency] = numAmount / rates[selectedCurrency] * rates[currency as keyof typeof rates];
+          newConversions[currency] = numAmount / rates[selectedCurrency as keyof Rates] * rates[currency as keyof Rates];
         }
       });
     }
