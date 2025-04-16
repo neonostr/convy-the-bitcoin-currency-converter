@@ -10,7 +10,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+    <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
       <BitcoinConverter />
     </div>
   );

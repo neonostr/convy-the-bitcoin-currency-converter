@@ -19,6 +19,7 @@ const DonationPopup: React.FC = () => {
   const [qrData, setQrData] = useState<string>('');
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
@@ -39,8 +40,8 @@ const DonationPopup: React.FC = () => {
     setIsSending(false);
     setPaymentConfirmed(false);
     setIsCopied(false);
+    setIsEditing(false);
     
-    // Clear any active polling interval
     if (pollInterval) {
       clearInterval(pollInterval);
       setPollInterval(null);
@@ -139,7 +140,7 @@ const DonationPopup: React.FC = () => {
           <span>Zap me a coffee</span>
         </a>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Coffee className="h-5 w-5 text-bitcoin-orange" />
@@ -161,6 +162,8 @@ const DonationPopup: React.FC = () => {
                 amount={amount}
                 onAmountChange={setAmount}
                 disabled={isSending}
+                isEditing={isEditing}
+                onEditingChange={setIsEditing}
               />
               <Button 
                 onClick={handleZap} 
