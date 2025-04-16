@@ -5,6 +5,8 @@ import { Currency } from '@/types/currency.types';
 import { useSettings } from './useSettings';
 import { formatForCopy } from '@/utils/formatUtils';
 import { useToast } from './use-toast';
+import { logEvent } from '@/services/eventLogger';
+import { trackApiCall } from '@/services/usageTracker';
 
 // Base interface for currency rates without index signature
 interface Rates {
@@ -33,6 +35,9 @@ const fetchRates = async (): Promise<RatesWithDate> => {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const data = await response.json();
+
+  // Track API call
+  trackApiCall();
 
   // Transform the data to match the Rates interface
   const rates: RatesWithDate = {
@@ -140,6 +145,10 @@ export const useConversion = () => {
   // Effect for handling rate updates
   useEffect(() => {
     if (rates) {
+      // Log the rate update event to Supabase
+      const apiType = rates.usd > 0 ? 'coingecko_api_public_success' : 'cached_data_provided';
+      logEvent(apiType);
+      
       toast({
         title: "Currency Rates Updated",
         description: "Auto-updates each minute when activity is detected.",

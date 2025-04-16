@@ -11,12 +11,15 @@ import {
   getActiveFetchPromise
 } from "./ratesService";
 import { supabase } from "@/integrations/supabase/client";
+import { logEvent } from "./eventLogger";
+import { trackApiCall } from "./usageTracker";
 
 export async function fetchCoinRates(): Promise<CoinRates> {
   // First, check if we have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
+    logEvent('cached_data_provided');
     return { ...cachedRates };
   }
   
@@ -52,15 +55,23 @@ async function performFetch(): Promise<CoinRates> {
   try {
     console.log("Fetching fresh Bitcoin rates from API...");
     
+    // Track this API call
+    trackApiCall();
+    
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
     if (error) {
+      logEvent('coingecko_api_public_failure');
       throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
     if (!data.bitcoin) {
+      logEvent('coingecko_api_public_failure');
       throw new Error('Invalid response from API');
     }
+    
+    // Log successful API call
+    logEvent('coingecko_api_public_success');
     
     console.log("Bitcoin rates from API:", data.bitcoin);
     
@@ -94,6 +105,9 @@ async function performFetch(): Promise<CoinRates> {
 function getLatestAvailableRates(): CoinRates {
   const cachedRates = getCachedRates();
   console.log('Using cached rates as fallback:', cachedRates);
+  
+  // Log that we're using cached data
+  logEvent('cached_data_provided');
   
   // Always use the most recent data we have
   if (cachedRates.lastUpdated) {
