@@ -70,11 +70,11 @@ async function updateCache(data: any) {
 // Log when cached data is used instead of making an API call
 async function logCachedDataProvided() {
   try {
-    console.log('Logging cached_data_provided event');
+    console.log('Logging cached_data_provided_coingecko event');
     await supabase
       .from('usage_logs')
       .insert([{ 
-        event_type: 'cached_data_provided',
+        event_type: 'cached_data_provided_coingecko',
         timestamp: new Date().toISOString()
       }]);
     console.log('Cached data usage logged successfully');
@@ -98,7 +98,7 @@ export async function fetchFromCoinGeckoPublic() {
     const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub');
     
     if (!response.ok) {
-      await logApiError('coingecko_api_public_failure', response.status);
+      await logApiError('coingecko_public', response.status);
       throw new Error(`CoinGecko public API failed with status: ${response.status}`);
     }
     
@@ -129,7 +129,7 @@ export async function fetchFromCoinGeckoWithKey() {
   try {
     const coinGeckoApiKey = Deno.env.get('COINGECKO_API_KEY');
     
-    if (!coinGeckoApiKey) {
+    if (!coinGeckoApiKey || coinGeckoApiKey.trim() === '') {
       console.error('COINGECKO_API_KEY is not set or empty');
       throw new Error('COINGECKO_API_KEY is not set or empty');
     }
@@ -138,7 +138,10 @@ export async function fetchFromCoinGeckoWithKey() {
     // Adding detailed logging for debugging API key issues
     console.log(`Using API key (first 4 chars): ${coinGeckoApiKey.substring(0, 4)}...`);
     
-    const response = await fetch('https://pro-api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub', {
+    const url = 'https://pro-api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub';
+    console.log(`Making request to: ${url}`);
+    
+    const response = await fetch(url, {
       headers: {
         'x-cg-pro-api-key': coinGeckoApiKey,
         'Content-Type': 'application/json'
@@ -153,7 +156,7 @@ export async function fetchFromCoinGeckoWithKey() {
       const errorText = await response.text();
       console.error(`CoinGecko API with key error response: ${errorText}`);
       
-      await logApiError('coingecko_api_with_key_failure', response.status);
+      await logApiError('coingecko_api_key', response.status);
       throw new Error(`CoinGecko API with key failed with status: ${response.status}, message: ${errorText}`);
     }
     
@@ -174,7 +177,7 @@ export async function fetchFromCoinGeckoWithKey() {
 // Log API errors
 async function logApiError(baseEventType: string, errorCode: number) {
   try {
-    const eventType = `${baseEventType}_${errorCode}`;
+    const eventType = `${baseEventType}_failure_${errorCode}`;
     console.log(`Logging API error event: ${eventType}`);
     
     await supabase

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
@@ -15,12 +14,12 @@ export const useConversion = () => {
   const { settings } = useSettings();
   const { toast } = useToast();
   const lastToastTime = useRef<number>(0);
-  const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts (increased from 10s)
+  const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts
   
   const { data: rates, refetch } = useQuery({
     queryKey: ['rates'],
     queryFn: fetchCoinRates,
-    refetchInterval: 120000, // Auto-refresh every 2 minutes (increased from 1 minute)
+    refetchInterval: 60000, // Back to 60 seconds as requested (reduced from 120s)
     staleTime: 60000, // Consider data stale after 1 minute
     refetchOnWindowFocus: false, // Don't refetch on window focus to reduce API calls
     meta: {
@@ -108,7 +107,7 @@ export const useConversion = () => {
       if (now - lastToastTime.current > MIN_TOAST_INTERVAL) {
         toast({
           title: "Currency Rates Updated",
-          description: "Auto-updates every 2 minutes when activity is detected.",
+          description: "Auto-updates every 60 seconds when activity is detected.",
           duration: 3000,
         });
         lastToastTime.current = now;

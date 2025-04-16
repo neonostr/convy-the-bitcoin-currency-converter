@@ -8,7 +8,7 @@ import {
   fetchFromCryptoComparePublic, 
   fetchFromCryptoCompareWithKey 
 } from '../_shared/providers/cryptocompare.ts'
-import { logApiCall } from '../_shared/logging.ts'
+import { logApiCall, logCacheHit } from '../_shared/logging.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 
 console.log("Coin Gecko Rates Edge Function Initialized")
@@ -36,39 +36,9 @@ serve(async (req) => {
       })
     }
     
-    // Primary Data Source: CoinGecko with API key
-    const coinGeckoApiKey = Deno.env.get('COINGECKO_API_KEY')
-    
-    if (coinGeckoApiKey && coinGeckoApiKey.trim() !== '') {
-      try {
-        console.log("Trying CoinGecko with API key...")
-        const { data, fromCache } = await fetchFromCoinGeckoWithKey()
-        
-        // Log the API call event if it was a fresh fetch (not from cache)
-        if (!fromCache) {
-          console.log("Logging fresh API call to CoinGecko with API key")
-          await logApiCall('coingecko_api_key', data)
-        } else {
-          console.log("Using cached data from CoinGecko with API key")
-          // This should be logged in the provider, but log it here too for redundancy
-          await logCacheHit('coingecko');
-        }
-        
-        return new Response(JSON.stringify(data), { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
-        })
-      } catch (error) {
-        console.error("CoinGecko API key fetch failed:", error.message)
-        // Continue to fallback methods
-      }
-    } else {
-      console.log("No CoinGecko API key set or key is empty, skipping API key method")
-    }
-    
-    // Fallback 1: CoinGecko Public API
+    // Primary Method: Try CoinGecko public API first
     try {
-      console.log("Trying CoinGecko public API...")
+      console.log("Trying CoinGecko public API as primary method...")
       const { data, fromCache } = await fetchFromCoinGeckoPublic()
       
       // Log the API call event if it was a fresh fetch (not from cache)
@@ -90,12 +60,35 @@ serve(async (req) => {
       // Continue to next fallback
     }
     
+    // Fallback 1: CryptoCompare public API (try this before using API keys)
+    try {
+      console.log("Trying CryptoCompare public API (fallback 1)...")
+      const { data, fromCache } = await fetchFromCryptoComparePublic()
+      
+      // Log the API call event if it was a fresh fetch (not from cache)
+      if (!fromCache) {
+        console.log("Logging fresh API call to CryptoCompare public API")
+        await logApiCall('cryptocompare_public', data)
+      } else {
+        console.log("Using cached data from CryptoCompare public API")
+        await logCacheHit('cryptocompare');
+      }
+      
+      return new Response(JSON.stringify(data), { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      })
+    } catch (error) {
+      console.error("CryptoCompare public API failed:", error.message)
+      // Continue to next fallback
+    }
+    
     // Fallback 2: CryptoCompare with API key
     const cryptoCompareApiKey = Deno.env.get('CRYPTOCOMPARE_API_KEY')
     
     if (cryptoCompareApiKey && cryptoCompareApiKey.trim() !== '') {
       try {
-        console.log("Trying CryptoCompare with API key...")
+        console.log("Trying CryptoCompare with API key (fallback 2)...")
         const { data, fromCache } = await fetchFromCryptoCompareWithKey()
         
         // Log the API call event if it was a fresh fetch (not from cache)
@@ -119,27 +112,35 @@ serve(async (req) => {
       console.log("No CryptoCompare API key set or key is empty, skipping API key method")
     }
     
-    // Final Fallback: CryptoCompare Public API
-    try {
-      console.log("Trying CryptoCompare public API (final fallback)...")
-      const { data, fromCache } = await fetchFromCryptoComparePublic()
-      
-      // Log the API call event if it was a fresh fetch (not from cache)
-      if (!fromCache) {
-        console.log("Logging fresh API call to CryptoCompare public API")
-        await logApiCall('cryptocompare_public', data)
-      } else {
-        console.log("Using cached data from CryptoCompare public API")
-        await logCacheHit('cryptocompare');
+    // Final Fallback 3: CoinGecko with API key (use as last resort due to 404 issues)
+    const coinGeckoApiKey = Deno.env.get('COINGECKO_API_KEY')
+    
+    if (coinGeckoApiKey && coinGeckoApiKey.trim() !== '') {
+      try {
+        console.log("Trying CoinGecko with API key (final fallback)...")
+        const { data, fromCache } = await fetchFromCoinGeckoWithKey()
+        
+        // Log the API call event if it was a fresh fetch (not from cache)
+        if (!fromCache) {
+          console.log("Logging fresh API call to CoinGecko with API key")
+          await logApiCall('coingecko_api_key', data)
+        } else {
+          console.log("Using cached data from CoinGecko with API key")
+          // This should be logged in the provider, but log it here too for redundancy
+          await logCacheHit('coingecko');
+        }
+        
+        return new Response(JSON.stringify(data), { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        })
+      } catch (error) {
+        console.error("CoinGecko API key fetch failed:", error.message)
+        throw error
       }
-      
-      return new Response(JSON.stringify(data), { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      })
-    } catch (error) {
-      console.error("All API providers failed:", error.message)
-      throw error
+    } else {
+      console.log("No CoinGecko API key set or key is empty, skipping API key method")
+      throw new Error("All API providers failed and no CoinGecko API key available")
     }
     
   } catch (error) {
@@ -161,15 +162,18 @@ async function logCacheHit(provider: string) {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    console.log(`Logging cached_data_provided event for ${provider}`);
+    // Use more specific event type for better tracking
+    const eventType = `cached_data_provided_${provider}`;
+    console.log(`Logging cache hit event: ${eventType}`);
+    
     await supabase
       .from('usage_logs')
       .insert([{ 
-        event_type: 'cached_data_provided',
+        event_type: eventType,
         timestamp: new Date().toISOString()
       }]);
       
-    console.log('Cached data usage logged successfully');
+    console.log(`Cached data usage for ${provider} logged successfully`);
   } catch (error) {
     console.error('Failed to log cache hit:', error);
   }

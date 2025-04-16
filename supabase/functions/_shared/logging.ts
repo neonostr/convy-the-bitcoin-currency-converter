@@ -77,20 +77,20 @@ export async function logApiError(source: string, errorCode: number | string) {
     } else {
       console.log(`Successfully logged error event: ${eventType}`);
     }
-  } catch (error) {
-    console.error('Error logging API error:', error);
   }
 }
 
 export async function logCacheHit(provider: string) {
   try {
-    console.log(`Logging cached_data_provided event for ${provider}`);
+    // Make cache log entries more specific so we can track them properly
+    const eventType = `cached_data_provided_${provider}`;
+    console.log(`Logging cache hit event: ${eventType}`);
     
     const { error } = await supabase
       .from('usage_logs')
       .insert([
         { 
-          event_type: 'cached_data_provided',
+          event_type: eventType,
           timestamp: new Date().toISOString()
         }
       ]);
@@ -98,7 +98,7 @@ export async function logCacheHit(provider: string) {
     if (error) {
       console.error('Error logging cache hit:', error);
     } else {
-      console.log('Successfully logged cached_data_provided event');
+      console.log(`Successfully logged cache hit event: ${eventType}`);
     }
   } catch (error) {
     console.error('Error logging cache hit:', error);
