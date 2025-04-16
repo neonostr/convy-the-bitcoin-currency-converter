@@ -14,12 +14,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { logEvent } from "./eventLogger";
 import { trackApiCall } from "./usageTracker";
 
+// Minimum time between API calls (in milliseconds)
+const MIN_API_CALL_INTERVAL = 30000; // 30 seconds
+let lastApiCallTime = 0;
+
 export async function fetchCoinRates(): Promise<CoinRates> {
   // First, check if we have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
     logEvent('cached_data_provided');
+    return { ...cachedRates };
+  }
+  
+  // Rate limiting: Check if we've made a request too recently
+  const now = Date.now();
+  const timeSinceLastCall = now - lastApiCallTime;
+  if (timeSinceLastCall < MIN_API_CALL_INTERVAL) {
+    console.log(`Rate limiting: Using cached rates (last API call was ${Math.round(timeSinceLastCall/1000)}s ago)`);
+    logEvent('cached_data_provided_rate_limited');
+    // Use cached rates even if stale to avoid too many API calls
     return { ...cachedRates };
   }
   
@@ -42,6 +56,7 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   
   try {
     const result = await fetchPromise;
+    lastApiCallTime = Date.now(); // Update last successful API call time
     setFetchingState(false, null);
     return result;
   } catch (error) {
@@ -65,7 +80,7 @@ async function performFetch(): Promise<CoinRates> {
       throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
-    if (!data.bitcoin) {
+    if (!data || !data.bitcoin) {
       logEvent('coingecko_api_public_failure');
       throw new Error('Invalid response from API');
     }

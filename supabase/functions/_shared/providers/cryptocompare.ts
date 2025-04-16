@@ -11,6 +11,7 @@ const CACHE_DURATION = 60000;
 
 async function getFromCache() {
   try {
+    console.log('Trying to fetch data from CryptoCompare cache');
     const { data: cacheData, error: cacheError } = await supabase
       .from('rate_cache')
       .select('*')
@@ -55,11 +56,12 @@ async function updateCache(data: any) {
       
     if (fetchError) {
       console.error('Error checking for existing cache:', fetchError);
+      throw new Error(`Failed to check for existing cache: ${fetchError.message}`);
     }
     
     let result;
     
-    if (existingCache) {
+    if (existingCache && existingCache.id) {
       // Update existing record
       console.log('Updating existing cache record for cryptocompare with ID:', existingCache.id);
       result = await supabase
@@ -89,6 +91,7 @@ async function updateCache(data: any) {
     }
   } catch (error) {
     console.error('Cache update failed:', error);
+    throw new Error(`Failed to update cache: ${error.message}`);
   }
 }
 
