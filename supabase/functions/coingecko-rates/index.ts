@@ -20,6 +20,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Processing request for bitcoin rates...")
+    
     // Primary Data Source: CoinGecko with API key
     const coinGeckoApiKey = Deno.env.get('COINGECKO_API_KEY')
     
@@ -30,7 +32,10 @@ serve(async (req) => {
         
         // Log the API call event if it was a fresh fetch (not from cache)
         if (!fromCache) {
+          console.log("Logging fresh API call to CoinGecko with API key")
           await logApiCall('coingecko_api_key', data)
+        } else {
+          console.log("Using cached data from CoinGecko with API key")
         }
         
         return new Response(JSON.stringify(data), { 
@@ -50,7 +55,10 @@ serve(async (req) => {
       
       // Log the API call event if it was a fresh fetch (not from cache)
       if (!fromCache) {
+        console.log("Logging fresh API call to CoinGecko public API")
         await logApiCall('coingecko_public', data)
+      } else {
+        console.log("Using cached data from CoinGecko public API")
       }
       
       return new Response(JSON.stringify(data), { 
@@ -72,7 +80,10 @@ serve(async (req) => {
         
         // Log the API call event if it was a fresh fetch (not from cache)
         if (!fromCache) {
+          console.log("Logging fresh API call to CryptoCompare with API key")
           await logApiCall('cryptocompare_api_key', data)
+        } else {
+          console.log("Using cached data from CryptoCompare with API key")
         }
         
         return new Response(JSON.stringify(data), { 
@@ -92,7 +103,10 @@ serve(async (req) => {
       
       // Log the API call event if it was a fresh fetch (not from cache)
       if (!fromCache) {
+        console.log("Logging fresh API call to CryptoCompare public API")
         await logApiCall('cryptocompare_public', data)
+      } else {
+        console.log("Using cached data from CryptoCompare public API")
       }
       
       return new Response(JSON.stringify(data), { 

@@ -16,7 +16,7 @@ async function getFromCache() {
       .eq('provider', 'coingecko')
       .order('updated_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (cacheError) {
       console.error('Cache fetch error:', cacheError);
@@ -31,6 +31,8 @@ async function getFromCache() {
         return cacheData.rates;
       }
       console.log('Cache is stale, age:', Math.round(cacheAge / 1000), 'seconds');
+    } else {
+      console.log('No cache data found for coingecko');
     }
     return null;
   } catch (error) {
@@ -41,9 +43,9 @@ async function getFromCache() {
 
 async function updateCache(data: any) {
   try {
-    console.log('Attempting to update rate_cache with new data:', data);
+    console.log('Updating rate_cache with new data');
     
-    // First check if an entry already exists
+    // Check if an entry already exists
     const { data: existingCache, error: fetchError } = await supabase
       .from('rate_cache')
       .select('id')
@@ -58,15 +60,17 @@ async function updateCache(data: any) {
     
     if (existingCache) {
       // Update existing record
+      console.log('Updating existing cache record for coingecko with ID:', existingCache.id);
       result = await supabase
         .from('rate_cache')
         .update({
           rates: data,
           updated_at: new Date().toISOString()
         })
-        .eq('provider', 'coingecko');
+        .eq('id', existingCache.id);
     } else {
       // Insert new record
+      console.log('Creating new cache record for coingecko');
       result = await supabase
         .from('rate_cache')
         .insert({
@@ -80,7 +84,7 @@ async function updateCache(data: any) {
       console.error('Cache update error:', result.error);
       throw new Error(`Cache update failed: ${result.error.message}`);
     } else {
-      console.log('Cache updated successfully');
+      console.log('Cache updated successfully for coingecko');
     }
   } catch (error) {
     console.error('Cache update failed:', error);
@@ -106,8 +110,9 @@ export async function fetchFromCoinGeckoPublic() {
   // First try to get data from cache
   const cachedData = await getFromCache();
   if (cachedData) {
-    // Log the cache hit with the new name
+    // Log the cache hit
     await logCachedDataProvided();
+    console.log('Using cached data from CoinGecko');
     return { data: cachedData, fromCache: true };
   }
 
@@ -138,8 +143,9 @@ export async function fetchFromCoinGeckoWithKey() {
   // First try to get data from cache
   const cachedData = await getFromCache();
   if (cachedData) {
-    // Log the cache hit with the new name
+    // Log the cache hit
     await logCachedDataProvided();
+    console.log('Using cached data from CoinGecko with API key');
     return { data: cachedData, fromCache: true };
   }
 
@@ -176,7 +182,7 @@ export async function fetchFromCoinGeckoWithKey() {
   }
 }
 
-// Keep only error logging at the provider level
+// Log API errors
 async function logApiError(baseEventType: string, errorCode: number) {
   try {
     const eventType = `${baseEventType}_${errorCode}`;
