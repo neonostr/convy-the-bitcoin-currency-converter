@@ -52,6 +52,9 @@ const DonationPopup: React.FC = () => {
     if (!open) {
       // Reset on close
       resetState();
+    } else {
+      // Ensure editing mode is off when opening the popup
+      setIsEditing(false);
     }
     setIsOpen(open);
   };

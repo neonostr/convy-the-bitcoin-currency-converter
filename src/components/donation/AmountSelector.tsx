@@ -37,19 +37,28 @@ const AmountSelector = ({
         className="relative" 
         onClick={handleClick}
       >
-        <Input
-          id="amount"
-          type="number"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={amount}
-          onChange={(e) => onAmountChange(Number(e.target.value))}
-          onFocus={handleAmountFocus}
-          min={1}
-          className="text-center text-lg font-bold"
-          disabled={disabled}
-          readOnly={!isEditing}
-        />
+        {isEditing ? (
+          <Input
+            id="amount"
+            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={amount}
+            onChange={(e) => onAmountChange(Number(e.target.value))}
+            onFocus={handleAmountFocus}
+            min={1}
+            className="text-center text-lg font-bold"
+            disabled={disabled}
+            autoFocus
+          />
+        ) : (
+          <div 
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-center text-lg font-bold cursor-pointer"
+            onClick={handleClick}
+          >
+            {amount.toLocaleString()}
+          </div>
+        )}
       </div>
       
       <div className="flex gap-2 mt-2">
