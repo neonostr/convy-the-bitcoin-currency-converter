@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSettings } from '@/hooks/useSettings';
+import { formatCurrency } from '@/utils/formatUtils';
 
 interface AmountSelectorProps {
   amount: number;
@@ -78,7 +79,7 @@ const AmountSelector = ({
             }}
             disabled={disabled}
           >
-            {value.toString()} {/* Display without thousand separators */}
+            {formatCurrency(value, 'sats', settings.decimalSeparator)}
           </Button>
         ))}
       </div>
