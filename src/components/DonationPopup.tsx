@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -49,25 +48,20 @@ const DonationPopup: React.FC = () => {
   };
 
   const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    
     if (!open) {
       // Reset on close
       resetState();
     } else {
-      // Force render with editing mode off when opening
+      // Force editing mode off when opening
       setIsEditing(false);
-      
-      // Small delay to ensure styles are properly applied
-      requestAnimationFrame(() => {
-        setIsOpen(open);
-      });
     }
-    setIsOpen(open);
   };
 
   const handleTriggerClick = () => {
     // Reset state completely when opening the popup
     resetState();
-    setIsOpen(true);
   };
 
   const generateQR = async (invoice: string) => {
