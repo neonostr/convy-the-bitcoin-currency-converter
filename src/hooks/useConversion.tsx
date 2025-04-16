@@ -1,17 +1,35 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency } from '@/types/currency.types';
 import { useSettings } from './useSettings';
 import { formatForCopy } from '@/utils/formatUtils';
+import { useToast } from './use-toast';
 
 interface Rates {
   [currency: string]: number;
+}
+
+// Extended interface that includes lastUpdated
+interface RatesWithDate extends Rates {
   lastUpdated: Date;
 }
 
 const API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,gbp,cny,jpy,aud,cad,inr,rub&include_last_updated_at=true';
 
-const fetchRates = async (): Promise<Rates> => {
+// Helper function to handle toast notifications for rate updates
+const handleRatesUpdate = (rates: RatesWithDate) => {
+  const { toast } = useToast();
+  if (rates) {
+    toast({
+      title: "Currency Rates Updated",
+      description: "Auto-updates each minute when activity is detected.",
+      duration: 3000,
+    });
+  }
+};
+
+const fetchRates = async (): Promise<RatesWithDate> => {
   const response = await fetch(API_URL);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -19,7 +37,7 @@ const fetchRates = async (): Promise<Rates> => {
   const data = await response.json();
 
   // Transform the data to match the Rates interface
-  const rates: Rates = {
+  const rates: RatesWithDate = {
     usd: data.bitcoin.usd,
     eur: data.bitcoin.eur,
     chf: data.bitcoin.chf,
@@ -41,12 +59,16 @@ export const useConversion = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
   const [conversions, setConversions] = useState<Record<string, number>>({});
   const { settings } = useSettings();
+  const { toast } = useToast();
+  
   const { data: rates, refetch } = useQuery({
     queryKey: ['rates'],
     queryFn: fetchRates,
     refetchInterval: 60000, // Auto-refresh every 60 seconds
-    onError: (error) => {
-      console.error("Failed to fetch rates:", error);
+    meta: {
+      onError: (error: Error) => {
+        console.error("Failed to fetch rates:", error);
+      }
     }
   });
 
@@ -77,14 +99,14 @@ export const useConversion = () => {
       newConversions['sats'] = numAmount * 100000000;
       Object.keys(rates).forEach(currency => {
         if (currency !== 'lastUpdated') {
-          newConversions[currency] = numAmount * rates[currency];
+          newConversions[currency] = numAmount * rates[currency as keyof typeof rates];
         }
       });
     } else if (selectedCurrency === 'sats') {
       newConversions['btc'] = numAmount / 100000000;
       Object.keys(rates).forEach(currency => {
         if (currency !== 'lastUpdated') {
-          newConversions[currency] = (numAmount / 100000000) * rates[currency];
+          newConversions[currency] = (numAmount / 100000000) * rates[currency as keyof typeof rates];
         }
       });
     }
@@ -93,7 +115,7 @@ export const useConversion = () => {
       newConversions['sats'] = (numAmount / rates[selectedCurrency]) * 100000000;
       Object.keys(rates).forEach(currency => {
         if (currency !== 'lastUpdated' && currency !== selectedCurrency) {
-          newConversions[currency] = numAmount / rates[selectedCurrency] * rates[currency];
+          newConversions[currency] = numAmount / rates[selectedCurrency] * rates[currency as keyof typeof rates];
         }
       });
     }
@@ -117,21 +139,10 @@ export const useConversion = () => {
     setAmount(sanitizedValue);
   };
 
-  // Update the toast message for currency rates update
-  export const handleRatesUpdate = (rates: Rates, toast: any) => {
-    if (rates) {
-      toast({
-        title: "Currency Rates Updated",
-        description: "Auto-updates each minute when activity is detected.",
-        duration: 3000,
-      });
-    }
-  };
-
+  // Effect for handling rate updates
   useEffect(() => {
     if (rates) {
-      // @ts-ignore
-      handleRatesUpdate(rates, useToast().toast);
+      handleRatesUpdate(rates);
     }
   }, [rates]);
 
