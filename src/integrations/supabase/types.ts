@@ -19,14 +19,14 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          id?: number
+          id?: never
           provider: string
           rates: Json
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          id?: number
+          id?: never
           provider?: string
           rates?: Json
           updated_at?: string | null
