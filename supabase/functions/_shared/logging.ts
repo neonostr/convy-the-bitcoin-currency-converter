@@ -78,7 +78,10 @@ export async function logApiError(source: string, errorCode: number | string) {
       console.log(`Successfully logged error event: ${eventType}`);
     }
   }
-}
+  catch (error) {
+    console.error('Error logging API error:', error);
+  }
+}; // Added the missing semicolon here
 
 export async function logCacheHit(provider: string) {
   try {
