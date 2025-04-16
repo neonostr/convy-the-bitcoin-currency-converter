@@ -27,18 +27,6 @@ interface RatesWithDate extends Rates {
 
 const API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,gbp,cny,jpy,aud,cad,inr,rub&include_last_updated_at=true';
 
-// Helper function to handle toast notifications for rate updates
-const handleRatesUpdate = (rates: RatesWithDate) => {
-  const { toast } = useToast();
-  if (rates) {
-    toast({
-      title: "Currency Rates Updated",
-      description: "Auto-updates each minute when activity is detected.",
-      duration: 3000,
-    });
-  }
-};
-
 const fetchRates = async (): Promise<RatesWithDate> => {
   const response = await fetch(API_URL);
   if (!response.ok) {
@@ -152,9 +140,13 @@ export const useConversion = () => {
   // Effect for handling rate updates
   useEffect(() => {
     if (rates) {
-      handleRatesUpdate(rates);
+      toast({
+        title: "Currency Rates Updated",
+        description: "Auto-updates each minute when activity is detected.",
+        duration: 3000,
+      });
     }
-  }, [rates]);
+  }, [rates, toast]);
 
   return {
     amount,
