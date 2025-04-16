@@ -25,7 +25,8 @@ const BitcoinConverter = () => {
     conversions, 
     setConversions,
     handleCurrencySelect, 
-    handleInputChange 
+    handleInputChange,
+    recordUserActivity 
   } = useConversion();
 
   // Use strict dependency tracking to avoid multiple triggers
@@ -36,12 +37,29 @@ const BitcoinConverter = () => {
       logAppOpen();
       sessionStorage.setItem('app_open_logged', 'true');
     }
-  }, []);
+    
+    // Record user activity when the app is loaded
+    recordUserActivity();
+    
+    // Setup visibility change listener to record activity when app becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        recordUserActivity();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [recordUserActivity]);
 
   const { displayCurrencies } = settings;
 
   const handleInputFocus = () => {
     setAmount('');
+    recordUserActivity();
     // Reset conversions to 0 when input field is focused
     if (rates) {
       const resetConversions: Record<string, number> = {};
@@ -53,6 +71,7 @@ const BitcoinConverter = () => {
   };
 
   const copyToClipboard = (value: string) => {
+    recordUserActivity();
     navigator.clipboard.writeText(value).then(() => {
       toast({
         title: "Copied to clipboard",

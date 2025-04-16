@@ -1,3 +1,4 @@
+
 import { CoinRates } from "@/types/currency.types";
 import { 
   initialRates, 
@@ -14,7 +15,7 @@ import { logEvent } from "./eventLogger";
 import { trackApiCall } from "./usageTracker";
 
 // Minimum time between API calls (in milliseconds)
-const MIN_API_CALL_INTERVAL = 30000; // Back to 30 seconds (reduced from 60s)
+const MIN_API_CALL_INTERVAL = 30000; // 30 seconds minimum between API calls
 let lastApiCallTime = 0;
 
 export async function fetchCoinRates(): Promise<CoinRates> {

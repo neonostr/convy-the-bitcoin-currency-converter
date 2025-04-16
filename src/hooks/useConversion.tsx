@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
@@ -11,23 +12,107 @@ export const useConversion = () => {
   const [amount, setAmount] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
   const [conversions, setConversions] = useState<Record<string, number>>({});
+  const [userActive, setUserActive] = useState<boolean>(true);
   const { settings } = useSettings();
   const { toast } = useToast();
   const lastToastTime = useRef<number>(0);
+  const lastActivityTime = useRef<number>(Date.now());
   const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts
+  
+  // Mark user as active when this hook is first used
+  useEffect(() => {
+    lastActivityTime.current = Date.now();
+    setUserActive(true);
+    
+    // Set up activity monitoring
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'focus', 'visibilitychange'];
+    
+    const handleUserActivity = () => {
+      const now = Date.now();
+      const timeSinceLastActivity = now - lastActivityTime.current;
+      
+      // If it's been a while since the last activity, mark as newly active
+      if (timeSinceLastActivity > 30000) { // 30 seconds of inactivity threshold
+        console.log('User returned after inactivity');
+      }
+      
+      lastActivityTime.current = now;
+      setUserActive(true);
+    };
+    
+    // Add event listeners for user activity
+    activityEvents.forEach(event => {
+      window.addEventListener(event, handleUserActivity);
+    });
+    
+    // Set up visibility change detection
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log('App became visible, marking user as active');
+        handleUserActivity();
+      }
+    });
+    
+    return () => {
+      // Clean up event listeners
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, handleUserActivity);
+      });
+    };
+  }, []);
+  
+  // Function to determine if we should refetch based on activity
+  const shouldRefetch = useCallback(() => {
+    // Only refetch if the user has been active recently (within the last minute)
+    const now = Date.now();
+    const timeSinceLastActivity = now - lastActivityTime.current;
+    
+    // User must be active within the last minute to trigger a refetch
+    const isRecentlyActive = timeSinceLastActivity < 60000;
+    
+    if (!isRecentlyActive) {
+      console.log('Skipping refetch due to user inactivity');
+      return false;
+    }
+    
+    return true;
+  }, []);
   
   const { data: rates, refetch } = useQuery({
     queryKey: ['rates'],
     queryFn: fetchCoinRates,
-    refetchInterval: 60000, // Back to 60 seconds as requested (reduced from 120s)
+    refetchInterval: (data) => shouldRefetch() ? 60000 : false, // Only refetch every 60s if user is active
     staleTime: 60000, // Consider data stale after 1 minute
-    refetchOnWindowFocus: false, // Don't refetch on window focus to reduce API calls
+    refetchOnWindowFocus: (query) => {
+      // When window regains focus, check if user is active and enough time has passed
+      const timeSinceLastFetch = query.state.dataUpdatedAt 
+        ? Date.now() - query.state.dataUpdatedAt 
+        : Infinity;
+      
+      // Only refetch on focus if data is older than 60 seconds and user is active
+      return timeSinceLastFetch > 60000 && shouldRefetch();
+    },
     meta: {
       onError: (error: Error) => {
         console.error("Failed to fetch rates:", error);
       }
     }
   });
+
+  // Register user activity when they change currency or input
+  const recordUserActivity = () => {
+    lastActivityTime.current = Date.now();
+    setUserActive(true);
+    
+    // If it's been more than 60 seconds since the last data update, trigger a refresh
+    if (rates?.lastUpdated) {
+      const timeSinceLastUpdate = Date.now() - new Date(rates.lastUpdated).getTime();
+      if (timeSinceLastUpdate > 60000) {
+        console.log('User activity detected and data is stale, triggering refresh');
+        refetch();
+      }
+    }
+  };
 
   // Load saved currency preference
   useEffect(() => {
@@ -89,13 +174,14 @@ export const useConversion = () => {
 
   const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency);
+    recordUserActivity();
     convert();
   };
 
   const handleInputChange = (value: string) => {
     // Allow only numbers and a single decimal separator
     const sanitizedValue = value.replace(/[^0-9,.]/g, '').replace(/(\..*)\./g, '$1').replace(/(,.*),/g, '$1');
-
+    recordUserActivity();
     setAmount(sanitizedValue);
   };
 
@@ -123,6 +209,7 @@ export const useConversion = () => {
     conversions,
     setConversions,
     handleCurrencySelect,
-    handleInputChange
+    handleInputChange,
+    recordUserActivity  // Expose the activity recorder for other components
   };
 };
