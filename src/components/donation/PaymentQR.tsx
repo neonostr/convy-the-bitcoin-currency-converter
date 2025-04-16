@@ -3,7 +3,6 @@ import React from 'react';
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
 
 interface PaymentQRProps {
   invoice: string;
@@ -13,16 +12,11 @@ interface PaymentQRProps {
 }
 
 const PaymentQR = ({ invoice, qrData, onCopy, isCopied }: PaymentQRProps) => {
-  const { toast } = useToast();
-
   const handleCopy = () => {
     if (invoice) {
       navigator.clipboard.writeText(invoice).then(() => {
         onCopy();
-        toast({
-          title: "Copied!",
-          description: "Lightning invoice copied to clipboard",
-        });
+        // Toast notification removed as requested
       });
     }
   };

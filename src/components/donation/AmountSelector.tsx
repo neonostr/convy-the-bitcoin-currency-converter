@@ -3,6 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useSettings } from '@/hooks/useSettings';
+import { formatCurrency } from '@/utils/formatUtils';
 
 interface AmountSelectorProps {
   amount: number;
@@ -19,6 +21,8 @@ const AmountSelector = ({
   isEditing,
   onEditingChange 
 }: AmountSelectorProps) => {
+  const { settings } = useSettings();
+  
   const handleAmountFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     onEditingChange(true);
     e.target.select();
@@ -56,7 +60,7 @@ const AmountSelector = ({
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-center text-lg font-bold cursor-pointer"
             onClick={handleClick}
           >
-            {amount}
+            {formatCurrency(amount, 'sats', settings.decimalSeparator)}
           </div>
         )}
       </div>
@@ -75,7 +79,7 @@ const AmountSelector = ({
             }}
             disabled={disabled}
           >
-            {value.toLocaleString()}
+            {formatCurrency(value, 'sats', settings.decimalSeparator)}
           </Button>
         ))}
       </div>

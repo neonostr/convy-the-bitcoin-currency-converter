@@ -115,7 +115,7 @@ const BitcoinConverter = () => {
       />
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        Tap any result to copy. Rates provided by CoinGecko API. All calculations are performed 100% offline on your device. You can check my <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
+        Tap any result to copy. Rates provided by CoinGecko. All calculations are performed 100% offline on your device. Check my <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
           <u>source code</u>
         </a> to verify. Add me to your home screen for a seamless web app experience.
       </div>

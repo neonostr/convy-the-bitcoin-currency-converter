@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,8 @@ import QRCode from 'qrcode';
 import AmountSelector from './donation/AmountSelector';
 import PaymentQR from './donation/PaymentQR';
 import ThankYouMessage from './donation/ThankYouMessage';
+import { useSettings } from '@/hooks/useSettings';
+import { formatCurrency } from '@/utils/formatUtils';
 
 const INITIAL_AMOUNT = 1000;
 
@@ -22,6 +25,7 @@ const DonationPopup: React.FC = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
+  const { settings } = useSettings();
 
   // Clean up any polling intervals when component unmounts
   useEffect(() => {
@@ -172,7 +176,7 @@ const DonationPopup: React.FC = () => {
                 className="w-full font-bold mt-2"
                 disabled={isSending || amount <= 0}
               >
-                {isSending ? "Generating invoice..." : `Zap ${amount.toLocaleString()} sats`}
+                {isSending ? "Generating invoice..." : `Zap ${formatCurrency(amount, 'sats', settings.decimalSeparator)} sats`}
               </Button>
             </>
           ) : (

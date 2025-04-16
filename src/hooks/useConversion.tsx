@@ -1,175 +1,139 @@
-import { useState, useEffect, useRef } from 'react';
-import { Currency, CoinRates } from '@/types/currency.types';
-import { fetchCoinRates } from '@/services/coinGeckoApi';
-import { 
-  convertCurrency, 
-  getCachedRates,
-  isCacheStale,
-  initialRates 
-} from '@/services/ratesService';
-import { useToast } from '@/hooks/use-toast';
-import { useSettings } from '@/hooks/useSettings';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Currency } from '@/types/currency.types';
+import { useSettings } from './useSettings';
+import { formatForCopy } from '@/utils/formatUtils';
 
-export const useConversion = () => {
-  const getInitialAmount = () => {
-    // Try to get saved amount from localStorage, default to '1'
-    const savedAmount = localStorage.getItem('bitcoin-converter-default-amount');
-    return savedAmount || '1';
+interface Rates {
+  [currency: string]: number;
+  lastUpdated: Date;
+}
+
+const API_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,gbp,cny,jpy,aud,cad,inr,rub&include_last_updated_at=true';
+
+const fetchRates = async (): Promise<Rates> => {
+  const response = await fetch(API_URL);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const data = await response.json();
+
+  // Transform the data to match the Rates interface
+  const rates: Rates = {
+    usd: data.bitcoin.usd,
+    eur: data.bitcoin.eur,
+    chf: data.bitcoin.chf,
+    gbp: data.bitcoin.gbp,
+    cny: data.bitcoin.cny,
+    jpy: data.bitcoin.jpy,
+    aud: data.bitcoin.aud,
+    cad: data.bitcoin.cad,
+    inr: data.bitcoin.inr,
+    rub: data.bitcoin.rub,
+    lastUpdated: new Date(data.bitcoin.last_updated_at * 1000), // Convert seconds to milliseconds
   };
 
-  const [amount, setAmount] = useState<string>(getInitialAmount());
+  return rates;
+};
+
+export const useConversion = () => {
+  const [amount, setAmount] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
-  const [rates, setRates] = useState<CoinRates | null>(null);
   const [conversions, setConversions] = useState<Record<string, number>>({});
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const { toast } = useToast();
   const { settings } = useSettings();
-  const isInitialFetch = useRef<boolean>(true);
-  const initialFetchDone = useRef<boolean>(false);
-  
-  // Fetch rates initially when component mounts - ensure it only runs once
+  const { data: rates, refetch } = useQuery({
+    queryKey: ['rates'],
+    queryFn: fetchRates,
+    refetchInterval: 60000, // Auto-refresh every 60 seconds
+    onError: (error) => {
+      console.error("Failed to fetch rates:", error);
+    }
+  });
+
   useEffect(() => {
-    if (!initialFetchDone.current) {
-      console.log('Initial fetch of rates');
-      fetchRates();
-      initialFetchDone.current = true;
-      
-      // Initial conversion with default values
-      if (rates) {
-        const newConversions = convertCurrency(1, 'btc', rates);
-        setConversions(newConversions);
-      }
+    const storedCurrency = localStorage.getItem('selectedCurrency') as Currency;
+    if (storedCurrency) {
+      setSelectedCurrency(storedCurrency);
     }
   }, []);
 
-  // Update conversions when amount, selected currency, or rates change
   useEffect(() => {
-    if (rates && amount !== '') {
-      // Correctly handle both comma and dot as decimal separators
-      const normalizedAmount = amount.replace(',', '.');
-      const numericAmount = parseFloat(normalizedAmount);
-      
-      if (!isNaN(numericAmount)) {
-        const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
-        setConversions(newConversions);
-      } else {
-        setConversions({});
-      }
+    localStorage.setItem('selectedCurrency', selectedCurrency);
+  }, [selectedCurrency]);
+
+  const convert = useCallback(() => {
+    if (!amount || !rates) {
+      return;
     }
+
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount)) {
+      return;
+    }
+
+    const newConversions: Record<string, number> = {};
+
+    if (selectedCurrency === 'btc') {
+      newConversions['sats'] = numAmount * 100000000;
+      Object.keys(rates).forEach(currency => {
+        if (currency !== 'lastUpdated') {
+          newConversions[currency] = numAmount * rates[currency];
+        }
+      });
+    } else if (selectedCurrency === 'sats') {
+      newConversions['btc'] = numAmount / 100000000;
+      Object.keys(rates).forEach(currency => {
+        if (currency !== 'lastUpdated') {
+          newConversions[currency] = (numAmount / 100000000) * rates[currency];
+        }
+      });
+    }
+    else {
+      newConversions['btc'] = numAmount / rates[selectedCurrency];
+      newConversions['sats'] = (numAmount / rates[selectedCurrency]) * 100000000;
+      Object.keys(rates).forEach(currency => {
+        if (currency !== 'lastUpdated' && currency !== selectedCurrency) {
+          newConversions[currency] = numAmount / rates[selectedCurrency] * rates[currency];
+        }
+      });
+    }
+
+    setConversions(newConversions);
   }, [amount, selectedCurrency, rates]);
 
-  // Update conversions when settings change (to reflect any changes in display currencies)
   useEffect(() => {
-    if (rates && amount !== '') {
-      // Ensure consistent handling of decimal separators
-      const normalizedAmount = amount.replace(',', '.');
-      const numericAmount = parseFloat(normalizedAmount);
-      
-      if (!isNaN(numericAmount)) {
-        const newConversions = convertCurrency(numericAmount, selectedCurrency, rates);
-        setConversions(newConversions);
-      }
-    }
-  }, [settings]);
-
-  const fetchRates = async () => {
-    // For initial fetch, always try to get fresh data
-    // For subsequent fetches, only fetch if the cache is stale (> 60s)
-    if (!isInitialFetch.current && !isCacheStale() && rates !== null) {
-      console.log('Skipping API call - using cached rates (< 60s old)');
-      return;
-    }
-    
-    if (isRefreshing) {
-      console.log('Already refreshing rates, skipping redundant API call');
-      return;
-    }
-    
-    setIsRefreshing(true);
-    try {
-      console.log('fetchCoinRates called, current initialRates:', initialRates);
-      const newRates = await fetchCoinRates();
-      setRates(newRates);
-      isInitialFetch.current = false;
-      
-      // If this is the first time we're fetching rates, calculate initial conversions
-      if (!rates) {
-        // Ensure we handle comma decimal separators
-        const normalizedAmount = amount.replace(',', '.');
-        const numericAmount = parseFloat(normalizedAmount);
-        if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
-          setConversions(newConversions);
-        }
-      } else {
-        // Recalculate conversions with new rates
-        const normalizedAmount = amount.replace(',', '.');
-        const numericAmount = parseFloat(normalizedAmount);
-        
-        if (!isNaN(numericAmount)) {
-          const newConversions = convertCurrency(numericAmount, selectedCurrency, newRates);
-          setConversions(newConversions);
-        }
-      }
-      
-      // Only show a toast notification if we actually fetched fresh data from the API
-      if (isCacheStale()) {
-        toast({
-          title: "Currency Rates Updated",
-          description: "Latest exchange rates have been fetched.",
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch rates:', error);
-      
-      // If API fails but we have cached rates, use those
-      if (!rates) {
-        const cachedRates = getCachedRates();
-        setRates(cachedRates);
-      }
-      
-      toast({
-        title: "Oops! Rate update failed",
-        description: "We're using cached rates. Please try again later.",
-        variant: "destructive",
-        duration: 3000,
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+    convert();
+  }, [convert]);
 
   const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency);
-    
-    // Reset the amount to zero when changing currency
-    setAmount('0');
-    
-    // Only update rates if cache is stale
-    if (isCacheStale()) {
-      fetchRates();
-    }
-    
-    if (rates) {
-      // When changing currency, set conversions to zero
-      const newConversions = convertCurrency(0, currency, rates);
-      setConversions(newConversions);
-    }
+    convert();
   };
 
   const handleInputChange = (value: string) => {
-    // Allow both comma and dot as decimal separators
-    if (/^-?\d*([.,]\d*)?$/.test(value)) {
-      setAmount(value);
-      // Save to localStorage
-      localStorage.setItem('bitcoin-converter-default-amount', value);
-      
-      if (value !== '' && isCacheStale()) {
-        fetchRates();
-      }
+    // Allow only numbers and a single decimal separator
+    const sanitizedValue = value.replace(/[^0-9,.]/g, '').replace(/(\..*)\./g, '$1').replace(/(,.*),/g, '$1');
+
+    setAmount(sanitizedValue);
+  };
+
+  // Update the toast message for currency rates update
+  export const handleRatesUpdate = (rates: Rates, toast: any) => {
+    if (rates) {
+      toast({
+        title: "Currency Rates Updated",
+        description: "Auto-updates each minute when activity is detected.",
+        duration: 3000,
+      });
     }
   };
+
+  useEffect(() => {
+    if (rates) {
+      // @ts-ignore
+      handleRatesUpdate(rates, useToast().toast);
+    }
+  }, [rates]);
 
   return {
     amount,
@@ -178,8 +142,7 @@ export const useConversion = () => {
     rates,
     conversions,
     setConversions,
-    isRefreshing,
     handleCurrencySelect,
-    handleInputChange,
+    handleInputChange
   };
 };
