@@ -51,16 +51,16 @@ const AmountSelector = ({
             onChange={(e) => onAmountChange(Number(e.target.value))}
             onFocus={handleAmountFocus}
             min={1}
-            className="text-center text-lg font-bold"
+            className="text-center text-2xl font-bold"
             disabled={disabled}
             autoFocus
           />
         ) : (
           <div 
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-center text-lg font-bold cursor-pointer"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-center text-2xl font-bold cursor-pointer"
             onClick={handleClick}
           >
-            {amount.toString()} {/* Display without thousand separators */}
+            {amount}
           </div>
         )}
       </div>
