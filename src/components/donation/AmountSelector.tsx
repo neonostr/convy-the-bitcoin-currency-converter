@@ -36,7 +36,7 @@ const AmountSelector = ({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="amount">Amount (sats)</Label>
+      <Label htmlFor="amount" className="block text-center">Amount (sats)</Label>
       <div 
         className="relative" 
         onClick={handleClick}
@@ -60,7 +60,7 @@ const AmountSelector = ({
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-center text-lg font-bold cursor-pointer"
             onClick={handleClick}
           >
-            {formatCurrency(amount, 'sats', settings.decimalSeparator)}
+            {amount.toString()} {/* Display without thousand separators */}
           </div>
         )}
       </div>

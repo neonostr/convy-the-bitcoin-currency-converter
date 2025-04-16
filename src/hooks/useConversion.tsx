@@ -133,7 +133,10 @@ export const useConversion = () => {
       return;
     }
 
-    const numAmount = parseFloat(amount);
+    // Convert comma to dot for calculation while preserving display
+    const normalizedAmount = amount.replace(',', '.');
+    const numAmount = parseFloat(normalizedAmount);
+    
     if (isNaN(numAmount)) {
       return;
     }
@@ -179,7 +182,7 @@ export const useConversion = () => {
   };
 
   const handleInputChange = (value: string) => {
-    // Allow only numbers and a single decimal separator
+    // Allow only numbers and a single decimal separator (both . and ,)
     const sanitizedValue = value.replace(/[^0-9,.]/g, '').replace(/(\..*)\./g, '$1').replace(/(,.*),/g, '$1');
     recordUserActivity();
     setAmount(sanitizedValue);

@@ -147,13 +147,13 @@ const DonationPopup: React.FC = () => {
         </a>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+        <DialogHeader className="text-center">
+          <DialogTitle className="flex items-center justify-center gap-2">
             <Coffee className="h-5 w-5 text-bitcoin-orange" />
             Zap me a coffee
           </DialogTitle>
           {!paymentConfirmed && (
-            <DialogDescription>
+            <DialogDescription className="text-center">
               Support this project with some sats
             </DialogDescription>
           )}
