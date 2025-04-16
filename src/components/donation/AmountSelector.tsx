@@ -51,13 +51,13 @@ const AmountSelector = ({
             onChange={(e) => onAmountChange(Number(e.target.value))}
             onFocus={handleAmountFocus}
             min={1}
-            className="text-center text-2xl font-bold"
+            className="text-center"
             disabled={disabled}
             autoFocus
           />
         ) : (
           <div 
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-center text-2xl font-bold cursor-pointer"
+            className="flex justify-center items-center h-10 w-full rounded-md border border-input bg-background px-3 py-2 cursor-pointer"
             onClick={handleClick}
           >
             {amount}
