@@ -12,21 +12,21 @@ export type Database = {
       rate_cache: {
         Row: {
           created_at: string | null
-          id: string
+          id: number
           provider: string
           rates: Json
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          id?: string
+          id?: number
           provider: string
           rates: Json
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          id?: string
+          id?: number
           provider?: string
           rates?: Json
           updated_at?: string | null
