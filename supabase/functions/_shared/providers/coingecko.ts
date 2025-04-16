@@ -44,59 +44,33 @@ async function getFromCache() {
 
 async function updateCache(data: any) {
   try {
-    console.log('Updating rate_cache with new data for CoinGecko');
+    console.log('Creating new rate_cache entry with new data for CoinGecko');
     
-    // Check if an entry already exists
-    const { data: existingCache, error: fetchError } = await supabase
+    // Always create a new entry instead of updating
+    const result = await supabase
       .from('rate_cache')
-      .select('id')
-      .eq('provider', 'coingecko')
-      .maybeSingle();
-      
-    if (fetchError) {
-      console.error('Error checking for existing cache:', fetchError);
-      throw new Error(`Failed to check for existing cache: ${fetchError.message}`);
-    }
-    
-    let result;
-    
-    if (existingCache && existingCache.id) {
-      // Update existing record
-      console.log('Updating existing cache record for coingecko with ID:', existingCache.id);
-      result = await supabase
-        .from('rate_cache')
-        .update({
-          rates: data,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingCache.id);
-    } else {
-      // Insert new record
-      console.log('Creating new cache record for coingecko');
-      result = await supabase
-        .from('rate_cache')
-        .insert({
-          provider: 'coingecko',
-          rates: data,
-          updated_at: new Date().toISOString()
-        });
-    }
+      .insert({
+        provider: 'coingecko',
+        rates: data,
+        updated_at: new Date().toISOString()
+      });
     
     if (result.error) {
-      console.error('Cache update error:', result.error);
-      throw new Error(`Cache update failed: ${result.error.message}`);
+      console.error('Cache insert error:', result.error);
+      throw new Error(`Cache insert failed: ${result.error.message}`);
     } else {
-      console.log('Cache updated successfully for coingecko');
+      console.log('New cache entry created successfully for coingecko');
     }
   } catch (error) {
     console.error('Cache update failed:', error);
-    throw new Error(`Failed to update cache: ${error.message}`);
+    throw new Error(`Failed to create cache entry: ${error.message}`);
   }
 }
 
 // Log when cached data is used instead of making an API call
 async function logCachedDataProvided() {
   try {
+    console.log('Logging cached_data_provided event');
     await supabase
       .from('usage_logs')
       .insert([{ 
@@ -129,11 +103,11 @@ export async function fetchFromCoinGeckoPublic() {
     }
     
     const data = await response.json();
+    console.log("Successfully fetched data from CoinGecko public API");
     
     // Update cache with new data
     await updateCache(data);
-    
-    console.log("Successfully fetched and cached data from CoinGecko public API");
+    console.log("Successfully cached data from CoinGecko public API");
     
     return { data, fromCache: false };
   } catch (error) {
@@ -156,27 +130,39 @@ export async function fetchFromCoinGeckoWithKey() {
     const coinGeckoApiKey = Deno.env.get('COINGECKO_API_KEY');
     
     if (!coinGeckoApiKey) {
-      throw new Error('COINGECKO_API_KEY is not set');
+      console.error('COINGECKO_API_KEY is not set or empty');
+      throw new Error('COINGECKO_API_KEY is not set or empty');
     }
     
     console.log("Cache miss or stale, fetching fresh data from CoinGecko API with key...");
+    // Adding detailed logging for debugging API key issues
+    console.log(`Using API key (first 4 chars): ${coinGeckoApiKey.substring(0, 4)}...`);
+    
     const response = await fetch('https://pro-api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub', {
       headers: {
-        'x-cg-pro-api-key': coinGeckoApiKey
+        'x-cg-pro-api-key': coinGeckoApiKey,
+        'Content-Type': 'application/json'
       }
     });
     
+    // Log the response status for debugging
+    console.log(`CoinGecko API with key response status: ${response.status}`);
+    
     if (!response.ok) {
+      // Log the response body for more debugging info
+      const errorText = await response.text();
+      console.error(`CoinGecko API with key error response: ${errorText}`);
+      
       await logApiError('coingecko_api_with_key_failure', response.status);
-      throw new Error(`CoinGecko API with key failed with status: ${response.status}`);
+      throw new Error(`CoinGecko API with key failed with status: ${response.status}, message: ${errorText}`);
     }
     
     const data = await response.json();
+    console.log("Successfully fetched data from CoinGecko with API key");
     
     // Update cache with new data
     await updateCache(data);
-    
-    console.log("Successfully fetched and cached data from CoinGecko with API key");
+    console.log("Successfully cached data from CoinGecko with API key");
     
     return { data, fromCache: false };
   } catch (error) {
@@ -189,10 +175,13 @@ export async function fetchFromCoinGeckoWithKey() {
 async function logApiError(baseEventType: string, errorCode: number) {
   try {
     const eventType = `${baseEventType}_${errorCode}`;
+    console.log(`Logging API error event: ${eventType}`);
     
     await supabase
       .from('usage_logs')
       .insert([{ event_type: eventType, timestamp: new Date().toISOString() }]);
+      
+    console.log(`Successfully logged API error event: ${eventType}`);
   } catch (error) {
     console.error(`Failed to log API error event (${baseEventType}):`, error);
   }

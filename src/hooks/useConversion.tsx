@@ -15,13 +15,13 @@ export const useConversion = () => {
   const { settings } = useSettings();
   const { toast } = useToast();
   const lastToastTime = useRef<number>(0);
-  const MIN_TOAST_INTERVAL = 10000; // 10 seconds between toasts
+  const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts (increased from 10s)
   
   const { data: rates, refetch } = useQuery({
     queryKey: ['rates'],
     queryFn: fetchCoinRates,
-    refetchInterval: 60000, // Auto-refresh every 60 seconds ONLY if app is active
-    staleTime: 55000, // Consider data stale after 55 seconds
+    refetchInterval: 120000, // Auto-refresh every 2 minutes (increased from 1 minute)
+    staleTime: 60000, // Consider data stale after 1 minute
     refetchOnWindowFocus: false, // Don't refetch on window focus to reduce API calls
     meta: {
       onError: (error: Error) => {
@@ -103,16 +103,12 @@ export const useConversion = () => {
   // Effect for handling rate updates - but limit toast frequency
   useEffect(() => {
     if (rates) {
-      // Log the rate update event to Supabase
-      const apiType = rates.usd > 0 ? 'coingecko_api_public_success' : 'cached_data_provided';
-      logEvent(apiType);
-      
       // Only show toast if enough time has passed since the last one
       const now = Date.now();
       if (now - lastToastTime.current > MIN_TOAST_INTERVAL) {
         toast({
           title: "Currency Rates Updated",
-          description: "Auto-updates each minute when activity is detected.",
+          description: "Auto-updates every 2 minutes when activity is detected.",
           duration: 3000,
         });
         lastToastTime.current = now;

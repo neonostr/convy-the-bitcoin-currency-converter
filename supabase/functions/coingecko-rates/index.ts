@@ -28,6 +28,8 @@ serve(async (req) => {
     
     if (cachedData) {
       console.log(`Using fresh cached data from ${provider}`)
+      // Log the cache hit event
+      await logCacheHit(provider);
       return new Response(JSON.stringify(cachedData), { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
@@ -37,7 +39,7 @@ serve(async (req) => {
     // Primary Data Source: CoinGecko with API key
     const coinGeckoApiKey = Deno.env.get('COINGECKO_API_KEY')
     
-    if (coinGeckoApiKey) {
+    if (coinGeckoApiKey && coinGeckoApiKey.trim() !== '') {
       try {
         console.log("Trying CoinGecko with API key...")
         const { data, fromCache } = await fetchFromCoinGeckoWithKey()
@@ -48,6 +50,8 @@ serve(async (req) => {
           await logApiCall('coingecko_api_key', data)
         } else {
           console.log("Using cached data from CoinGecko with API key")
+          // This should be logged in the provider, but log it here too for redundancy
+          await logCacheHit('coingecko');
         }
         
         return new Response(JSON.stringify(data), { 
@@ -58,6 +62,8 @@ serve(async (req) => {
         console.error("CoinGecko API key fetch failed:", error.message)
         // Continue to fallback methods
       }
+    } else {
+      console.log("No CoinGecko API key set or key is empty, skipping API key method")
     }
     
     // Fallback 1: CoinGecko Public API
@@ -71,6 +77,8 @@ serve(async (req) => {
         await logApiCall('coingecko_public', data)
       } else {
         console.log("Using cached data from CoinGecko public API")
+        // This should be logged in the provider, but log it here too for redundancy
+        await logCacheHit('coingecko');
       }
       
       return new Response(JSON.stringify(data), { 
@@ -85,7 +93,7 @@ serve(async (req) => {
     // Fallback 2: CryptoCompare with API key
     const cryptoCompareApiKey = Deno.env.get('CRYPTOCOMPARE_API_KEY')
     
-    if (cryptoCompareApiKey) {
+    if (cryptoCompareApiKey && cryptoCompareApiKey.trim() !== '') {
       try {
         console.log("Trying CryptoCompare with API key...")
         const { data, fromCache } = await fetchFromCryptoCompareWithKey()
@@ -96,6 +104,7 @@ serve(async (req) => {
           await logApiCall('cryptocompare_api_key', data)
         } else {
           console.log("Using cached data from CryptoCompare with API key")
+          await logCacheHit('cryptocompare');
         }
         
         return new Response(JSON.stringify(data), { 
@@ -106,6 +115,8 @@ serve(async (req) => {
         console.error("CryptoCompare API key fetch failed:", error.message)
         // Continue to final fallback
       }
+    } else {
+      console.log("No CryptoCompare API key set or key is empty, skipping API key method")
     }
     
     // Final Fallback: CryptoCompare Public API
@@ -119,6 +130,7 @@ serve(async (req) => {
         await logApiCall('cryptocompare_public', data)
       } else {
         console.log("Using cached data from CryptoCompare public API")
+        await logCacheHit('cryptocompare');
       }
       
       return new Response(JSON.stringify(data), { 
@@ -139,6 +151,29 @@ serve(async (req) => {
     })
   }
 })
+
+// Helper function to log cache hits
+async function logCacheHit(provider: string) {
+  try {
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    
+    const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co";
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    console.log(`Logging cached_data_provided event for ${provider}`);
+    await supabase
+      .from('usage_logs')
+      .insert([{ 
+        event_type: 'cached_data_provided',
+        timestamp: new Date().toISOString()
+      }]);
+      
+    console.log('Cached data usage logged successfully');
+  } catch (error) {
+    console.error('Failed to log cache hit:', error);
+  }
+}
 
 // Helper function to check for fresh cache across providers
 async function checkForFreshCache() {

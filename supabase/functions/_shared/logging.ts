@@ -23,16 +23,24 @@ export async function logApiCall(source: string, data: any) {
       eventType = `${source}_success`;
     }
     
-    await supabase
+    console.log(`Logging API call event: ${eventType}`);
+    
+    const { error } = await supabase
       .from('usage_logs')
       .insert([
         { 
           event_type: eventType,
           timestamp: new Date().toISOString()
         }
-      ])
+      ]);
+      
+    if (error) {
+      console.error('Error logging API call:', error);
+    } else {
+      console.log(`Successfully logged event: ${eventType}`);
+    }
   } catch (error) {
-    console.error('Error logging API call:', error)
+    console.error('Error logging API call:', error);
   }
 }
 
@@ -53,15 +61,46 @@ export async function logApiError(source: string, errorCode: number | string) {
       eventType = `${source}_failure_${errorCode}`;
     }
     
-    await supabase
+    console.log(`Logging API error event: ${eventType}`);
+    
+    const { error } = await supabase
       .from('usage_logs')
       .insert([
         { 
           event_type: eventType,
           timestamp: new Date().toISOString()
         }
-      ])
+      ]);
+      
+    if (error) {
+      console.error(`Error logging API error event:`, error);
+    } else {
+      console.log(`Successfully logged error event: ${eventType}`);
+    }
   } catch (error) {
-    console.error('Error logging API error:', error)
+    console.error('Error logging API error:', error);
+  }
+}
+
+export async function logCacheHit(provider: string) {
+  try {
+    console.log(`Logging cached_data_provided event for ${provider}`);
+    
+    const { error } = await supabase
+      .from('usage_logs')
+      .insert([
+        { 
+          event_type: 'cached_data_provided',
+          timestamp: new Date().toISOString()
+        }
+      ]);
+      
+    if (error) {
+      console.error('Error logging cache hit:', error);
+    } else {
+      console.log('Successfully logged cached_data_provided event');
+    }
+  } catch (error) {
+    console.error('Error logging cache hit:', error);
   }
 }

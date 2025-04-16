@@ -15,7 +15,7 @@ import { logEvent } from "./eventLogger";
 import { trackApiCall } from "./usageTracker";
 
 // Minimum time between API calls (in milliseconds)
-const MIN_API_CALL_INTERVAL = 30000; // 30 seconds
+const MIN_API_CALL_INTERVAL = 60000; // 60 seconds (increased from 30s)
 let lastApiCallTime = 0;
 
 export async function fetchCoinRates(): Promise<CoinRates> {
@@ -23,7 +23,8 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   const cachedRates = getCachedRates();
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
-    logEvent('cached_data_provided');
+    // Log that we're using cached data
+    await logEvent('cached_data_provided');
     return { ...cachedRates };
   }
   
@@ -32,7 +33,8 @@ export async function fetchCoinRates(): Promise<CoinRates> {
   const timeSinceLastCall = now - lastApiCallTime;
   if (timeSinceLastCall < MIN_API_CALL_INTERVAL) {
     console.log(`Rate limiting: Using cached rates (last API call was ${Math.round(timeSinceLastCall/1000)}s ago)`);
-    logEvent('cached_data_provided_rate_limited');
+    // Log that we're using cached data due to rate limiting
+    await logEvent('cached_data_provided_rate_limited');
     // Use cached rates even if stale to avoid too many API calls
     return { ...cachedRates };
   }
@@ -76,17 +78,18 @@ async function performFetch(): Promise<CoinRates> {
     const { data, error } = await supabase.functions.invoke('coingecko-rates');
     
     if (error) {
+      console.error('Supabase function error:', error);
       logEvent('coingecko_api_public_failure');
       throw new Error(`Failed to fetch data: ${error.message}`);
     }
 
     if (!data || !data.bitcoin) {
+      console.error('Invalid response from API:', data);
       logEvent('coingecko_api_public_failure');
       throw new Error('Invalid response from API');
     }
     
-    // Log successful API call
-    logEvent('coingecko_api_public_success');
+    // The usage logging is now done by the edge function
     
     console.log("Bitcoin rates from API:", data.bitcoin);
     
