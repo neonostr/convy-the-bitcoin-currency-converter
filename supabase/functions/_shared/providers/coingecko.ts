@@ -59,18 +59,18 @@ async function updateCache(data: any) {
   }
 }
 
-// Add a new function to log cache hits
-async function logCacheHit() {
+// Log when cached data is used instead of making an API call
+async function logCachedDataProvided() {
   try {
     await supabase
       .from('usage_logs')
       .insert([{ 
-        event_type: 'cache_hit_coingecko',
+        event_type: 'cached_data_provided',
         timestamp: new Date().toISOString()
       }]);
-    console.log('Cache hit logged successfully');
+    console.log('Cached data usage logged successfully');
   } catch (error) {
-    console.error('Failed to log cache hit:', error);
+    console.error('Failed to log cached data usage:', error);
   }
 }
 
@@ -78,9 +78,9 @@ export async function fetchFromCoinGeckoPublic() {
   // First try to get data from cache
   const cachedData = await getFromCache();
   if (cachedData) {
-    // Log the cache hit
-    await logCacheHit();
-    return cachedData;
+    // Log the cache hit with the new name
+    await logCachedDataProvided();
+    return { data: cachedData, fromCache: true };
   }
 
   try {
@@ -99,7 +99,7 @@ export async function fetchFromCoinGeckoPublic() {
     
     console.log("Successfully fetched and cached data from CoinGecko public API");
     
-    return data;
+    return { data, fromCache: false };
   } catch (error) {
     console.error(`CoinGecko public API error: ${error.message}`);
     throw error;
@@ -110,9 +110,9 @@ export async function fetchFromCoinGeckoWithKey() {
   // First try to get data from cache
   const cachedData = await getFromCache();
   if (cachedData) {
-    // Log the cache hit
-    await logCacheHit();
-    return cachedData;
+    // Log the cache hit with the new name
+    await logCachedDataProvided();
+    return { data: cachedData, fromCache: true };
   }
 
   try {
@@ -141,7 +141,7 @@ export async function fetchFromCoinGeckoWithKey() {
     
     console.log("Successfully fetched and cached data from CoinGecko with API key");
     
-    return data;
+    return { data, fromCache: false };
   } catch (error) {
     console.error(`CoinGecko API with key error: ${error.message}`);
     throw error;

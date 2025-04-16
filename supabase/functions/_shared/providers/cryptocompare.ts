@@ -1,12 +1,107 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { supportedCurrencies } from '../types.ts'
 
-const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co"
-const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co";
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Cache duration in milliseconds (60 seconds)
+const CACHE_DURATION = 60000;
+
+async function getFromCache() {
+  try {
+    const { data: cacheData, error: cacheError } = await supabase
+      .from('rate_cache')
+      .select('*')
+      .eq('provider', 'cryptocompare')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (cacheError) {
+      console.error('Cache fetch error:', cacheError);
+      return null;
+    }
+
+    // Check if cache is fresh (less than CACHE_DURATION old)
+    if (cacheData) {
+      const cacheAge = Date.now() - new Date(cacheData.updated_at).getTime();
+      if (cacheAge < CACHE_DURATION) {
+        console.log('Using cached rates, age:', Math.round(cacheAge / 1000), 'seconds');
+        return cacheData.rates;
+      }
+      console.log('Cache is stale, age:', Math.round(cacheAge / 1000), 'seconds');
+    }
+    return null;
+  } catch (error) {
+    console.error('Cache retrieval error:', error);
+    return null;
+  }
+}
+
+async function updateCache(data: any) {
+  try {
+    const { error: upsertError } = await supabase
+      .from('rate_cache')
+      .upsert({
+        provider: 'cryptocompare',
+        rates: data,
+        updated_at: new Date().toISOString()
+      });
+
+    if (upsertError) {
+      console.error('Cache update error:', upsertError);
+    } else {
+      console.log('Cache updated successfully');
+    }
+  } catch (error) {
+    console.error('Cache update failed:', error);
+  }
+}
+
+// Log when cached data is used instead of making an API call
+async function logCachedDataProvided() {
+  try {
+    await supabase
+      .from('usage_logs')
+      .insert([{ 
+        event_type: 'cached_data_provided',
+        timestamp: new Date().toISOString()
+      }]);
+    console.log('Cached data usage logged successfully');
+  } catch (error) {
+    console.error('Failed to log cached data usage:', error);
+  }
+}
+
+// Convert CryptoCompare response to match CoinGecko format
+function formatCryptoCompareResponse(data: any) {
+  const bitcoin: Record<string, number> = {};
+  
+  // Format matches what we expect from CoinGecko
+  for (const currency of supportedCurrencies) {
+    if (data && data.BTC && currency.toUpperCase() in data.BTC) {
+      bitcoin[currency] = data.BTC[currency.toUpperCase()];
+    }
+  }
+  
+  return { bitcoin };
+}
 
 export async function fetchFromCryptoComparePublic() {
+  // First try to get data from cache
+  const cachedData = await getFromCache();
+  if (cachedData) {
+    // Log the cache hit with the new name
+    await logCachedDataProvided();
+    return { data: cachedData, fromCache: true };
+  }
+
   try {
-    const response = await fetch('https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=USD,EUR,CHF,CNY,JPY,GBP,AUD,CAD,INR,RUB');
+    console.log("Cache miss or stale, fetching fresh data from CryptoCompare public API...");
+    const fsyms = 'BTC';
+    const tsyms = supportedCurrencies.map(c => c.toUpperCase()).join(',');
+    const response = await fetch(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${fsyms}&tsyms=${tsyms}`);
     
     if (!response.ok) {
       await logApiError('cryptocompare_api_public_failure', response.status);
@@ -15,26 +110,15 @@ export async function fetchFromCryptoComparePublic() {
     
     const data = await response.json();
     
-    // Transform the response to match CoinGecko format
-    const transformedData = {
-      bitcoin: {
-        usd: data.BTC.USD,
-        eur: data.BTC.EUR,
-        chf: data.BTC.CHF,
-        cny: data.BTC.CNY,
-        jpy: data.BTC.JPY,
-        gbp: data.BTC.GBP,
-        aud: data.BTC.AUD,
-        cad: data.BTC.CAD,
-        inr: data.BTC.INR,
-        rub: data.BTC.RUB
-      }
-    };
+    // Format data to match expected structure
+    const formattedData = formatCryptoCompareResponse(data);
     
-    // Don't log success here - let the main edge function handle it
-    console.log("Successfully fetched data from CryptoCompare public API");
+    // Update cache with new data
+    await updateCache(formattedData);
     
-    return transformedData;
+    console.log("Successfully fetched and cached data from CryptoCompare public API");
+    
+    return { data: formattedData, fromCache: false };
   } catch (error) {
     console.error(`CryptoCompare public API error: ${error.message}`);
     throw error;
@@ -42,14 +126,29 @@ export async function fetchFromCryptoComparePublic() {
 }
 
 export async function fetchFromCryptoCompareWithKey() {
+  // First try to get data from cache
+  const cachedData = await getFromCache();
+  if (cachedData) {
+    // Log the cache hit with the new name
+    await logCachedDataProvided();
+    return { data: cachedData, fromCache: true };
+  }
+
   try {
-    const apiKey = Deno.env.get('CRYPTOCOMPARE_API_KEY');
+    const cryptoCompareApiKey = Deno.env.get('CRYPTOCOMPARE_API_KEY');
     
-    if (!apiKey) {
+    if (!cryptoCompareApiKey) {
       throw new Error('CRYPTOCOMPARE_API_KEY is not set');
     }
     
-    const response = await fetch(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC&tsyms=USD,EUR,CHF,CNY,JPY,GBP,AUD,CAD,INR,RUB&api_key=${apiKey}`);
+    console.log("Cache miss or stale, fetching fresh data from CryptoCompare API with key...");
+    const fsyms = 'BTC';
+    const tsyms = supportedCurrencies.map(c => c.toUpperCase()).join(',');
+    const response = await fetch(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${fsyms}&tsyms=${tsyms}`, {
+      headers: {
+        'authorization': `Apikey ${cryptoCompareApiKey}`
+      }
+    });
     
     if (!response.ok) {
       await logApiError('cryptocompare_api_with_key_failure', response.status);
@@ -58,50 +157,25 @@ export async function fetchFromCryptoCompareWithKey() {
     
     const data = await response.json();
     
-    // Transform the response to match CoinGecko format
-    const transformedData = {
-      bitcoin: {
-        usd: data.BTC.USD,
-        eur: data.BTC.EUR,
-        chf: data.BTC.CHF,
-        cny: data.BTC.CNY,
-        jpy: data.BTC.JPY,
-        gbp: data.BTC.GBP,
-        aud: data.BTC.AUD,
-        cad: data.BTC.CAD,
-        inr: data.BTC.INR,
-        rub: data.BTC.RUB
-      }
-    };
+    // Format data to match expected structure
+    const formattedData = formatCryptoCompareResponse(data);
     
-    // Don't log success here - let the main edge function handle it
-    console.log("Successfully fetched data from CryptoCompare with API key");
+    // Update cache with new data
+    await updateCache(formattedData);
     
-    return transformedData;
+    console.log("Successfully fetched and cached data from CryptoCompare with API key");
+    
+    return { data: formattedData, fromCache: false };
   } catch (error) {
     console.error(`CryptoCompare API with key error: ${error.message}`);
     throw error;
   }
 }
 
-// Add helper functions for logging API calls
-async function logApiSuccess(eventType: string) {
-  try {
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    
-    await supabase
-      .from('usage_logs')
-      .insert([{ event_type: eventType, timestamp: new Date().toISOString() }]);
-  } catch (error) {
-    console.error(`Failed to log API success event (${eventType}):`, error);
-  }
-}
-
+// Keep only error logging at the provider level
 async function logApiError(baseEventType: string, errorCode: number) {
   try {
     const eventType = `${baseEventType}_${errorCode}`;
-    
-    const supabase = createClient(supabaseUrl, supabaseKey);
     
     await supabase
       .from('usage_logs')
