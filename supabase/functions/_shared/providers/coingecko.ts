@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabaseUrl = "https://wmwwjdkjybtwqzrqchfh.supabase.co";
@@ -40,16 +41,44 @@ async function getFromCache() {
 
 async function updateCache(data: any) {
   try {
-    const { error: upsertError } = await supabase
+    console.log('Attempting to update rate_cache with new data:', data);
+    
+    // First check if an entry already exists
+    const { data: existingCache, error: fetchError } = await supabase
       .from('rate_cache')
-      .upsert({
-        provider: 'coingecko',
-        rates: data,
-        updated_at: new Date().toISOString()
-      });
-
-    if (upsertError) {
-      console.error('Cache update error:', upsertError);
+      .select('id')
+      .eq('provider', 'coingecko')
+      .maybeSingle();
+      
+    if (fetchError) {
+      console.error('Error checking for existing cache:', fetchError);
+    }
+    
+    let result;
+    
+    if (existingCache) {
+      // Update existing record
+      result = await supabase
+        .from('rate_cache')
+        .update({
+          rates: data,
+          updated_at: new Date().toISOString()
+        })
+        .eq('provider', 'coingecko');
+    } else {
+      // Insert new record
+      result = await supabase
+        .from('rate_cache')
+        .insert({
+          provider: 'coingecko',
+          rates: data,
+          updated_at: new Date().toISOString()
+        });
+    }
+    
+    if (result.error) {
+      console.error('Cache update error:', result.error);
+      throw new Error(`Cache update failed: ${result.error.message}`);
     } else {
       console.log('Cache updated successfully');
     }
