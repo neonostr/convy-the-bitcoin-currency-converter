@@ -9,12 +9,14 @@ import { Label } from '@/components/ui/label';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Currency } from '@/types/currency.types';
 import { getCurrencyLabel } from '@/utils/formatUtils';
+import { useConversion } from '@/hooks/useConversion';
 
 const MIN_CURRENCY_COUNT = 2;
 const MAX_CURRENCY_COUNT = 6;
 
 const SettingsMenu: React.FC = () => {
   const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings, appVersion } = useSettings();
+  const { setAmount, handleCurrencySelect } = useConversion();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
 
@@ -72,6 +74,16 @@ const SettingsMenu: React.FC = () => {
       return settings.decimalSeparator === ',' ? '2.009,01' : '2,009.01';
     } else {
       return settings.decimalSeparator === ',' ? '2009,01' : '2009.01';
+    }
+  };
+
+  const handlePriceTrackerToggle = (checked: boolean) => {
+    updateSettings({ alwaysDefaultToBtc: checked });
+    
+    // When turning off tracker mode, we should clear the input field
+    if (!checked) {
+      setAmount('');
+      // Also resets the currency if needed
     }
   };
 
@@ -220,9 +232,7 @@ const SettingsMenu: React.FC = () => {
             <Switch
               id="default-to-btc"
               checked={settings.alwaysDefaultToBtc}
-              onCheckedChange={(checked) => 
-                updateSettings({ alwaysDefaultToBtc: checked })
-              }
+              onCheckedChange={handlePriceTrackerToggle}
             />
           </div>
           <p className="text-xs text-muted-foreground mb-4">

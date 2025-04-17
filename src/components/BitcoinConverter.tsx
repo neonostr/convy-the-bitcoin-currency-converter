@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -70,6 +71,7 @@ const BitcoinConverter = () => {
   const { displayCurrencies } = settings;
 
   const handleInputFocus = () => {
+    // Only clear input field when focused
     setAmount('');
     recordUserActivity();
     // Reset conversions to 0 when input field is focused
