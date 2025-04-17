@@ -98,6 +98,14 @@ export const useConversion = () => {
     }
   }, [userActive, rates, refetch]);
 
+  // Set BTC and amount=1 when the tracker is enabled and the app becomes active
+  const setDefaultBtcValue = useCallback(() => {
+    if (settings.alwaysDefaultToBtc) {
+      setSelectedCurrency('btc');
+      setAmount('1');
+    }
+  }, [settings.alwaysDefaultToBtc]);
+
   return {
     amount,
     setAmount,
@@ -107,6 +115,7 @@ export const useConversion = () => {
     setConversions,
     handleCurrencySelect,
     handleInputChange,
-    recordUserActivity
+    recordUserActivity,
+    setDefaultBtcValue
   };
 };

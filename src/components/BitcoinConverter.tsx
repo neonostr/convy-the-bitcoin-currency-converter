@@ -26,7 +26,8 @@ const BitcoinConverter = () => {
     setConversions,
     handleCurrencySelect, 
     handleInputChange,
-    recordUserActivity 
+    recordUserActivity,
+    setDefaultBtcValue
   } = useConversion();
 
   // Use strict dependency tracking to avoid multiple triggers
@@ -47,10 +48,9 @@ const BitcoinConverter = () => {
         recordUserActivity();
         
         // Apply default to BTC when app becomes visible (if setting is enabled)
-        // But don't override if user is already interacting with the app
+        // But only if the user is not already interacting with the app
         if (settings.alwaysDefaultToBtc && !document.activeElement?.matches('input')) {
-          handleCurrencySelect('btc');
-          setAmount('1');
+          setDefaultBtcValue();
         }
       }
     };
@@ -59,19 +59,18 @@ const BitcoinConverter = () => {
     
     // Apply default to BTC on initial load (if setting is enabled)
     if (settings.alwaysDefaultToBtc) {
-      handleCurrencySelect('btc');
-      setAmount('1');
+      setDefaultBtcValue();
     }
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [recordUserActivity, settings.alwaysDefaultToBtc, handleCurrencySelect, setAmount]);
+  }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc]);
 
   const { displayCurrencies } = settings;
 
   const handleInputFocus = () => {
-    // Only clear input field when focused
+    // Clear input field when focused - this is key for the fix
     setAmount('');
     recordUserActivity();
     // Reset conversions to 0 when input field is focused
