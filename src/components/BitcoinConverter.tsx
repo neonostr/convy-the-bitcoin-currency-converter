@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -47,7 +46,8 @@ const BitcoinConverter = () => {
         recordUserActivity();
         
         // Apply default to BTC when app becomes visible (if setting is enabled)
-        if (settings.alwaysDefaultToBtc) {
+        // But don't override if user is already interacting with the app
+        if (settings.alwaysDefaultToBtc && !document.activeElement?.matches('input')) {
           handleCurrencySelect('btc');
           setAmount('1');
         }

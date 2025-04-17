@@ -212,10 +212,10 @@ const SettingsMenu: React.FC = () => {
         </div>
 
         <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">Default Behavior</h3>
+          <h3 className="text-lg font-medium mb-4">Price Tracker</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="default-to-btc">
-              Always show 1 BTC on app open/resume
+              BTC price tracker mode
             </Label>
             <Switch
               id="default-to-btc"
@@ -226,7 +226,7 @@ const SettingsMenu: React.FC = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground mb-4">
-            When enabled, the app will default to showing the value of 1 BTC whenever you open or resume it.
+            When enabled, the app will automatically show the current value of 1 BTC whenever you open or resume it, while still allowing you to input your own values.
           </p>
         </div>
 
