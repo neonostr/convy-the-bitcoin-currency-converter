@@ -45,15 +45,27 @@ const BitcoinConverter = () => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         recordUserActivity();
+        
+        // Apply default to BTC when app becomes visible (if setting is enabled)
+        if (settings.alwaysDefaultToBtc) {
+          handleCurrencySelect('btc');
+          setAmount('1');
+        }
       }
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
+    // Apply default to BTC on initial load (if setting is enabled)
+    if (settings.alwaysDefaultToBtc) {
+      handleCurrencySelect('btc');
+      setAmount('1');
+    }
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [recordUserActivity]);
+  }, [recordUserActivity, settings.alwaysDefaultToBtc, handleCurrencySelect, setAmount]);
 
   const { displayCurrencies } = settings;
 

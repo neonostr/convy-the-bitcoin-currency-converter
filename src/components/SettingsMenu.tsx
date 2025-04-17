@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ const MIN_CURRENCY_COUNT = 2;
 const MAX_CURRENCY_COUNT = 6;
 
 const SettingsMenu: React.FC = () => {
-  const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings } = useSettings();
+  const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings, appVersion } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
 
@@ -208,6 +209,31 @@ const SettingsMenu: React.FC = () => {
           <div className="text-sm font-medium text-center mb-4 bg-secondary/50 p-2 rounded-md">
             {getCopyExample()}
           </div>
+        </div>
+
+        <div className="py-4 border-t">
+          <h3 className="text-lg font-medium mb-4">Default Behavior</h3>
+          <div className="flex items-center justify-between space-x-2 mb-2">
+            <Label htmlFor="default-to-btc">
+              Always show 1 BTC on app open/resume
+            </Label>
+            <Switch
+              id="default-to-btc"
+              checked={settings.alwaysDefaultToBtc}
+              onCheckedChange={(checked) => 
+                updateSettings({ alwaysDefaultToBtc: checked })
+              }
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">
+            When enabled, the app will default to showing the value of 1 BTC whenever you open or resume it.
+          </p>
+        </div>
+
+        <div className="pt-4 border-t text-center">
+          <p className="text-xs text-muted-foreground">
+            Version {appVersion}
+          </p>
         </div>
       </SheetContent>
     </Sheet>
