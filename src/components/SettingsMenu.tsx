@@ -12,6 +12,7 @@ import { getCurrencyLabel } from '@/utils/formatUtils';
 import { useConversion } from '@/hooks/useConversion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Separator } from '@/components/ui/separator';
 
 // Define currency count limits
 const MIN_CURRENCY_COUNT = 2;
@@ -120,7 +121,9 @@ const SettingsMenu: React.FC = () => {
           </div>
         </div>
         
-        <div className="py-4 border-t">
+        <Separator />
+        
+        <div className="py-4">
           <h3 className="text-lg font-medium mb-4">{t('settings.language')}</h3>
           <Select value={language} onValueChange={(value) => setLanguage(value as 'en' | 'es' | 'de')}>
             <SelectTrigger className="w-full">
@@ -133,6 +136,8 @@ const SettingsMenu: React.FC = () => {
             </SelectContent>
           </Select>
         </div>
+
+        <Separator />
 
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">{t('settings.displayCurrencies')}</h3>
@@ -204,7 +209,9 @@ const SettingsMenu: React.FC = () => {
           </div>
         </div>
 
-        <div className="py-4 border-t">
+        <Separator />
+
+        <div className="py-4">
           <h3 className="text-lg font-medium mb-4">{t('settings.numberFormat')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="decimal-separator">
@@ -239,7 +246,9 @@ const SettingsMenu: React.FC = () => {
           </div>
         </div>
 
-        <div className="py-4 border-t">
+        <Separator />
+
+        <div className="py-4">
           <h3 className="text-lg font-medium mb-4">{t('settings.priceTracker')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="default-to-btc">
@@ -256,7 +265,9 @@ const SettingsMenu: React.FC = () => {
           </p>
         </div>
 
-        <div className="pt-4 border-t text-center">
+        <Separator />
+
+        <div className="pt-4 text-center">
           <p className="text-xs text-muted-foreground">
             Version {appVersion}
           </p>

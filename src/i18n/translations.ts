@@ -26,6 +26,15 @@ export const translations = {
       language: 'Language',
       chooseLanguage: 'Choose your language',
     },
+    donation: {
+      zapCoffee: 'Zap me a coffee',
+      supportProject: 'Support this project with some sats',
+      generatingInvoice: 'Generating invoice...',
+      zapButton: 'Zap',
+      thankYou: 'Thank you for your support! ⚡️',
+      errorTitle: 'Error generating payment',
+      errorDesc: "We couldn't generate a Lightning invoice. Please try again.",
+    },
     footer: {
       tapToCopy: 'Tap any result to copy.',
       ratesBy: 'Rates provided by CoinGecko.',
@@ -58,6 +67,15 @@ export const translations = {
       language: 'Idioma',
       chooseLanguage: 'Elija su idioma',
     },
+    donation: {
+      zapCoffee: 'Envíame un café',
+      supportProject: 'Apoya este proyecto con algunos sats',
+      generatingInvoice: 'Generando factura...',
+      zapButton: 'Enviar',
+      thankYou: '¡Gracias por tu apoyo! ⚡️',
+      errorTitle: 'Error al generar el pago',
+      errorDesc: "No pudimos generar una factura Lightning. Por favor, inténtalo de nuevo.",
+    },
     footer: {
       tapToCopy: 'Toque cualquier resultado para copiar.',
       ratesBy: 'Tasas proporcionadas por CoinGecko.',
@@ -89,6 +107,15 @@ export const translations = {
       priceTrackerDesc: 'Wenn aktiviert, zeigt die App automatisch den aktuellen Wert von 1 BTC an, wenn Sie sie öffnen oder fortsetzen, während Sie weiterhin eigene Werte eingeben können.',
       language: 'Sprache',
       chooseLanguage: 'Wählen Sie Ihre Sprache',
+    },
+    donation: {
+      zapCoffee: 'Spende mir einen Kaffee',
+      supportProject: 'Unterstütze dieses Projekt mit einigen Sats',
+      generatingInvoice: 'Rechnung wird erstellt...',
+      zapButton: 'Spenden',
+      thankYou: 'Vielen Dank für deine Unterstützung! ⚡️',
+      errorTitle: 'Fehler beim Erstellen der Zahlung',
+      errorDesc: "Wir konnten keine Lightning-Rechnung erstellen. Bitte versuche es erneut.",
     },
     footer: {
       tapToCopy: 'Tippen Sie auf ein Ergebnis zum Kopieren.',

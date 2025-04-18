@@ -11,6 +11,7 @@ import PaymentQR from './donation/PaymentQR';
 import ThankYouMessage from './donation/ThankYouMessage';
 import { useSettings } from '@/hooks/useSettings';
 import { formatCurrency } from '@/utils/formatUtils';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const INITIAL_AMOUNT = 1000;
 
@@ -26,6 +27,7 @@ const DonationPopup: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
   const { settings } = useSettings();
+  const { t } = useLanguage();
 
   // Clean up any polling intervals when component unmounts
   useEffect(() => {
@@ -129,8 +131,8 @@ const DonationPopup: React.FC = () => {
     } catch (error) {
       console.error('Error generating lightning invoice:', error);
       toast({
-        title: "Error generating payment",
-        description: "We couldn't generate a Lightning invoice. Please try again.",
+        title: t('donation.errorTitle'),
+        description: t('donation.errorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -143,18 +145,18 @@ const DonationPopup: React.FC = () => {
       <DialogTrigger asChild onClick={handleTriggerClick}>
         <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
           <Coffee className="h-4 w-4 mr-1" />
-          <span>Zap me a coffee</span>
+          <span>{t('donation.zapCoffee')}</span>
         </a>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
           <DialogTitle className="flex items-center justify-center gap-2">
             <Coffee className="h-5 w-5 text-bitcoin-orange" />
-            Zap me a coffee
+            {t('donation.zapCoffee')}
           </DialogTitle>
           {!paymentConfirmed && (
             <DialogDescription className="text-center">
-              Support this project with some sats
+              {t('donation.supportProject')}
             </DialogDescription>
           )}
         </DialogHeader>
@@ -176,7 +178,9 @@ const DonationPopup: React.FC = () => {
                 className="w-full font-bold mt-2"
                 disabled={isSending || amount <= 0}
               >
-                {isSending ? "Generating invoice..." : `Zap ${formatCurrency(amount, 'sats', settings.decimalSeparator)} sats`}
+                {isSending 
+                  ? t('donation.generatingInvoice') 
+                  : `${t('donation.zapButton')} ${formatCurrency(amount, 'sats', settings.decimalSeparator)} sats`}
               </Button>
             </>
           ) : (

@@ -20,7 +20,10 @@ interface SettingsContextType {
 }
 
 const DEFAULT_CURRENCIES: Currency[] = ['btc', 'sats', 'usd', 'eur', 'chf', 'gbp'];
-const ALL_CURRENCIES: Currency[] = ['btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub'];
+const ALL_CURRENCIES: Currency[] = [
+  'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
+  'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try'
+];
 const APP_VERSION = '1.0.0'; // Add version constant
 
 // Create a context
