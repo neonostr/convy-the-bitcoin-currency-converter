@@ -1,5 +1,5 @@
 
-export type Currency = 'btc' | 'sats' | 'usd' | 'eur' | 'chf' | 'cny' | 'jpy' | 'gbp' | 'aud' | 'cad' | 'inr' | 'rub';
+export type Currency = 'btc' | 'sats' | 'usd' | 'eur' | 'chf' | 'cny' | 'jpy' | 'gbp' | 'aud' | 'cad' | 'inr' | 'rub' | 'sek' | 'nzd' | 'krw' | 'sgd' | 'nok' | 'mxn' | 'brl' | 'hkd' | 'try';
 
 export interface CoinRates {
   btc: number;
@@ -14,6 +14,15 @@ export interface CoinRates {
   cad: number;
   inr: number;
   rub: number;
+  sek: number;
+  nzd: number;
+  krw: number;
+  sgd: number;
+  nok: number;
+  mxn: number;
+  brl: number;
+  hkd: number;
+  try: number;
   lastUpdated: Date;
 }
 

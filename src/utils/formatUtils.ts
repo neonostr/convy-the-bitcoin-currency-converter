@@ -1,4 +1,3 @@
-
 export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
   const locale = 'en-US';
   let formatted: string;
@@ -71,32 +70,28 @@ export function formatForCopy(
 
 export function getCurrencySymbol(currency: string): string {
   switch (currency) {
-    case 'btc':
-      return '₿';
-    case 'sats':
-      return 'sats';
-    case 'usd':
-      return '$';
-    case 'eur':
-      return '€';
-    case 'chf':
-      return 'CHF';
-    case 'cny':
-      return '¥';
-    case 'jpy':
-      return '¥';
-    case 'gbp':
-      return '£';
-    case 'aud':
-      return 'A$';
-    case 'cad':
-      return 'C$';
-    case 'inr':
-      return '₹';
-    case 'rub':
-      return '₽';
-    default:
-      return '';
+    case 'btc': return '₿';
+    case 'sats': return 'sats';
+    case 'usd': return '$';
+    case 'eur': return '€';
+    case 'chf': return 'CHF';
+    case 'cny': return '¥';
+    case 'jpy': return '¥';
+    case 'gbp': return '£';
+    case 'aud': return 'A$';
+    case 'cad': return 'C$';
+    case 'inr': return '₹';
+    case 'rub': return '₽';
+    case 'sek': return 'kr';
+    case 'nzd': return 'NZ$';
+    case 'krw': return '₩';
+    case 'sgd': return 'S$';
+    case 'nok': return 'kr';
+    case 'mxn': return '$';
+    case 'brl': return 'R$';
+    case 'hkd': return 'HK$';
+    case 'try': return '₺';
+    default: return '';
   }
 }
 
@@ -124,6 +119,15 @@ export function getCurrencyLabel(currency: string): string {
     case 'cad': return 'Canadian Dollar (CAD)';
     case 'inr': return 'Indian Rupee (INR)';
     case 'rub': return 'Russian Ruble (RUB)';
+    case 'sek': return 'Swedish Krona (SEK)';
+    case 'nzd': return 'New Zealand Dollar (NZD)';
+    case 'krw': return 'South Korean Won (KRW)';
+    case 'sgd': return 'Singapore Dollar (SGD)';
+    case 'nok': return 'Norwegian Krone (NOK)';
+    case 'mxn': return 'Mexican Peso (MXN)';
+    case 'brl': return 'Brazilian Real (BRL)';
+    case 'hkd': return 'Hong Kong Dollar (HKD)';
+    case 'try': return 'Turkish Lira (TRY)';
     default: return currency;
   }
 }
