@@ -1,7 +1,6 @@
-
 // Service Worker for Bitcoin Currency Converter
-
-const CACHE_NAME = 'bitcoin-converter-cache-v2';
+const CACHE_NAME = 'bitcoin-converter-cache-v3';
+const APP_VERSION = '1.1.0'; // Increment this when publishing updates
 const APP_URLS_TO_CACHE = [
   '/',
   '/index.html',
@@ -9,6 +8,16 @@ const APP_URLS_TO_CACHE = [
   '/src/index.css',
   '/src/App.tsx'
 ];
+
+// Function to notify all clients about updates
+const notifyClientsAboutUpdate = async () => {
+  const clients = await self.clients.matchAll();
+  clients.forEach(client => {
+    client.postMessage({
+      type: 'UPDATE_AVAILABLE'
+    });
+  });
+};
 
 // Install a service worker
 self.addEventListener('install', event => {
@@ -25,17 +34,33 @@ self.addEventListener('install', event => {
 
 // Cache and return requests
 self.addEventListener('fetch', event => {
-  // Skip cross-origin requests
+  // Add version check for HTML requests
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // If we get a valid response, check if it's a new version
+          if (response.headers.get('x-app-version') !== APP_VERSION) {
+            notifyClientsAboutUpdate();
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // For other requests, use standard cache strategy
   if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
         .then(response => {
-          // Cache hit - return response
           if (response) {
             return response;
           }
           
-          // Clone the request
           const fetchRequest = event.request.clone();
           
           return fetch(fetchRequest).then(response => {
@@ -85,20 +110,21 @@ self.addEventListener('message', event => {
 
 // Update service worker and clean up old caches
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
       // Take control of all clients immediately
-      return self.clients.claim();
-    })
+      self.clients.claim()
+    ])
   );
 });
 

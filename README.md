@@ -6,7 +6,9 @@ A privacy-focused, open-source Bitcoin currency converter that works offline and
 ## Features
 
 - **Privacy First**: All calculations are performed locally in your browser. No tracking, no analytics, no data collection.
+- **Price Tracking**: Enable automatic BTC price monitoring to always see the latest exchange rates when you open the app.
 - **Offline Support**: Works without an internet connection after the first load, with cached exchange rates.
+- **Auto Updates**: Automatically notifies users when a new version is available.
 - **Multiple Currencies**: Convert between BTC, satoshis, and various fiat currencies (USD, EUR, GBP, etc.).
 - **Customizable Currency Display**: Choose up to 6 currencies to display and reorder them as you prefer.
 - **Real-time Rates**: Fetch the latest exchange rates from CoinGecko (when online).
