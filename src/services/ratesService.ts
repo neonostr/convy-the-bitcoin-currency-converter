@@ -1,3 +1,4 @@
+
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Cache settings
@@ -33,6 +34,15 @@ export const DEFAULT_INITIAL_RATES: CoinRates = {
   cad: 0,
   inr: 0,
   rub: 0,
+  sek: 0,
+  nzd: 0,
+  krw: 0,
+  sgd: 0,
+  nok: 0,
+  mxn: 0,
+  brl: 0, 
+  hkd: 0,
+  try: 0,
   lastUpdated: new Date()
 };
 
@@ -139,7 +149,16 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
     aud: amountInBtc * rates.aud,
     cad: amountInBtc * rates.cad,
     inr: amountInBtc * rates.inr,
-    rub: amountInBtc * rates.rub
+    rub: amountInBtc * rates.rub,
+    sek: amountInBtc * rates.sek,
+    nzd: amountInBtc * rates.nzd,
+    krw: amountInBtc * rates.krw,
+    sgd: amountInBtc * rates.sgd,
+    nok: amountInBtc * rates.nok,
+    mxn: amountInBtc * rates.mxn,
+    brl: amountInBtc * rates.brl,
+    hkd: amountInBtc * rates.hkd,
+    try: amountInBtc * rates.try
   };
 }
 
