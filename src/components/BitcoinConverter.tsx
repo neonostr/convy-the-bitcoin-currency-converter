@@ -12,11 +12,13 @@ import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
 import { logAppOpen } from "@/services/eventLogger";
+import { useLanguage } from '@/hooks/useLanguage';
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { settings } = useSettings();
+  const { language, t } = useLanguage();
   const { 
     amount, 
     setAmount, 
@@ -87,8 +89,8 @@ const BitcoinConverter = () => {
     recordUserActivity();
     navigator.clipboard.writeText(value).then(() => {
       toast({
-        title: "Copied to clipboard",
-        description: `Copied ${value}`,
+        title: t('copyMessage'),
+        description: `${t('copied')} ${value}`,
         duration: 2000,
       });
     }).catch(err => {
@@ -108,7 +110,7 @@ const BitcoinConverter = () => {
       <div className="flex items-center justify-between w-full mb-6">
         <div className="flex items-center space-x-2">
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />
-          <h1 className="text-2xl font-bold">Bitcoin Currency Converter</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
         </div>
         <SettingsMenu />
       </div>
@@ -119,7 +121,7 @@ const BitcoinConverter = () => {
           type="text"
           inputMode="decimal"
           className="text-3xl md:text-4xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          placeholder="Enter amount"
+          placeholder={t('enterAmount')}
           value={amount}
           onFocus={handleInputFocus}
           onChange={(e) => handleInputChange(e.target.value)}
@@ -135,7 +137,7 @@ const BitcoinConverter = () => {
 
       {rates && (
         <div className="text-sm text-muted-foreground mb-4">
-          Last updated: {getLastUpdatedFormatted(rates.lastUpdated)}
+          {t('lastUpdated')}: {getLastUpdatedFormatted(rates.lastUpdated)}
         </div>
       )}
 
@@ -147,9 +149,9 @@ const BitcoinConverter = () => {
       />
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        Tap any result to copy. Rates provided by CoinGecko. All calculations are performed 100% offline on your device. Check my <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
-          <u>source code</u>
-        </a> to verify. Add me to your home screen for a seamless web app experience.
+        {t('footer.tapToCopy')} {t('footer.ratesBy')} {t('footer.offlineCalc')} {t('footer.checkSource')} <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
+          <u>{t('footer.checkSource')}</u>
+        </a> {t('footer.addToHome')}
       </div>
 
       <DonationPopup />

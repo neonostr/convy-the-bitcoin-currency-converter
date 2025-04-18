@@ -20,12 +20,23 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('app-language', language);
   }, [language]);
 
-  const t = (key: string, section?: string) => {
+  const t = (key: string): string => {
     try {
-      if (section) {
-        return (translations[language][section] as any)[key] || key;
+      // Split the key by dots to handle nested properties
+      const parts = key.split('.');
+      let result: any = translations[language];
+      
+      // Navigate through the object based on the key parts
+      for (const part of parts) {
+        if (result && result[part] !== undefined) {
+          result = result[part];
+        } else {
+          return key; // Return the key if the translation is not found
+        }
       }
-      return (translations[language] as any)[key] || key;
+      
+      // Make sure we're returning a string
+      return typeof result === 'string' ? result : key;
     } catch (e) {
       return key;
     }

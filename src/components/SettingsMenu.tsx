@@ -98,15 +98,15 @@ const SettingsMenu: React.FC = () => {
       </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{t('settings')}</SheetTitle>
+          <SheetTitle>{t('title')}</SheetTitle>
         </SheetHeader>
         
         <div className="py-6">
-          <h3 className="text-lg font-medium mb-4">{t('appearance', 'settings')}</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.appearance')}</h3>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Sun className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="theme-toggle">{t('light', 'settings')}</Label>
+              <Label htmlFor="theme-toggle">{t('settings.light')}</Label>
             </div>
             <Switch 
               id="theme-toggle"
@@ -115,16 +115,16 @@ const SettingsMenu: React.FC = () => {
             />
             <div className="flex items-center space-x-2">
               <Moon className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="theme-toggle">{t('dark', 'settings')}</Label>
+              <Label htmlFor="theme-toggle">{t('settings.dark')}</Label>
             </div>
           </div>
         </div>
         
         <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">{t('language', 'settings')}</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.language')}</h3>
           <Select value={language} onValueChange={(value) => setLanguage(value as 'en' | 'es' | 'de')}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={t('chooseLanguage', 'settings')} />
+              <SelectValue placeholder={t('settings.chooseLanguage')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="en">English</SelectItem>
@@ -135,14 +135,14 @@ const SettingsMenu: React.FC = () => {
         </div>
 
         <div className="py-4">
-          <h3 className="text-lg font-medium mb-4">{t('displayCurrencies', 'settings')}</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.displayCurrencies')}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            {t('selectCurrencies', 'settings').replace('{min}', MIN_CURRENCY_COUNT.toString()).replace('{max}', MAX_CURRENCY_COUNT.toString())}
+            {t('settings.selectCurrencies').replace('{min}', MIN_CURRENCY_COUNT.toString()).replace('{max}', MAX_CURRENCY_COUNT.toString())}
           </p>
           
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">{t('selectedCurrencies', 'settings')}</h4>
-            <p className="text-xs text-muted-foreground mb-2">{t('dragToReorder', 'settings')}</p>
+            <h4 className="text-sm font-medium">{t('settings.selectedCurrencies')}</h4>
+            <p className="text-xs text-muted-foreground mb-2">{t('settings.dragToReorder')}</p>
             
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="selected-currencies">
@@ -181,7 +181,7 @@ const SettingsMenu: React.FC = () => {
           </div>
           
           <div className="mt-6 space-y-4">
-            <h4 className="text-sm font-medium">{t('availableCurrencies', 'settings')}</h4>
+            <h4 className="text-sm font-medium">{t('settings.availableCurrencies')}</h4>
             <div className="space-y-2">
               {allCurrencies
                 .filter(currency => !selectedCurrencies.includes(currency))
@@ -205,10 +205,10 @@ const SettingsMenu: React.FC = () => {
         </div>
 
         <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">{t('numberFormat', 'settings')}</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.numberFormat')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="decimal-separator">
-              {t('useCommaDecimal', 'settings')}
+              {t('settings.useCommaDecimal')}
             </Label>
             <Switch
               id="decimal-separator"
@@ -224,7 +224,7 @@ const SettingsMenu: React.FC = () => {
           
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="thousand-separator-when-copying">
-              {t('includeThousandSep', 'settings')}
+              {t('settings.includeThousandSep')}
             </Label>
             <Switch
               id="thousand-separator-when-copying"
@@ -240,10 +240,10 @@ const SettingsMenu: React.FC = () => {
         </div>
 
         <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">{t('priceTracker', 'settings')}</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.priceTracker')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="default-to-btc">
-              {t('priceTrackerMode', 'settings')}
+              {t('settings.priceTrackerMode')}
             </Label>
             <Switch
               id="default-to-btc"
@@ -252,7 +252,7 @@ const SettingsMenu: React.FC = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground mb-4">
-            {t('priceTrackerDesc', 'settings')}
+            {t('settings.priceTrackerDesc')}
           </p>
         </div>
 
