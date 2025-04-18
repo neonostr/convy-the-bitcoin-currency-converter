@@ -95,8 +95,7 @@ export async function fetchFromCoinGeckoPublic() {
 
   try {
     console.log("Cache miss or stale, fetching fresh data from CoinGecko public API...");
-    // Include all currencies in the request
-    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub,sek,nzd,krw,sgd,nok,mxn,brl,hkd,try');
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub');
     
     if (!response.ok) {
       await logApiError('coingecko_public', response.status);
@@ -139,8 +138,7 @@ export async function fetchFromCoinGeckoWithKey() {
     // Adding detailed logging for debugging API key issues
     console.log(`Using API key (first 4 chars): ${coinGeckoApiKey.substring(0, 4)}...`);
     
-    // Include all currencies in the request
-    const url = 'https://pro-api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub,sek,nzd,krw,sgd,nok,mxn,brl,hkd,try';
+    const url = 'https://pro-api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,chf,cny,jpy,gbp,aud,cad,inr,rub';
     console.log(`Making request to: ${url}`);
     
     const response = await fetch(url, {

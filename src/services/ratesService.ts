@@ -33,15 +33,6 @@ export const DEFAULT_INITIAL_RATES: CoinRates = {
   cad: 0,
   inr: 0,
   rub: 0,
-  sek: 0,
-  nzd: 0,
-  krw: 0,
-  sgd: 0,
-  nok: 0,
-  mxn: 0,
-  brl: 0,
-  hkd: 0,
-  try: 0,
   lastUpdated: new Date()
 };
 
@@ -136,15 +127,20 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
   }
   
   // Now convert from BTC to all other currencies
-  const result: Record<string, number> = {};
-  
-  Object.keys(rates).forEach(currency => {
-    if (currency !== 'lastUpdated') {
-      result[currency] = amountInBtc * (rates[currency as keyof Omit<CoinRates, 'lastUpdated'>] || 0);
-    }
-  });
-  
-  return result;
+  return {
+    btc: amountInBtc,
+    sats: amountInBtc * rates.sats,
+    usd: amountInBtc * rates.usd,
+    eur: amountInBtc * rates.eur,
+    chf: amountInBtc * rates.chf,
+    cny: amountInBtc * rates.cny,
+    jpy: amountInBtc * rates.jpy,
+    gbp: amountInBtc * rates.gbp,
+    aud: amountInBtc * rates.aud,
+    cad: amountInBtc * rates.cad,
+    inr: amountInBtc * rates.inr,
+    rub: amountInBtc * rates.rub
+  };
 }
 
 // Initialize service worker data synchronization
