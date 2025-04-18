@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -32,25 +31,19 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
 
-  // Use strict dependency tracking to avoid multiple triggers
   useEffect(() => {
-    // Only log app open once per session
     const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
     if (!hasLoggedOpen) {
       logAppOpen();
       sessionStorage.setItem('app_open_logged', 'true');
     }
     
-    // Record user activity when the app is loaded
     recordUserActivity();
     
-    // Setup visibility change listener to record activity when app becomes visible
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         recordUserActivity();
         
-        // Apply default to BTC when app becomes visible (if setting is enabled)
-        // But only if the user is not already interacting with the app
         if (settings.alwaysDefaultToBtc && !document.activeElement?.matches('input')) {
           setDefaultBtcValue();
         }
@@ -59,7 +52,6 @@ const BitcoinConverter = () => {
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Apply default to BTC on initial load (if setting is enabled)
     if (settings.alwaysDefaultToBtc) {
       setDefaultBtcValue();
     }
@@ -72,10 +64,8 @@ const BitcoinConverter = () => {
   const { displayCurrencies } = settings;
 
   const handleInputFocus = () => {
-    // Clear input field when focused - this is key for the fix
     setAmount('');
     recordUserActivity();
-    // Reset conversions to 0 when input field is focused
     if (rates) {
       const resetConversions: Record<string, number> = {};
       Object.keys(conversions).forEach(currency => {
@@ -149,7 +139,7 @@ const BitcoinConverter = () => {
       />
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        {t('footer.tapToCopy')} {t('footer.ratesBy')} {t('footer.offlineCalc')} {t('footer.checkSource')} <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
+        {t('footer.tapToCopy')} {t('footer.ratesBy')} {t('footer.offlineCalc')} <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" className="text-muted-foreground" target="_blank" rel="noopener noreferrer">
           <u>{t('footer.checkSource')}</u>
         </a> {t('footer.addToHome')}
       </div>

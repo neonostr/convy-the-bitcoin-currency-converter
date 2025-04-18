@@ -93,9 +93,11 @@ async function performFetch(): Promise<CoinRates> {
     
     console.log("Bitcoin rates from API:", data.bitcoin);
     
+    // Create new rates object with all currencies
     const newRates: CoinRates = {
       btc: 1,
       sats: 100000000,
+      // Map all existing currencies from API response or fallback to initialRates
       usd: data.bitcoin.usd || initialRates.usd,
       eur: data.bitcoin.eur || initialRates.eur,
       chf: data.bitcoin.chf || initialRates.chf,
