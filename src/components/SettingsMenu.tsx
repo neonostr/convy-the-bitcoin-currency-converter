@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,10 @@ import { getCurrencyLabel } from '@/utils/formatUtils';
 import { useConversion } from '@/hooks/useConversion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/hooks/useLanguage';
+
+// Define currency count limits
+const MIN_CURRENCY_COUNT = 2;
+const MAX_CURRENCY_COUNT = 10;
 
 const SettingsMenu: React.FC = () => {
   const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings, appVersion } = useSettings();
@@ -132,12 +137,12 @@ const SettingsMenu: React.FC = () => {
         <div className="py-4">
           <h3 className="text-lg font-medium mb-4">{t('displayCurrencies', 'settings')}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select between {MIN_CURRENCY_COUNT} and {MAX_CURRENCY_COUNT} currencies to display on the main screen. Drag and drop to reorder.
+            {t('selectCurrencies', 'settings').replace('{min}', MIN_CURRENCY_COUNT.toString()).replace('{max}', MAX_CURRENCY_COUNT.toString())}
           </p>
           
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Selected Currencies</h4>
-            <p className="text-xs text-muted-foreground mb-2">Drag to reorder:</p>
+            <h4 className="text-sm font-medium">{t('selectedCurrencies', 'settings')}</h4>
+            <p className="text-xs text-muted-foreground mb-2">{t('dragToReorder', 'settings')}</p>
             
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="selected-currencies">
@@ -176,7 +181,7 @@ const SettingsMenu: React.FC = () => {
           </div>
           
           <div className="mt-6 space-y-4">
-            <h4 className="text-sm font-medium">Available Currencies</h4>
+            <h4 className="text-sm font-medium">{t('availableCurrencies', 'settings')}</h4>
             <div className="space-y-2">
               {allCurrencies
                 .filter(currency => !selectedCurrencies.includes(currency))
@@ -203,7 +208,7 @@ const SettingsMenu: React.FC = () => {
           <h3 className="text-lg font-medium mb-4">{t('numberFormat', 'settings')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="decimal-separator">
-              Use comma as decimal separator
+              {t('useCommaDecimal', 'settings')}
             </Label>
             <Switch
               id="decimal-separator"
@@ -219,7 +224,7 @@ const SettingsMenu: React.FC = () => {
           
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="thousand-separator-when-copying">
-              Include thousand separators when copying
+              {t('includeThousandSep', 'settings')}
             </Label>
             <Switch
               id="thousand-separator-when-copying"
@@ -238,7 +243,7 @@ const SettingsMenu: React.FC = () => {
           <h3 className="text-lg font-medium mb-4">{t('priceTracker', 'settings')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="default-to-btc">
-              BTC price tracker mode
+              {t('priceTrackerMode', 'settings')}
             </Label>
             <Switch
               id="default-to-btc"
@@ -247,7 +252,7 @@ const SettingsMenu: React.FC = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground mb-4">
-            When enabled, the app will automatically show the current value of 1 BTC whenever you open or resume it, while still allowing you to input your own values.
+            {t('priceTrackerDesc', 'settings')}
           </p>
         </div>
 

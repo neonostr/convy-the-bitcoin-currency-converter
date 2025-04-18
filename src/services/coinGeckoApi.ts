@@ -106,6 +106,15 @@ async function performFetch(): Promise<CoinRates> {
       cad: data.bitcoin.cad || initialRates.cad,
       inr: data.bitcoin.inr || initialRates.inr,
       rub: data.bitcoin.rub || initialRates.rub,
+      sek: data.bitcoin.sek || initialRates.sek,
+      nzd: data.bitcoin.nzd || initialRates.nzd,
+      krw: data.bitcoin.krw || initialRates.krw,
+      sgd: data.bitcoin.sgd || initialRates.sgd,
+      nok: data.bitcoin.nok || initialRates.nok,
+      mxn: data.bitcoin.mxn || initialRates.mxn,
+      brl: data.bitcoin.brl || initialRates.brl,
+      hkd: data.bitcoin.hkd || initialRates.hkd,
+      try: data.bitcoin.try || initialRates.try,
       lastUpdated: new Date()
     };
     

@@ -38,5 +38,14 @@ export interface CoinGeckoResponse {
     cad?: number;
     inr?: number;
     rub?: number;
+    sek?: number;
+    nzd?: number;
+    krw?: number;
+    sgd?: number;
+    nok?: number;
+    mxn?: number;
+    brl?: number;
+    hkd?: number;
+    try?: number;
   };
 }
