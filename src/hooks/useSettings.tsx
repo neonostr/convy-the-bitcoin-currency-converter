@@ -26,6 +26,10 @@ const ALL_CURRENCIES: Currency[] = [
 ];
 const APP_VERSION = '1.0.0'; // Add version constant
 
+// Define currency count limits
+export const MIN_CURRENCY_COUNT = 2;
+export const MAX_CURRENCY_COUNT = 6; // Changed back to 6 from 10
+
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 

@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Settings as SettingsIcon, Moon, Sun } from 'lucide-react';
-import { useSettings } from '@/hooks/useSettings';
+import { useSettings, MIN_CURRENCY_COUNT, MAX_CURRENCY_COUNT } from '@/hooks/useSettings';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -13,10 +12,6 @@ import { useConversion } from '@/hooks/useConversion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Separator } from '@/components/ui/separator';
-
-// Define currency count limits
-const MIN_CURRENCY_COUNT = 2;
-const MAX_CURRENCY_COUNT = 10;
 
 const SettingsMenu: React.FC = () => {
   const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings, appVersion } = useSettings();
@@ -121,9 +116,9 @@ const SettingsMenu: React.FC = () => {
           </div>
         </div>
         
-        <Separator />
+        <Separator className="my-6" />
         
-        <div className="py-4">
+        <div className="py-4 pb-6">
           <h3 className="text-lg font-medium mb-4">{t('settings.language')}</h3>
           <Select value={language} onValueChange={(value) => setLanguage(value as 'en' | 'es' | 'de')}>
             <SelectTrigger className="w-full">
@@ -137,9 +132,9 @@ const SettingsMenu: React.FC = () => {
           </Select>
         </div>
 
-        <Separator />
+        <Separator className="my-6" />
 
-        <div className="py-4">
+        <div className="py-4 pb-6">
           <h3 className="text-lg font-medium mb-4">{t('settings.displayCurrencies')}</h3>
           <p className="text-sm text-muted-foreground mb-4">
             {t('settings.selectCurrencies').replace('{min}', MIN_CURRENCY_COUNT.toString()).replace('{max}', MAX_CURRENCY_COUNT.toString())}
@@ -209,9 +204,9 @@ const SettingsMenu: React.FC = () => {
           </div>
         </div>
 
-        <Separator />
+        <Separator className="my-6" />
 
-        <div className="py-4">
+        <div className="py-4 pb-6">
           <h3 className="text-lg font-medium mb-4">{t('settings.numberFormat')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="decimal-separator">
@@ -246,9 +241,9 @@ const SettingsMenu: React.FC = () => {
           </div>
         </div>
 
-        <Separator />
+        <Separator className="my-6" />
 
-        <div className="py-4">
+        <div className="py-4 pb-6">
           <h3 className="text-lg font-medium mb-4">{t('settings.priceTracker')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="default-to-btc">
@@ -265,7 +260,7 @@ const SettingsMenu: React.FC = () => {
           </p>
         </div>
 
-        <Separator />
+        <Separator className="my-6" />
 
         <div className="pt-4 text-center">
           <p className="text-xs text-muted-foreground">

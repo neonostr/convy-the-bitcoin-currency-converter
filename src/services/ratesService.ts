@@ -1,4 +1,3 @@
-
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Cache settings
@@ -137,29 +136,15 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
   }
   
   // Now convert from BTC to all other currencies
-  return {
-    btc: amountInBtc,
-    sats: amountInBtc * rates.sats,
-    usd: amountInBtc * rates.usd,
-    eur: amountInBtc * rates.eur,
-    chf: amountInBtc * rates.chf,
-    cny: amountInBtc * rates.cny,
-    jpy: amountInBtc * rates.jpy,
-    gbp: amountInBtc * rates.gbp,
-    aud: amountInBtc * rates.aud,
-    cad: amountInBtc * rates.cad,
-    inr: amountInBtc * rates.inr,
-    rub: amountInBtc * rates.rub,
-    sek: amountInBtc * rates.sek,
-    nzd: amountInBtc * rates.nzd,
-    krw: amountInBtc * rates.krw,
-    sgd: amountInBtc * rates.sgd,
-    nok: amountInBtc * rates.nok,
-    mxn: amountInBtc * rates.mxn,
-    brl: amountInBtc * rates.brl,
-    hkd: amountInBtc * rates.hkd,
-    try: amountInBtc * rates.try
-  };
+  const result: Record<string, number> = {};
+  
+  Object.keys(rates).forEach(currency => {
+    if (currency !== 'lastUpdated') {
+      result[currency] = amountInBtc * (rates[currency as keyof Omit<CoinRates, 'lastUpdated'>] || 0);
+    }
+  });
+  
+  return result;
 }
 
 // Initialize service worker data synchronization
