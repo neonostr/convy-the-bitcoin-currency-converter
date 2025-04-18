@@ -11,6 +11,15 @@ export interface CoinGeckoResponse {
     cad?: number;
     inr?: number;
     rub?: number;
+    sek?: number;
+    nzd?: number;
+    krw?: number;
+    sgd?: number;
+    nok?: number;
+    mxn?: number;
+    brl?: number;
+    hkd?: number;
+    try?: number;
   };
 }
 
@@ -18,4 +27,7 @@ export interface RatesResponse {
   bitcoin: Record<string, number>;
 }
 
-export const supportedCurrencies = ['usd', 'eur', 'chf', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'inr', 'rub'];
+export const supportedCurrencies = [
+  'usd', 'eur', 'chf', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'inr', 'rub',
+  'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try'
+];
