@@ -1,11 +1,12 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Settings, Moon, Sun } from 'lucide-react';
+import { Settings as SettingsIcon, Moon, Sun } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Currency } from '@/types/currency.types';
 import { getCurrencyLabel } from '@/utils/formatUtils';
@@ -17,6 +18,7 @@ const MAX_CURRENCY_COUNT = 6;
 const SettingsMenu: React.FC = () => {
   const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings, appVersion } = useSettings();
   const { setAmount, handleCurrencySelect } = useConversion();
+  const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
 
@@ -80,10 +82,8 @@ const SettingsMenu: React.FC = () => {
   const handlePriceTrackerToggle = (checked: boolean) => {
     updateSettings({ alwaysDefaultToBtc: checked });
     
-    // When turning off tracker mode, we should clear the input field
     if (!checked) {
       setAmount('');
-      // Also resets the currency if needed
     }
   };
 
@@ -91,20 +91,20 @@ const SettingsMenu: React.FC = () => {
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
-          <Settings className="h-5 w-5" />
+          <SettingsIcon className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Settings</SheetTitle>
+          <SheetTitle>{t('settings.title')}</SheetTitle>
         </SheetHeader>
         
         <div className="py-6">
-          <h3 className="text-lg font-medium mb-4">Appearance</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.appearance')}</h3>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Sun className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="theme-toggle">Light</Label>
+              <Label htmlFor="theme-toggle">{t('common.light')}</Label>
             </div>
             <Switch 
               id="theme-toggle"
@@ -113,20 +113,34 @@ const SettingsMenu: React.FC = () => {
             />
             <div className="flex items-center space-x-2">
               <Moon className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="theme-toggle">Dark</Label>
+              <Label htmlFor="theme-toggle">{t('common.dark')}</Label>
             </div>
           </div>
         </div>
         
+        <div className="py-4 border-t">
+          <h3 className="text-lg font-medium mb-4">Language</h3>
+          <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="es">Español</SelectItem>
+              <SelectItem value="de">Deutsch</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="py-4">
-          <h3 className="text-lg font-medium mb-4">Display Currencies</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.displayCurrencies')}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Select between {MIN_CURRENCY_COUNT} and {MAX_CURRENCY_COUNT} currencies to display on the main screen. Drag and drop to reorder.
+            {t('settings.displayCurrencies.description')}
           </p>
           
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Selected Currencies</h4>
-            <p className="text-xs text-muted-foreground mb-2">Drag to reorder:</p>
+            <h4 className="text-sm font-medium">{t('settings.displayCurrencies.selected')}</h4>
+            <p className="text-xs text-muted-foreground mb-2">{t('settings.displayCurrencies.dragToReorder')}</p>
             
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="selected-currencies">
@@ -165,7 +179,7 @@ const SettingsMenu: React.FC = () => {
           </div>
           
           <div className="mt-6 space-y-4">
-            <h4 className="text-sm font-medium">Available Currencies</h4>
+            <h4 className="text-sm font-medium">{t('settings.displayCurrencies.available')}</h4>
             <div className="space-y-2">
               {allCurrencies
                 .filter(currency => !selectedCurrencies.includes(currency))
@@ -189,10 +203,10 @@ const SettingsMenu: React.FC = () => {
         </div>
 
         <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">Number Format</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.numberFormat')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="decimal-separator">
-              Use comma as decimal separator
+              {t('settings.numberFormat.useCommaAsDecimalSeparator')}
             </Label>
             <Switch
               id="decimal-separator"
@@ -208,7 +222,7 @@ const SettingsMenu: React.FC = () => {
           
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="thousand-separator-when-copying">
-              Include thousand separators when copying
+              {t('settings.numberFormat.includeThousandSeparatorsWhenCopying')}
             </Label>
             <Switch
               id="thousand-separator-when-copying"
@@ -224,10 +238,10 @@ const SettingsMenu: React.FC = () => {
         </div>
 
         <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">Price Tracker</h3>
+          <h3 className="text-lg font-medium mb-4">{t('settings.priceTracker')}</h3>
           <div className="flex items-center justify-between space-x-2 mb-2">
             <Label htmlFor="default-to-btc">
-              BTC price tracker mode
+              {t('settings.priceTracker.btcPriceTrackerMode')}
             </Label>
             <Switch
               id="default-to-btc"
@@ -236,7 +250,7 @@ const SettingsMenu: React.FC = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground mb-4">
-            When enabled, the app will automatically show the current value of 1 BTC whenever you open or resume it, while still allowing you to input your own values.
+            {t('settings.priceTracker.description')}
           </p>
         </div>
 
