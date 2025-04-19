@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -139,7 +140,7 @@ const BitcoinConverter = () => {
       />
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        {t('converter.tapToCopy')}. {t('converter.sourceCode')}. {t('converter.addToHomeScreen')}
+        {t('converter.tapToCopy')}. <a href="https://github.com/rauchg/bitcoin-converter" className="underline" target="_blank" rel="noopener noreferrer">{t('converter.sourceCode')}</a>. {t('converter.addToHomeScreen')}
       </div>
 
       <DonationPopup />

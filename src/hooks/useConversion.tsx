@@ -72,12 +72,15 @@ export const useConversion = () => {
     setAmount(sanitizedValue);
   };
 
-  // Effect for handling rate updates - but limit toast frequency
+  // Effect for handling rate updates - but limit toast frequency and don't show when in settings
   useEffect(() => {
     if (rates) {
       // Only show toast if enough time has passed since the last one
+      // and if we're not in a sheet/modal (checking for body class)
       const now = Date.now();
-      if (now - lastToastTime.current > MIN_TOAST_INTERVAL) {
+      const isSheetOpen = document.querySelector('[role="dialog"]') !== null;
+      
+      if (now - lastToastTime.current > MIN_TOAST_INTERVAL && !isSheetOpen) {
         toast({
           title: "Currency Rates Updated",
           description: "Auto-updates every 60 seconds when activity is detected.",

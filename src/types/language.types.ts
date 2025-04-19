@@ -5,22 +5,14 @@ export interface Translations {
   settings: {
     title: string;
     appearance: string;
-    displayCurrencies: string;
-    selectCurrencies: string;
-    selectedCurrencies: string;
-    availableCurrencies: string;
-    dragToReorder: string;
-    numberFormat: string;
-    useCommaDecimal: string;
-    includeThousandSeparator: string;
+    language: string;
+    version: string;
     priceTracker: {
       title: string;
       description: string;
       toggle: string;
       btcPriceTrackerMode: string;
     };
-    version: string;
-    language: string;
     numberFormat: {
       title: string;
       useCommaAsDecimalSeparator: string;

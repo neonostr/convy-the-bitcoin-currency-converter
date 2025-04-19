@@ -6,22 +6,14 @@ export const translations: Record<string, Translations> = {
     settings: {
       title: 'Settings',
       appearance: 'Appearance',
-      displayCurrencies: 'Display Currencies',
-      selectCurrencies: 'Select Currencies',
-      selectedCurrencies: 'Selected Currencies',
-      availableCurrencies: 'Available Currencies',
-      dragToReorder: 'Drag to reorder',
-      numberFormat: 'Number Format',
-      useCommaDecimal: 'Use comma as decimal separator',
-      includeThousandSeparator: 'Include thousand separators when copying',
       language: 'Language',
+      version: 'Version',
       priceTracker: {
         title: 'Price Tracker',
-        description: 'When enabled, the app will always show the current Bitcoin price when opened.',
+        description: 'When enabled, the app will automatically show the current value of 1 BTC whenever you open or resume it, while still allowing you to input your own values.',
         toggle: 'Enable Price Tracker',
-        btcPriceTrackerMode: 'BTC Price Tracker Mode'
+        btcPriceTrackerMode: 'BTC price tracker mode'
       },
-      version: 'Version',
       numberFormat: {
         title: 'Number Format',
         useCommaAsDecimalSeparator: 'Use comma as decimal separator',
@@ -29,7 +21,7 @@ export const translations: Record<string, Translations> = {
       },
       displayCurrencies: {
         title: 'Display Currencies',
-        description: 'Select which currencies to display and their order.',
+        description: 'Select between 2 and 6 currencies to display on the main screen. Drag and drop to reorder.',
         selected: 'Selected Currencies',
         available: 'Available Currencies',
         dragToReorder: 'Drag to reorder'
@@ -39,9 +31,9 @@ export const translations: Record<string, Translations> = {
       title: 'Bitcoin Converter',
       enterAmount: 'Enter amount',
       lastUpdated: 'Last updated',
-      tapToCopy: 'Tap a result to copy',
-      sourceCode: 'Source code on GitHub',
-      addToHomeScreen: 'Add to home screen for offline use'
+      tapToCopy: 'Tap any result to copy',
+      sourceCode: 'Check my source code',
+      addToHomeScreen: 'Add me to your home screen for a seamless web app experience'
     },
     donation: {
       button: 'Zap me a coffee',
@@ -66,22 +58,14 @@ export const translations: Record<string, Translations> = {
     settings: {
       title: 'Configuración',
       appearance: 'Apariencia',
-      displayCurrencies: 'Mostrar Monedas',
-      selectCurrencies: 'Seleccionar Monedas',
-      selectedCurrencies: 'Monedas Seleccionadas',
-      availableCurrencies: 'Monedas Disponibles',
-      dragToReorder: 'Arrastra para reordenar',
-      numberFormat: 'Formato de Números',
-      useCommaDecimal: 'Usar coma como separador decimal',
-      includeThousandSeparator: 'Incluir separadores de miles al copiar',
       language: 'Idioma',
+      version: 'Versión',
       priceTracker: {
         title: 'Seguimiento de Precios',
-        description: 'Cuando está activado, la aplicación siempre mostrará el precio actual de Bitcoin al abrirse.',
+        description: 'Cuando está activado, la aplicación mostrará automáticamente el valor actual de 1 BTC cada vez que la abras o reanudes, mientras que aún te permite ingresar tus propios valores.',
         toggle: 'Activar Seguimiento de Precios',
-        btcPriceTrackerMode: 'Modo de Seguimiento de Precios BTC'
+        btcPriceTrackerMode: 'Modo de seguimiento de precio BTC'
       },
-      version: 'Versión',
       numberFormat: {
         title: 'Formato de Números',
         useCommaAsDecimalSeparator: 'Usar coma como separador decimal',
@@ -89,7 +73,7 @@ export const translations: Record<string, Translations> = {
       },
       displayCurrencies: {
         title: 'Mostrar Monedas',
-        description: 'Selecciona qué monedas mostrar y su orden.',
+        description: 'Selecciona entre 2 y 6 monedas para mostrar en la pantalla principal. Arrastra y suelta para reordenar.',
         selected: 'Monedas Seleccionadas',
         available: 'Monedas Disponibles',
         dragToReorder: 'Arrastra para reordenar'
@@ -99,9 +83,9 @@ export const translations: Record<string, Translations> = {
       title: 'Conversor de Bitcoin',
       enterAmount: 'Ingresa cantidad',
       lastUpdated: 'Última actualización',
-      tapToCopy: 'Toca un resultado para copiar',
-      sourceCode: 'Código fuente en GitHub',
-      addToHomeScreen: 'Añadir a la pantalla de inicio para uso sin conexión'
+      tapToCopy: 'Toca cualquier resultado para copiar',
+      sourceCode: 'Revisa mi código fuente',
+      addToHomeScreen: 'Añádeme a tu pantalla de inicio para una experiencia web fluida'
     },
     donation: {
       button: 'Envíame un café',
@@ -126,22 +110,14 @@ export const translations: Record<string, Translations> = {
     settings: {
       title: 'Einstellungen',
       appearance: 'Erscheinungsbild',
-      displayCurrencies: 'Währungen anzeigen',
-      selectCurrencies: 'Währungen auswählen',
-      selectedCurrencies: 'Ausgewählte Währungen',
-      availableCurrencies: 'Verfügbare Währungen',
-      dragToReorder: 'Ziehen zum Neuordnen',
-      numberFormat: 'Zahlenformat',
-      useCommaDecimal: 'Komma als Dezimaltrennzeichen verwenden',
-      includeThousandSeparator: 'Tausendertrennzeichen beim Kopieren einschließen',
       language: 'Sprache',
+      version: 'Version',
       priceTracker: {
         title: 'Preisverfolgung',
-        description: 'Wenn aktiviert, zeigt die App beim Öffnen immer den aktuellen Bitcoin-Preis an.',
+        description: 'Wenn aktiviert, zeigt die App automatisch den aktuellen Wert von 1 BTC an, wann immer du sie öffnest oder wieder aufnimmst, während du weiterhin deine eigenen Werte eingeben kannst.',
         toggle: 'Preisverfolgung aktivieren',
         btcPriceTrackerMode: 'BTC-Preisverfolgungsmodus'
       },
-      version: 'Version',
       numberFormat: {
         title: 'Zahlenformat',
         useCommaAsDecimalSeparator: 'Komma als Dezimaltrennzeichen verwenden',
@@ -149,7 +125,7 @@ export const translations: Record<string, Translations> = {
       },
       displayCurrencies: {
         title: 'Währungen anzeigen',
-        description: 'Wähle aus, welche Währungen angezeigt werden und in welcher Reihenfolge.',
+        description: 'Wähle zwischen 2 und 6 Währungen, die auf dem Hauptbildschirm angezeigt werden sollen. Ziehen und ablegen zum Neuordnen.',
         selected: 'Ausgewählte Währungen',
         available: 'Verfügbare Währungen',
         dragToReorder: 'Ziehen zum Neuordnen'
@@ -160,8 +136,8 @@ export const translations: Record<string, Translations> = {
       enterAmount: 'Betrag eingeben',
       lastUpdated: 'Zuletzt aktualisiert',
       tapToCopy: 'Tippe auf ein Ergebnis zum Kopieren',
-      sourceCode: 'Quellcode auf GitHub',
-      addToHomeScreen: 'Zum Startbildschirm hinzufügen für Offline-Nutzung'
+      sourceCode: 'Schau dir meinen Quellcode an',
+      addToHomeScreen: 'Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis'
     },
     donation: {
       button: 'Spendiere mir einen Kaffee',
