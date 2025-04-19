@@ -17,8 +17,22 @@ export interface Translations {
       title: string;
       description: string;
       toggle: string;
+      btcPriceTrackerMode: string;
     };
     version: string;
+    language: string;
+    numberFormat: {
+      title: string;
+      useCommaAsDecimalSeparator: string;
+      includeThousandSeparatorsWhenCopying: string;
+    };
+    displayCurrencies: {
+      title: string;
+      description: string;
+      selected: string;
+      available: string;
+      dragToReorder: string;
+    };
   };
   converter: {
     title: string;

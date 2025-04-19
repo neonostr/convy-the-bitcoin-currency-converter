@@ -1,91 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Settings as SettingsIcon, Moon, Sun } from 'lucide-react';
-import { useSettings } from '@/hooks/useSettings';
+import { Settings as SettingsIcon } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Currency } from '@/types/currency.types';
-import { getCurrencyLabel } from '@/utils/formatUtils';
-import { useConversion } from '@/hooks/useConversion';
-
-const MIN_CURRENCY_COUNT = 2;
-const MAX_CURRENCY_COUNT = 6;
+import AppearanceSettings from '@/components/settings/AppearanceSettings';
+import LanguageSelector from '@/components/settings/LanguageSelector';
+import CurrencySettings from '@/components/settings/CurrencySettings';
+import NumberFormatSettings from '@/components/settings/NumberFormatSettings';
+import PriceTrackerSettings from '@/components/settings/PriceTrackerSettings';
+import AppVersion from '@/components/settings/AppVersion';
 
 const SettingsMenu: React.FC = () => {
-  const { settings, toggleTheme, updateDisplayCurrencies, allCurrencies, updateSettings, appVersion } = useSettings();
-  const { setAmount, handleCurrencySelect } = useConversion();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCurrencies, setSelectedCurrencies] = useState<Currency[]>([]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedCurrencies([...settings.displayCurrencies]);
-    }
-  }, [isOpen, settings.displayCurrencies]);
 
   const handleOpenChange = useCallback((open: boolean) => {
-    if (!open && selectedCurrencies.length >= MIN_CURRENCY_COUNT) {
-      updateDisplayCurrencies(selectedCurrencies);
-    }
     setIsOpen(open);
-  }, [selectedCurrencies, updateDisplayCurrencies]);
-
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const items = Array.from(selectedCurrencies);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setSelectedCurrencies(items);
-    updateDisplayCurrencies(items);
-  };
-
-  const toggleCurrency = (currency: Currency, isEnabled: boolean) => {
-    let newSelection: Currency[];
-    
-    if (isEnabled) {
-      if (selectedCurrencies.length < MAX_CURRENCY_COUNT) {
-        newSelection = [...selectedCurrencies, currency];
-      } else {
-        return;
-      }
-    } else {
-      if (selectedCurrencies.length > MIN_CURRENCY_COUNT) {
-        newSelection = selectedCurrencies.filter(c => c !== currency);
-      } else {
-        return;
-      }
-    }
-    
-    setSelectedCurrencies(newSelection);
-    updateDisplayCurrencies(newSelection);
-  };
-
-  const getFormattedExample = () => {
-    return settings.decimalSeparator === ',' ? '2.009,01' : '2,009.01';
-  };
-
-  const getCopyExample = () => {
-    if (settings.includeThouSepWhenCopying) {
-      return settings.decimalSeparator === ',' ? '2.009,01' : '2,009.01';
-    } else {
-      return settings.decimalSeparator === ',' ? '2009,01' : '2009.01';
-    }
-  };
-
-  const handlePriceTrackerToggle = (checked: boolean) => {
-    updateSettings({ alwaysDefaultToBtc: checked });
-    
-    if (!checked) {
-      setAmount('');
-    }
-  };
+  }, []);
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
@@ -99,166 +31,12 @@ const SettingsMenu: React.FC = () => {
           <SheetTitle>{t('settings.title')}</SheetTitle>
         </SheetHeader>
         
-        <div className="py-6">
-          <h3 className="text-lg font-medium mb-4">{t('settings.appearance')}</h3>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Sun className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="theme-toggle">{t('common.light')}</Label>
-            </div>
-            <Switch 
-              id="theme-toggle"
-              checked={settings.theme === 'dark'}
-              onCheckedChange={toggleTheme}
-            />
-            <div className="flex items-center space-x-2">
-              <Moon className="h-4 w-4 text-muted-foreground" />
-              <Label htmlFor="theme-toggle">{t('common.dark')}</Label>
-            </div>
-          </div>
-        </div>
-        
-        <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">Language</h3>
-          <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="es">Español</SelectItem>
-              <SelectItem value="de">Deutsch</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="py-4">
-          <h3 className="text-lg font-medium mb-4">{t('settings.displayCurrencies')}</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            {t('settings.displayCurrencies.description')}
-          </p>
-          
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium">{t('settings.displayCurrencies.selected')}</h4>
-            <p className="text-xs text-muted-foreground mb-2">{t('settings.displayCurrencies.dragToReorder')}</p>
-            
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="selected-currencies">
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="space-y-2"
-                  >
-                    {selectedCurrencies.map((currency, index) => (
-                      <Draggable key={currency} draggableId={currency} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="flex items-center justify-between p-3 bg-secondary rounded-md"
-                          >
-                            <span className="font-medium">
-                              {currency === 'sats' ? 'Satoshis (SATS)' : getCurrencyLabel(currency)}
-                            </span>
-                            <Switch 
-                              checked={true}
-                              onCheckedChange={() => toggleCurrency(currency, false)}
-                              disabled={selectedCurrencies.length <= MIN_CURRENCY_COUNT}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          </div>
-          
-          <div className="mt-6 space-y-4">
-            <h4 className="text-sm font-medium">{t('settings.displayCurrencies.available')}</h4>
-            <div className="space-y-2">
-              {allCurrencies
-                .filter(currency => !selectedCurrencies.includes(currency))
-                .map(currency => (
-                  <div
-                    key={currency}
-                    className="flex items-center justify-between p-3 bg-secondary/50 rounded-md"
-                  >
-                    <span>
-                      {currency === 'sats' ? 'Satoshis (SATS)' : getCurrencyLabel(currency)}
-                    </span>
-                    <Switch 
-                      checked={false}
-                      onCheckedChange={() => toggleCurrency(currency, true)}
-                      disabled={selectedCurrencies.length >= MAX_CURRENCY_COUNT}
-                    />
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">{t('settings.numberFormat')}</h3>
-          <div className="flex items-center justify-between space-x-2 mb-2">
-            <Label htmlFor="decimal-separator">
-              {t('settings.numberFormat.useCommaAsDecimalSeparator')}
-            </Label>
-            <Switch
-              id="decimal-separator"
-              checked={settings.decimalSeparator === ','}
-              onCheckedChange={(checked) => 
-                updateSettings({ decimalSeparator: checked ? ',' : '.' })
-              }
-            />
-          </div>
-          <div className="text-sm font-medium text-center mb-4 bg-secondary/50 p-2 rounded-md">
-            {getFormattedExample()}
-          </div>
-          
-          <div className="flex items-center justify-between space-x-2 mb-2">
-            <Label htmlFor="thousand-separator-when-copying">
-              {t('settings.numberFormat.includeThousandSeparatorsWhenCopying')}
-            </Label>
-            <Switch
-              id="thousand-separator-when-copying"
-              checked={settings.includeThouSepWhenCopying}
-              onCheckedChange={(checked) => 
-                updateSettings({ includeThouSepWhenCopying: checked })
-              }
-            />
-          </div>
-          <div className="text-sm font-medium text-center mb-4 bg-secondary/50 p-2 rounded-md">
-            {getCopyExample()}
-          </div>
-        </div>
-
-        <div className="py-4 border-t">
-          <h3 className="text-lg font-medium mb-4">{t('settings.priceTracker')}</h3>
-          <div className="flex items-center justify-between space-x-2 mb-2">
-            <Label htmlFor="default-to-btc">
-              {t('settings.priceTracker.btcPriceTrackerMode')}
-            </Label>
-            <Switch
-              id="default-to-btc"
-              checked={settings.alwaysDefaultToBtc}
-              onCheckedChange={handlePriceTrackerToggle}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground mb-4">
-            {t('settings.priceTracker.description')}
-          </p>
-        </div>
-
-        <div className="pt-4 border-t text-center">
-          <p className="text-xs text-muted-foreground">
-            Version {appVersion}
-          </p>
-        </div>
+        <AppearanceSettings />
+        <LanguageSelector />
+        <CurrencySettings isOpen={isOpen} />
+        <NumberFormatSettings />
+        <PriceTrackerSettings />
+        <AppVersion />
       </SheetContent>
     </Sheet>
   );
