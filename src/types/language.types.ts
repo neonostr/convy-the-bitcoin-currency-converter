@@ -33,6 +33,7 @@ export interface Translations {
     tapToCopy: string;
     sourceCode: string;
     addToHomeScreen: string;
+    ratesFooter: string;
   };
   donation: {
     button: string;

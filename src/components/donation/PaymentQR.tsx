@@ -13,16 +13,15 @@ interface PaymentQRProps {
 }
 
 const PaymentQR = ({ invoice, qrData, onCopy, isCopied }: PaymentQRProps) => {
+  const { t } = useLanguage();
+  
   const handleCopy = () => {
     if (invoice) {
       navigator.clipboard.writeText(invoice).then(() => {
         onCopy();
-        // Toast notification removed as requested
       });
     }
   };
-
-  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col items-center space-y-4">
