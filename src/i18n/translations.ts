@@ -1,4 +1,12 @@
 
+// How to access uploaded images:
+// Just type this in your browser (replace [your-domain] accordingly): 
+//    https://[your-domain]/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png
+// For development, use: http://localhost:5173/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png
+// The "public" part is left out in the URL. Place your files in the public/lovable-uploads folder.
+//
+// --- END IMAGE ACCESS COMMENT ---
+
 import { Translations } from '@/types/language.types';
 
 export const translations: Record<string, Translations> = {
@@ -10,7 +18,7 @@ export const translations: Record<string, Translations> = {
       version: 'Version',
       priceTracker: {
         title: 'Price Tracker',
-        description: 'When enabled, the app will automatically show the current value of 1 BTC whenever you open or resume it, while still allowing you to input your own values.',
+        description: "When enabled, the app will automatically show the current value of 1 BTC each time you open it, while still allowing you to input your own values.",
         toggle: 'Enable Price Tracker',
         btcPriceTrackerMode: 'BTC price tracker mode'
       },
@@ -21,10 +29,10 @@ export const translations: Record<string, Translations> = {
       },
       displayCurrencies: {
         title: 'Display Currencies',
-        description: 'Select between 2 and 6 currencies to display on the main screen. Drag and drop to reorder.',
+        description: 'Select between 2 and 6 currencies to show on the main screen. Drag & drop to reorder.',
         selected: 'Selected Currencies',
         available: 'Available Currencies',
-        dragToReorder: 'Drag to reorder'
+        dragToReorder: 'Drag & drop to reorder'
       }
     },
     converter: {
@@ -34,7 +42,7 @@ export const translations: Record<string, Translations> = {
       tapToCopy: 'Tap any result to copy',
       sourceCode: 'source code',
       addToHomeScreen: 'Add me to your home screen for a seamless web app experience.',
-      ratesFooter: 'Tap any result to copy. Rates provided by Coingecko. All calculations are performed 100% offline on your device. You can check my source code to verify. Add me to your home screen for a seamless web app experience.'
+      ratesFooter: "Tap any result to copy. Rates provided by Coingecko. All calculations are performed 100% offline on your device. You can check my source code to verify. Add me to your home screen for a seamless web app experience."
     },
     donation: {
       button: 'Zap me a coffee',
@@ -63,7 +71,7 @@ export const translations: Record<string, Translations> = {
       version: 'Versión',
       priceTracker: {
         title: 'Seguimiento de Precios',
-        description: 'Cuando está activado, la aplicación mostrará automáticamente el valor actual de 1 BTC cada vez que la abras o reanudes, mientras que aún te permite ingresar tus propios valores.',
+        description: "Cuando está habilitado, la aplicación mostrará automáticamente el valor actual de 1 BTC cada vez que la abras, y aún podrás ingresar tus propios valores.",
         toggle: 'Activar Seguimiento de Precios',
         btcPriceTrackerMode: 'Modo de seguimiento de precio BTC'
       },
@@ -74,7 +82,7 @@ export const translations: Record<string, Translations> = {
       },
       displayCurrencies: {
         title: 'Mostrar Monedas',
-        description: 'Selecciona entre 2 y 6 monedas para mostrar en la pantalla principal. Arrastra y suelta para reordenar.',
+        description: 'Selecciona entre 2 y 6 monedas para mostrar en la pantalla principal. Arrástralas para cambiar el orden.',
         selected: 'Monedas Seleccionadas',
         available: 'Monedas Disponibles',
         dragToReorder: 'Arrastra para reordenar'
@@ -87,7 +95,7 @@ export const translations: Record<string, Translations> = {
       tapToCopy: 'Toca cualquier resultado para copiar',
       sourceCode: 'código fuente',
       addToHomeScreen: 'Añádeme a tu pantalla de inicio para una experiencia web fluida.',
-      ratesFooter: 'Toca cualquier resultado para copiar. Tasas proporcionadas por Coingecko. Todos los cálculos se realizan 100% sin conexión en tu dispositivo. Puedes revisar mi código fuente para verificarlo. Añádeme a tu pantalla de inicio para una experiencia web fluida.'
+      ratesFooter: "Toca cualquier resultado para copiarlo. Las cotizaciones son proporcionadas por CoinGecko. Todos los cálculos se realizan al 100 % sin conexión en tu dispositivo. Puedes revisar el código fuente para comprobarlo. Agrégame a tu pantalla de inicio para disfrutar de una experiencia web fluida."
     },
     donation: {
       button: 'Envíame un café',
@@ -116,7 +124,7 @@ export const translations: Record<string, Translations> = {
       version: 'Version',
       priceTracker: {
         title: 'Preisverfolgung',
-        description: 'Wenn aktiviert, zeigt die App automatisch den aktuellen Wert von 1 BTC an, wann immer du sie öffnest oder wieder aufnimmst, während du weiterhin deine eigenen Werte eingeben kannst.',
+        description: "Ist die Funktion aktiviert, zeigt die App bei jedem Öffnen automatisch den aktuellen Wert von 1 BTC an, während du weiterhin eigene Werte eingeben kannst.",
         toggle: 'Preisverfolgung aktivieren',
         btcPriceTrackerMode: 'BTC-Preisverfolgungsmodus'
       },
@@ -127,10 +135,10 @@ export const translations: Record<string, Translations> = {
       },
       displayCurrencies: {
         title: 'Währungen anzeigen',
-        description: 'Wähle zwischen 2 und 6 Währungen, die auf dem Hauptbildschirm angezeigt werden sollen. Ziehen und ablegen zum Neuordnen.',
+        description: "Wähle zwischen 2 und 6 Währungen, die auf dem Hauptbildschirm angezeigt werden sollen. Ziehe sie per Drag & Drop, um ihre Reihenfolge anzupassen.",
         selected: 'Ausgewählte Währungen',
         available: 'Verfügbare Währungen',
-        dragToReorder: 'Ziehen zum Neuordnen'
+        dragToReorder: 'Drag & Drop zum Neuordnen'
       }
     },
     converter: {
@@ -140,7 +148,7 @@ export const translations: Record<string, Translations> = {
       tapToCopy: 'Tippe auf ein Ergebnis zum Kopieren',
       sourceCode: 'Quellcode',
       addToHomeScreen: 'Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis.',
-      ratesFooter: 'Tippe auf ein Ergebnis zum Kopieren. Kurse bereitgestellt von Coingecko. Alle Berechnungen werden zu 100% offline auf deinem Gerät durchgeführt. Du kannst meinen Quellcode überprüfen, um dies zu verifizieren. Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis.'
+      ratesFooter: "Tippe auf ein Ergebnis, um es zu kopieren. Die Kurse werden von CoinGecko bereitgestellt. Alle Berechnungen erfolgen zu 100 % offline auf deinem Gerät. Du kannst den Quellcode jederzeit einsehen, um das zu verifizieren. Füge diese Web‑App deinem Startbildschirm hinzu, um sie nahtlos wie eine native App zu nutzen."
     },
     donation: {
       button: 'Spendiere mir einen Kaffee',

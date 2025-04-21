@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -140,23 +139,30 @@ const BitcoinConverter = () => {
       />
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        {t('converter.ratesFooter').split('source code').map((part, idx, arr) => (
-          idx < arr.length - 1 ? (
-            <React.Fragment key={idx}>
-              {part}
-              <a 
-                href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
-                className="underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t('converter.sourceCode')}
-              </a>
-            </React.Fragment>
-          ) : (
-            part
-          )
-        ))}
+        {
+          (() => {
+            const footerText = t('converter.ratesFooter');
+            const anchorWord = t('converter.sourceCode');
+            const parts = footerText.split(anchorWord);
+            return parts.map((part, idx, arr) => (
+              idx < arr.length - 1 ? (
+                <React.Fragment key={idx}>
+                  {part}
+                  <a
+                    href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
+                    className="underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {anchorWord}
+                  </a>
+                </React.Fragment>
+              ) : (
+                part
+              )
+            ));
+          })()
+        }
       </div>
 
       <DonationPopup />
