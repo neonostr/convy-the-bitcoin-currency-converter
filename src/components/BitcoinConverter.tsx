@@ -18,7 +18,7 @@ const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { settings } = useSettings();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { 
     amount, 
     setAmount, 
@@ -140,7 +140,23 @@ const BitcoinConverter = () => {
       />
       
       <div className="text-xs text-muted-foreground mb-4 text-center">
-        {t('converter.tapToCopy')}. <a href="https://github.com/rauchg/bitcoin-converter" className="underline" target="_blank" rel="noopener noreferrer">{t('converter.sourceCode')}</a>. {t('converter.addToHomeScreen')}
+        {t('converter.ratesFooter').split('source code').map((part, idx, arr) => (
+          idx < arr.length - 1 ? (
+            <React.Fragment key={idx}>
+              {part}
+              <a 
+                href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
+                className="underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('converter.sourceCode')}
+              </a>
+            </React.Fragment>
+          ) : (
+            part
+          )
+        ))}
       </div>
 
       <DonationPopup />

@@ -12,7 +12,9 @@ interface InvoiceData {
   verify?: string;
 }
 
-const COINOS_USERNAME = 'neo21';
+// CHANGED DONATION RECEIVER HERE:
+// Access image via: [your app's base URL]/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png
+const COINOS_USERNAME = 'convyclick';
 
 export async function getLnurlData(): Promise<LNURLData> {
   const response = await fetch(`https://coinos.io/.well-known/lnurlp/${COINOS_USERNAME}`);

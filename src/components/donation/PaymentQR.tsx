@@ -3,6 +3,7 @@ import React from 'react';
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface PaymentQRProps {
   invoice: string;
@@ -20,6 +21,8 @@ const PaymentQR = ({ invoice, qrData, onCopy, isCopied }: PaymentQRProps) => {
       });
     }
   };
+
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -44,7 +47,7 @@ const PaymentQR = ({ invoice, qrData, onCopy, isCopied }: PaymentQRProps) => {
       </div>
       
       <p className="text-sm text-center text-muted-foreground">
-        Scan this QR code with your Lightning wallet to pay
+        {t('donation.scanQR')}
       </p>
     </div>
   );

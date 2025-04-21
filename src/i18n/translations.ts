@@ -32,8 +32,9 @@ export const translations: Record<string, Translations> = {
       enterAmount: 'Enter amount',
       lastUpdated: 'Last updated',
       tapToCopy: 'Tap any result to copy',
-      sourceCode: 'Check my source code',
-      addToHomeScreen: 'Add me to your home screen for a seamless web app experience'
+      sourceCode: 'source code',
+      addToHomeScreen: 'Add me to your home screen for a seamless web app experience.',
+      ratesFooter: 'Tap any result to copy. Rates provided by Coingecko. All calculations are performed 100% offline on your device. You can check my source code to verify. Add me to your home screen for a seamless web app experience.'
     },
     donation: {
       button: 'Zap me a coffee',
@@ -42,10 +43,10 @@ export const translations: Record<string, Translations> = {
       generating: 'Generating Lightning invoice...',
       copied: 'Copied to clipboard',
       description: 'Choose an amount to send:',
-      scanQR: 'Scan with Lightning wallet',
+      scanQR: 'Scan this QR code with your Lightning wallet to pay',
       copyInvoice: 'Copy Invoice',
       thankYou: {
-        title: 'Thank You!',
+        title: 'Thank you for your donation!',
         subtitle: 'Your donation helps keep this project going'
       }
     },
@@ -84,8 +85,9 @@ export const translations: Record<string, Translations> = {
       enterAmount: 'Ingresa cantidad',
       lastUpdated: 'Última actualización',
       tapToCopy: 'Toca cualquier resultado para copiar',
-      sourceCode: 'Revisa mi código fuente',
-      addToHomeScreen: 'Añádeme a tu pantalla de inicio para una experiencia web fluida'
+      sourceCode: 'código fuente',
+      addToHomeScreen: 'Añádeme a tu pantalla de inicio para una experiencia web fluida.',
+      ratesFooter: 'Toca cualquier resultado para copiar. Tasas proporcionadas por Coingecko. Todos los cálculos se realizan 100% sin conexión en tu dispositivo. Puedes revisar mi código fuente para verificarlo. Añádeme a tu pantalla de inicio para una experiencia web fluida.'
     },
     donation: {
       button: 'Envíame un café',
@@ -94,10 +96,10 @@ export const translations: Record<string, Translations> = {
       generating: 'Generando factura Lightning...',
       copied: 'Copiado al portapapeles',
       description: 'Elige una cantidad para enviar:',
-      scanQR: 'Escanea con billetera Lightning',
+      scanQR: 'Escanea este código QR con tu billetera Lightning para pagar',
       copyInvoice: 'Copiar Factura',
       thankYou: {
-        title: '¡Gracias!',
+        title: '¡Gracias por tu donación!',
         subtitle: 'Tu donación ayuda a mantener este proyecto'
       }
     },
@@ -136,8 +138,9 @@ export const translations: Record<string, Translations> = {
       enterAmount: 'Betrag eingeben',
       lastUpdated: 'Zuletzt aktualisiert',
       tapToCopy: 'Tippe auf ein Ergebnis zum Kopieren',
-      sourceCode: 'Schau dir meinen Quellcode an',
-      addToHomeScreen: 'Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis'
+      sourceCode: 'Quellcode',
+      addToHomeScreen: 'Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis.',
+      ratesFooter: 'Tippe auf ein Ergebnis zum Kopieren. Kurse bereitgestellt von Coingecko. Alle Berechnungen werden zu 100% offline auf deinem Gerät durchgeführt. Du kannst meinen Quellcode überprüfen, um dies zu verifizieren. Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis.'
     },
     donation: {
       button: 'Spendiere mir einen Kaffee',
@@ -146,10 +149,10 @@ export const translations: Record<string, Translations> = {
       generating: 'Lightning-Rechnung wird erstellt...',
       copied: 'In die Zwischenablage kopiert',
       description: 'Wähle einen Betrag zum Senden:',
-      scanQR: 'Mit Lightning-Wallet scannen',
+      scanQR: 'Scanne diesen QR-Code mit deiner Lightning Wallet um zu bezahlen',
       copyInvoice: 'Rechnung kopieren',
       thankYou: {
-        title: 'Vielen Dank!',
+        title: 'Vielen Dank für deine Spende!',
         subtitle: 'Deine Spende hilft, dieses Projekt am Laufen zu halten'
       }
     },
