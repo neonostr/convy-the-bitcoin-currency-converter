@@ -1,3 +1,4 @@
+
 export type Language = 'en' | 'es' | 'de';
 
 export interface Translations {
@@ -37,6 +38,10 @@ export interface Translations {
     sourceCode: string;
     addToHomeScreen: string;
     ratesFooter: string;
+    ratesUpdated?: {
+      title: string;
+      description: string;
+    };
   };
   donation: {
     button: string;

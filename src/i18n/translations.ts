@@ -37,7 +37,11 @@ export const translations: Record<string, Translations> = {
       tapToCopy: 'Tap any result to copy',
       sourceCode: 'source code',
       addToHomeScreen: 'Add me to your home screen for a seamless web app experience.',
-      ratesFooter: "Tap any result to copy. Rates provided by Coingecko. All calculations are performed 100% offline on your device. You can check my source code to verify. Add me to your home screen for a seamless web app experience."
+      ratesFooter: "Tap any result to copy. Rates provided by Coingecko. All calculations are performed 100% offline on your device. You can check my source code to verify. Add me to your home screen for a seamless web app experience.",
+      ratesUpdated: {
+        title: "Currency Rates Updated",
+        description: "Auto-updates every 60 seconds when activity is detected."
+      }
     },
     donation: {
       button: 'Zap me a coffee',
@@ -94,7 +98,11 @@ export const translations: Record<string, Translations> = {
       tapToCopy: 'Toca cualquier resultado para copiar',
       sourceCode: 'código fuente',
       addToHomeScreen: 'Añádeme a tu pantalla de inicio para una experiencia web fluida.',
-      ratesFooter: "Toca cualquier resultado para copiarlo. Las cotizaciones son proporcionadas por CoinGecko. Todos los cálculos se realizan al 100 % sin conexión en tu dispositivo. Puedes revisar el código fuente para comprobarlo. Agrégame a tu pantalla de inicio para disfrutar de una experiencia web fluida."
+      ratesFooter: "Toca cualquier resultado para copiarlo. Las cotizaciones son proporcionadas por CoinGecko. Todos los cálculos se realizan al 100 % sin conexión en tu dispositivo. Puedes revisar el código fuente para comprobarlo. Agrégame a tu pantalla de inicio para disfrutar de una experiencia web fluida.",
+      ratesUpdated: {
+        title: "Cotizaciones Actualizadas",
+        description: "Se actualiza automáticamente cada 60 segundos cuando se detecta actividad."
+      }
     },
     donation: {
       button: 'Envíame un café',
@@ -151,7 +159,11 @@ export const translations: Record<string, Translations> = {
       tapToCopy: 'Tippe auf ein Ergebnis zum Kopieren',
       sourceCode: 'Quellcode',
       addToHomeScreen: 'Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis.',
-      ratesFooter: "Tippe auf ein Ergebnis, um es zu kopieren. Die Kurse werden von CoinGecko bereitgestellt. Alle Berechnungen erfolgen zu 100 % offline auf deinem Gerät. Du kannst den Quellcode jederzeit einsehen, um das zu verifizieren. Füge diese Web‑App deinem Startbildschirm hinzu, um sie nahtlos wie eine native App zu nutzen."
+      ratesFooter: "Tippe auf ein Ergebnis, um es zu kopieren. Die Kurse werden von CoinGecko bereitgestellt. Alle Berechnungen erfolgen zu 100 % offline auf deinem Gerät. Du kannst den Quellcode jederzeit einsehen, um das zu verifizieren. Füge diese Web‑App deinem Startbildschirm hinzu, um sie nahtlos wie eine native App zu nutzen.",
+      ratesUpdated: {
+        title: "Währungskurse Aktualisiert",
+        description: "Automatische Aktualisierung alle 60 Sekunden bei erkannter Aktivität."
+      }
     },
     donation: {
       button: 'Spendiere mir einen Kaffee',

@@ -119,11 +119,15 @@ export function getCurrencySymbol(currency: string): string {
 }
 
 export function getLastUpdatedFormatted(timestamp: Date): string {
-  const year = timestamp.getUTCFullYear();
-  const month = String(timestamp.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(timestamp.getUTCDate()).padStart(2, '0');
-  const hours = String(timestamp.getUTCHours()).padStart(2, '0');
-  const minutes = String(timestamp.getUTCMinutes()).padStart(2, '0');
+  // Create a new Date object to avoid mutating the input
+  const date = new Date(timestamp);
+  
+  // Get UTC components directly using UTC-specific methods
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
   
   return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
 }

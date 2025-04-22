@@ -7,6 +7,7 @@ import { useToast } from './use-toast';
 import { fetchCoinRates } from '@/services/coinGeckoApi';
 import { useActivity } from './useActivity';
 import { useConversionCalculator } from './useConversionCalculator';
+import { useLanguage } from './useLanguage';
 
 export const useConversion = () => {
   const [amount, setAmount] = useState<string>('');
@@ -15,6 +16,7 @@ export const useConversion = () => {
   const { settings } = useSettings();
   const { toast } = useToast();
   const { userActive, recordUserActivity, shouldRefetch, lastToastTime } = useActivity();
+  const { t } = useLanguage();
   const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts
   
   const { data: rates, refetch } = useQuery({
@@ -82,14 +84,14 @@ export const useConversion = () => {
       
       if (now - lastToastTime.current > MIN_TOAST_INTERVAL && !isSheetOpen) {
         toast({
-          title: "Currency Rates Updated",
-          description: "Auto-updates every 60 seconds when activity is detected.",
+          title: t('converter.ratesUpdated.title') || "Currency Rates Updated",
+          description: t('converter.ratesUpdated.description') || "Auto-updates every 60 seconds when activity is detected.",
           duration: 3000,
         });
         lastToastTime.current = now;
       }
     }
-  }, [rates, toast, lastToastTime]);
+  }, [rates, toast, lastToastTime, t]);
 
   // Trigger a refresh when activity is detected and data is stale
   useEffect(() => {
