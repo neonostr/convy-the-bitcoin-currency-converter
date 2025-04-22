@@ -9,6 +9,7 @@ import LanguageSelector from '@/components/settings/LanguageSelector';
 import CurrencySettings from '@/components/settings/CurrencySettings';
 import NumberFormatSettings from '@/components/settings/NumberFormatSettings';
 import PriceTrackerSettings from '@/components/settings/PriceTrackerSettings';
+import AboutSection from '@/components/settings/AboutSection';
 import AppVersion from '@/components/settings/AppVersion';
 
 const SettingsMenu: React.FC = () => {
@@ -30,12 +31,12 @@ const SettingsMenu: React.FC = () => {
         <SheetHeader>
           <SheetTitle>{t('settings.title')}</SheetTitle>
         </SheetHeader>
-        
         <AppearanceSettings />
         <LanguageSelector />
         <CurrencySettings isOpen={isOpen} />
         <NumberFormatSettings />
         <PriceTrackerSettings />
+        <AboutSection />
         <AppVersion />
       </SheetContent>
     </Sheet>

@@ -1,12 +1,4 @@
 
-// How to access uploaded images:
-// Just type this in your browser (replace [your-domain] accordingly): 
-//    https://[your-domain]/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png
-// For development, use: http://localhost:5173/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png
-// The "public" part is left out in the URL. Place your files in the public/lovable-uploads folder.
-//
-// --- END IMAGE ACCESS COMMENT ---
-
 import { Translations } from '@/types/language.types';
 
 export const translations: Record<string, Translations> = {
@@ -33,7 +25,9 @@ export const translations: Record<string, Translations> = {
         selected: 'Selected Currencies',
         available: 'Available Currencies',
         dragToReorder: 'Drag & drop to reorder'
-      }
+      },
+      about: `Meet Convy
+your fast, privacy‑first Bitcoin currency converter and real‑time price tracker. All conversions and updates run 100 % on your device—so your data stays private. I’m [Neo](neo). the builder, and I create native web apps for freedom‑loving people who want to escape the walled gardens of Apple and Co. Just add Convy to your home screen, and it behaves like a real app thanks to [PWA](pwa) support.`
     },
     converter: {
       title: 'Bitcoin Converter',
@@ -86,7 +80,9 @@ export const translations: Record<string, Translations> = {
         selected: 'Monedas Seleccionadas',
         available: 'Monedas Disponibles',
         dragToReorder: 'Arrastra para reordenar'
-      }
+      },
+      about: `Conoce Convy
+tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados. Soy [Neo](neo), el creador, y diseño aplicaciones web nativas para personas amantes de la libertad que quieran liberarse de los jardines vallados de Apple y compañía. Simplemente agrega convy a tu pantalla de inicio y funcionará como una app real gracias al soporte [PWA](pwa).`
     },
     converter: {
       title: 'Conversor de Bitcoin',
@@ -139,7 +135,9 @@ export const translations: Record<string, Translations> = {
         selected: 'Ausgewählte Währungen',
         available: 'Verfügbare Währungen',
         dragToReorder: 'Drag & Drop zum Neuordnen'
-      }
+      },
+      about: `Lerne Convy kennen
+Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin [Neo](neo) und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen. Füge Convy einfach deinem Startbildschirm hinzu, und es verhält sich dank [PWA](pwa)‑Funktion wie eine echte App.`
     },
     converter: {
       title: 'Bitcoin-Umrechner',

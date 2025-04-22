@@ -25,6 +25,7 @@ export interface Translations {
       available: string;
       dragToReorder: string;
     };
+    about: string; // NEW: About section text (with possible anchor tokens)
   };
   converter: {
     title: string;
@@ -33,7 +34,7 @@ export interface Translations {
     tapToCopy: string;
     sourceCode: string;
     addToHomeScreen: string;
-    ratesFooter: string;
+    ratesFooter: string; // make sure this exists in type!
   };
   donation: {
     button: string;
