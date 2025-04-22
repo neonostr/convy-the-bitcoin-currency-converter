@@ -1,4 +1,3 @@
-
 export type Language = 'en' | 'es' | 'de';
 
 export interface Translations {
@@ -25,7 +24,10 @@ export interface Translations {
       available: string;
       dragToReorder: string;
     };
-    about: string; // NEW: About section text (with possible anchor tokens)
+    about?: {
+      title: string;
+      description: string;
+    };
   };
   converter: {
     title: string;
@@ -34,7 +36,7 @@ export interface Translations {
     tapToCopy: string;
     sourceCode: string;
     addToHomeScreen: string;
-    ratesFooter: string; // make sure this exists in type!
+    ratesFooter: string;
   };
   donation: {
     button: string;

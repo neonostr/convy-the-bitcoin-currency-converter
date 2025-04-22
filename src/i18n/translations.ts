@@ -25,8 +25,10 @@ export const translations: Record<string, Translations> = {
         available: 'Available Currencies',
         dragToReorder: 'Drag & drop to reorder'
       },
-      about: `Meet Convy
-Your fast, privacy‑first Bitcoin currency converter and real‑time price tracker. All conversions and updates run 100 % on your device—so your data stays private. I'm [Neo](neo), the builder, and I create native web apps for freedom‑loving people who want to escape the walled gardens of Apple and Co. Just add Convy to your home screen, and it behaves like a real app thanks to [PWA](pwa) support.`
+      about: {
+        title: 'Meet Convy',
+        description: 'Your fast, privacy‑first Bitcoin currency converter and real‑time price tracker. All conversions and updates run 100 % on your device—so your data stays private. I'm [Neo](neo), the builder, and I create native web apps for freedom‑loving people who want to escape the walled gardens of Apple and Co. Just add Convy to your home screen, and it behaves like a real app thanks to [PWA](pwa) support.'
+      }
     },
     converter: {
       title: 'Bitcoin Converter',
@@ -80,8 +82,10 @@ Your fast, privacy‑first Bitcoin currency converter and real‑time price trac
         available: 'Monedas Disponibles',
         dragToReorder: 'Arrastra para reordenar'
       },
-      about: `Conoce Convy
-Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados. Soy [Neo](neo), el creador, y diseño aplicaciones web nativas para personas amantes de la libertad que quieran liberarse de los jardines vallados de Apple y compañía. Simplemente agrega convy a tu pantalla de inicio y funcionará como una app real gracias al soporte [PWA](pwa).`
+      about: {
+        title: 'Conoce Convy',
+        description: 'Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados. Soy [Neo](neo), el creador, y diseño aplicaciones web nativas para personas amantes de la libertad que quieran liberarse de los jardines vallados de Apple y compañía. Simplemente agrega convy a tu pantalla de inicio y funcionará como una app real gracias al soporte [PWA](pwa).'
+      }
     },
     converter: {
       title: 'Conversor de Bitcoin',
@@ -135,8 +139,10 @@ Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastre
         available: 'Verfügbare Währungen',
         dragToReorder: 'Drag & Drop zum Neuordnen'
       },
-      about: `Lerne Convy kennen
-Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin [Neo](neo) und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen. Füge Convy einfach deinem Startbildschirm hinzu, und es verhält sich dank [PWA](pwa)‑Funktion wie eine echte App.`
+      about: {
+        title: 'Lerne Convy kennen',
+        description: 'Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin Neo und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen. Füge Convy einfach deinem Startbildschirm hinzu, und es verhält sich dank PWA‑Funktion wie eine echte App.'
+      }
     },
     converter: {
       title: 'Bitcoin-Umrechner',

@@ -28,7 +28,7 @@ function renderAboutLocalized(text: string) {
   }
   return text.split('\n').map((line, idx) => (
     <p
-      className={idx === 0 ? "font-bold mb-1" : "mb-1"}
+      className={idx === 0 ? "mb-1" : "mb-1"}
       key={idx}
       dangerouslySetInnerHTML={{ __html: line }}
     />
@@ -40,10 +40,13 @@ function renderAboutLocalized(text: string) {
  */
 const AboutSection = () => {
   const { t } = useLanguage();
-  const aboutRaw = t('settings.about');
+  const aboutTitle = t('settings.about.title');
+  const aboutDescription = t('settings.about.description');
+
   return (
     <section className="py-4 border-t">
-      {renderAboutLocalized(aboutRaw)}
+      <h3 className="text-lg font-semibold mb-2">{aboutTitle}</h3>
+      {renderAboutLocalized(aboutDescription)}
     </section>
   );
 };
