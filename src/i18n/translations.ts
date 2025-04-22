@@ -1,3 +1,4 @@
+
 import { Translations } from '@/types/language.types';
 
 export const translations: Record<string, Translations> = {
@@ -149,7 +150,7 @@ export const translations: Record<string, Translations> = {
       },
       about: {
         title: 'Lerne Convy kennen',
-        description: 'Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin [Neo](neo), der Entwickler, und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen. Füge Convy einfach deinem Startbildschirm hinzu, und es verhält sich dank [PWA](pwa)-Funktion wie eine echte App.'
+        description: 'Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin [Neo](neo), der Entwickler, und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen. Füge Convy App deinem Startbildschirm hinzu, um sie nahtlos wie eine echte App zu nutzen.'
       }
     },
     converter: {
@@ -159,7 +160,7 @@ export const translations: Record<string, Translations> = {
       tapToCopy: 'Tippe auf ein Ergebnis zum Kopieren',
       sourceCode: 'Quellcode',
       addToHomeScreen: 'Füge mich deinem Startbildschirm hinzu für ein nahtloses Web-App-Erlebnis.',
-      ratesFooter: "Tippe auf ein Ergebnis, um es zu kopieren. Die Kurse werden von CoinGecko bereitgestellt. Alle Berechnungen erfolgen zu 100 % offline auf deinem Gerät. Du kannst den Quellcode jederzeit einsehen, um das zu verifizieren. Füge diese Web‑App deinem Startbildschirm hinzu, um sie nahtlos wie eine native App zu nutzen.",
+      ratesFooter: "Tippe auf ein Ergebnis, um es zu kopieren. Die Kurse werden von CoinGecko bereitgestellt. Alle Berechnungen erfolgen zu 100 % offline auf deinem Gerät. Du kannst den Quellcode jederzeit einsehen, um das zu verifizieren. Füge Convy App deinem Startbildschirm hinzu, um sie nahtlos wie eine native App zu nutzen.",
       ratesUpdated: {
         title: "Währungskurse Aktualisiert",
         description: "Automatische Aktualisierung alle 60 Sekunden bei erkannter Aktivität."

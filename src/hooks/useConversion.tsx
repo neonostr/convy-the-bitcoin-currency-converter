@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
@@ -82,10 +81,11 @@ export const useConversion = () => {
       const now = Date.now();
       const isSheetOpen = document.querySelector('[role="dialog"]') !== null;
       
+      // Never use any hardcoded fallback for toast, always use translation
       if (now - lastToastTime.current > MIN_TOAST_INTERVAL && !isSheetOpen) {
         toast({
-          title: t('converter.ratesUpdated.title') || "Currency Rates Updated",
-          description: t('converter.ratesUpdated.description') || "Auto-updates every 60 seconds when activity is detected.",
+          title: t('converter.ratesUpdated.title'), // translation key for every language
+          description: t('converter.ratesUpdated.description'), // translation key
           duration: 3000,
         });
         lastToastTime.current = now;

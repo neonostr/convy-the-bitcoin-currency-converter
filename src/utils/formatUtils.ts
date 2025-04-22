@@ -1,4 +1,3 @@
-
 export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
   const locale = 'en-US';
   let formatted: string;
@@ -19,14 +18,9 @@ export function formatCurrency(value: number, currency: string, decimalSeparator
     });
   }
   
-  // If decimal separator is comma, we need to replace both the decimal point
-  // and adjust the thousand separator to be a dot
   if (decimalSeparator === ',') {
-    // First replace all commas temporarily to something else
     formatted = formatted.replace(/,/g, '___TEMP___');
-    // Replace decimal points with commas
     formatted = formatted.replace(/\./g, ',');
-    // Replace the temporary placeholders with dots (new thousand separator)
     formatted = formatted.replace(/___TEMP___/g, '.');
   }
   
@@ -50,19 +44,12 @@ export function formatForCopy(
     formatted = value.toFixed(2);
   }
   
-  // Apply thousand separators if needed
   if (includeThouSep) {
-    // First split by the default dot decimal separator
     const parts = formatted.split('.');
-    
-    // Apply thousand separators using the appropriate separator based on decimal separator choice
     const thousandSeparator = decimalSeparator === ',' ? '.' : ',';
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
-    
-    // Rejoin with the user's preferred decimal separator
     formatted = parts.join(decimalSeparator);
   } else {
-    // If we're not including thousand separators, just replace the decimal separator
     formatted = decimalSeparator === ',' ? formatted.replace('.', ',') : formatted;
   }
   
@@ -119,17 +106,18 @@ export function getCurrencySymbol(currency: string): string {
 }
 
 export function getLastUpdatedFormatted(timestamp: Date): string {
-  // Create a new Date object to avoid mutating the input
   const date = new Date(timestamp);
-  
-  // Get UTC components directly using UTC-specific methods
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const hours = String(date.getUTCHours()).padStart(2, '0');
-  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-  
-  return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let tzLabel = '';
+  if (tz) tzLabel = ` (${tz})`;
+
+  return `${year}-${month}-${day} ${hours}:${minutes}${tzLabel}`;
 }
 
 export function getCurrencyLabel(currency: string): string {
