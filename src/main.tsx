@@ -2,6 +2,18 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { toast } from "sonner"
+
+// Add the toast utility function to window for service worker to use
+if (window) {
+  (window as any).showToast = function(options: any) {
+    return toast(options.title, {
+      description: options.description,
+      action: options.action,
+      position: "bottom-center"
+    });
+  };
+}
 
 // Toast: show update banner when SW says "update available"
 function showUpdateToast(sw: ServiceWorker) {
