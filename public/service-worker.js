@@ -8,9 +8,7 @@ const APP_URLS_TO_CACHE = [
   '/index.html',
   '/src/main.tsx',
   '/src/index.css',
-  '/src/App.tsx',
-  '/og-image.html',
-  '/screenshot-service.js'
+  '/src/App.tsx'
 ];
 
 // Install the SW and activate it immediately
@@ -100,3 +98,4 @@ self.addEventListener('install', event => {
     })
   );
 });
+
