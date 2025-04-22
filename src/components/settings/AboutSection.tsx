@@ -26,13 +26,7 @@ function renderAboutLocalized(text: string) {
     // Remove all previous (if exists) [PWA](pwa) - just leave as text "PWA"
     text = text.replace(/\[PWA\]\(pwa\)/g, 'PWA');
   }
-  return text.split('\n').map((line, idx) => (
-    <p
-      className="text-sm text-muted-foreground"
-      key={idx}
-      dangerouslySetInnerHTML={{ __html: line }}
-    />
-  ));
+  return <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: text }} />;
 }
 
 /**
@@ -46,7 +40,7 @@ const AboutSection = () => {
   return (
     <section className="py-4 border-t">
       <h3 className="text-lg font-semibold mb-2">{aboutTitle}</h3>
-      <div className="space-y-2">
+      <div>
         {renderAboutLocalized(aboutDescription)}
       </div>
     </section>
