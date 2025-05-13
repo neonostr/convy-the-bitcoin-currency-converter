@@ -6,18 +6,37 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/hooks/useSettings";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+import { initializeServiceWorkerSync } from "@/services/ratesService";
 
-// Create a new query client that persists cache
+// Lazy load pages for faster initial load
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Optimize query client config for faster startup
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity, // Keep data fresh forever
       gcTime: 1000 * 60 * 60 * 24, // Cache for 24 hours (previously cacheTime)
+      retry: 2, // Reduce retry attempts for faster feedback
+      retryDelay: 1000, // Shorter retry delay
+      networkMode: 'online', // Don't waste time retrying when offline
     },
   },
 });
+
+// Initialize service worker sync as early as possible
+if (typeof window !== 'undefined') {
+  initializeServiceWorkerSync();
+}
+
+// Simple loading component
+const PageLoading = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="w-16 h-16 border-4 border-blue-600 rounded-full animate-spin border-t-transparent"></div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -27,10 +46,12 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<PageLoading />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
       </SettingsProvider>
@@ -38,4 +59,5 @@ const App = () => (
   </QueryClientProvider>
 );
 
+// Export for React to render
 export default App;

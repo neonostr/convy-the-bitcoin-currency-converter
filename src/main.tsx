@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Create root before SW registration to speed up initial render
+const root = createRoot(document.getElementById("root")!)
+root.render(<App />)
+
 // Toast: show update banner when SW says "update available"
 function showUpdateToast(sw: ServiceWorker) {
   // We're using shadcn/toast system for notification
@@ -48,45 +52,61 @@ function showUpdateToast(sw: ServiceWorker) {
   document.body.appendChild(banner);
 }
 
-// Register SW and check for updates on every load
+// Register SW using requestIdleCallback to not block main thread
+// This will improve initial load time while still ensuring SW is registered
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').then(registration => {
-      // Always check for update on every load/app open
-      registration.update();
-
-      // Listen for SW message about new update
-      navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data && event.data.type === 'SW_UPDATE') {
-          // Show update toast/banner, pass waiting SW if possible
-          const waitingSw = registration.waiting || registration.installing;
-          if (waitingSw) {
-            showUpdateToast(waitingSw);
-          }
-        }
-      });
-
-      // Listen for new SW activation and reload
-      if (registration.waiting) {
-        showUpdateToast(registration.waiting);
-      }
-      registration.addEventListener('updatefound', () => {
-        const newSw = registration.installing;
-        if (newSw) {
-          newSw.addEventListener('statechange', () => {
-            if (newSw.state === 'installed' && navigator.serviceWorker.controller) {
-              showUpdateToast(newSw);
-            }
-          });
-        }
-      });
-    });
-
-    // Listen for controllerchange (when new SW activates after skipWaiting), then reload
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
-  });
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => registerServiceWorker(), { timeout: 3000 });
+  } else {
+    // Fallback for browsers without requestIdleCallback
+    setTimeout(registerServiceWorker, 1000);
+  }
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+function registerServiceWorker() {
+  navigator.serviceWorker.register('/service-worker.js').then(registration => {
+    console.log('Service Worker registered with scope:', registration.scope);
+    
+    // Check for updates after page is fully loaded
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        registration.update();
+        console.log('Checking for Service Worker updates...');
+      }, 3000); // Delay update check to improve initial performance
+    });
+
+    // Listen for SW message about new update
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data && event.data.type === 'SW_UPDATE') {
+        // Show update toast/banner, pass waiting SW if possible
+        const waitingSw = registration.waiting || registration.installing;
+        if (waitingSw) {
+          showUpdateToast(waitingSw);
+        }
+      }
+    });
+
+    // Listen for new SW activation and reload
+    if (registration.waiting) {
+      showUpdateToast(registration.waiting);
+    }
+    registration.addEventListener('updatefound', () => {
+      const newSw = registration.installing;
+      if (newSw) {
+        newSw.addEventListener('statechange', () => {
+          if (newSw.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateToast(newSw);
+          }
+        });
+      }
+    });
+  }).catch(error => {
+    console.error('Service Worker registration failed:', error);
+  });
+
+  // Listen for controllerchange (when new SW activates after skipWaiting), then reload
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    console.log('New Service Worker controller, reloading for fresh content...');
+    window.location.reload();
+  });
+}

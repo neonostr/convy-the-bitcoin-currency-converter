@@ -18,13 +18,30 @@ import { trackApiCall } from "./usageTracker";
 const MIN_API_CALL_INTERVAL = 30000; // 30 seconds minimum between API calls
 let lastApiCallTime = 0;
 
+// Prefetch data in the background after initial load to speed up subsequent interactions
+let hasPrefetched = false;
+
 export async function fetchCoinRates(): Promise<CoinRates> {
+  console.time('fetchCoinRates');
+  
   // First, check if we have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
+  
+  // If we have rates and they're still fresh, use them immediately
   if (!isCacheStale()) {
     console.log('Using fresh cached rates (< 60s old)');
     // Log that we're using cached data
     await logEvent('cached_data_provided');
+    
+    // But if we haven't prefetched yet, do it in the background
+    if (!hasPrefetched) {
+      hasPrefetched = true;
+      setTimeout(() => {
+        prefetchData().catch(err => console.error('Background prefetch failed:', err));
+      }, 5000); // Delay to ensure main UI is responsive first
+    }
+    
+    console.timeEnd('fetchCoinRates');
     return { ...cachedRates };
   }
   
@@ -36,6 +53,7 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     // Log that we're using cached data due to rate limiting
     await logEvent('cached_data_provided_rate_limited');
     // Use cached rates even if stale to avoid too many API calls
+    console.timeEnd('fetchCoinRates');
     return { ...cachedRates };
   }
   
@@ -45,7 +63,9 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     const activePromise = getActiveFetchPromise();
     if (activePromise) {
       try {
-        return await activePromise;
+        const result = await activePromise;
+        console.timeEnd('fetchCoinRates');
+        return result;
       } catch (error) {
         console.error('Error while waiting for active fetch:', error);
       }
@@ -60,11 +80,26 @@ export async function fetchCoinRates(): Promise<CoinRates> {
     const result = await fetchPromise;
     lastApiCallTime = Date.now(); // Update last successful API call time
     setFetchingState(false, null);
+    console.timeEnd('fetchCoinRates');
     return result;
   } catch (error) {
     console.error('Fetch failed:', error);
     setFetchingState(false, null);
-    return getLatestAvailableRates();
+    const latestRates = getLatestAvailableRates();
+    console.timeEnd('fetchCoinRates');
+    return latestRates;
+  }
+}
+
+// Function to prefetch data in the background to speed up future interactions
+async function prefetchData(): Promise<void> {
+  console.log('Prefetching data in background for faster future interactions');
+  try {
+    const result = await performFetch();
+    lastApiCallTime = Date.now();
+    console.log('Background prefetch complete, data updated');
+  } catch (error) {
+    console.error('Background prefetch failed:', error);
   }
 }
 
@@ -88,8 +123,6 @@ async function performFetch(): Promise<CoinRates> {
       logEvent('coingecko_api_public_failure');
       throw new Error('Invalid response from API');
     }
-    
-    // The usage logging is now done by the edge function
     
     console.log("Bitcoin rates from API:", data.bitcoin);
     
