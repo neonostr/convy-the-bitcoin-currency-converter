@@ -20,8 +20,6 @@ export interface CoinGeckoResponse {
     brl?: number;
     hkd?: number;
     try?: number;
-    pln?: number;
-    zar?: number;
   };
 }
 
@@ -31,5 +29,5 @@ export interface RatesResponse {
 
 export const supportedCurrencies = [
   'usd', 'eur', 'chf', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'inr', 'rub',
-  'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
+  'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try'
 ];

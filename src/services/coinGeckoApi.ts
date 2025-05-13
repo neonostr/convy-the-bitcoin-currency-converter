@@ -1,3 +1,4 @@
+
 import { CoinRates } from "@/types/currency.types";
 import { 
   initialRates, 
@@ -147,8 +148,6 @@ async function performFetch(): Promise<CoinRates> {
       brl: data.bitcoin.brl || initialRates.brl,
       hkd: data.bitcoin.hkd || initialRates.hkd,
       try: data.bitcoin.try || initialRates.try,
-      pln: data.bitcoin.pln || initialRates.pln,
-      zar: data.bitcoin.zar || initialRates.zar,
       lastUpdated: new Date()
     };
     
