@@ -38,6 +38,8 @@ export interface Translations {
     sourceCode: string;
     addToHomeScreen: string;
     ratesFooter: string;
+    gettingRates: string;
+    loadingRates: string;
     ratesUpdated?: {
       title: string;
       description: string;

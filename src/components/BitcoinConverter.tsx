@@ -1,8 +1,8 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Bitcoin } from 'lucide-react';
+import { Bitcoin, LoaderCircle } from 'lucide-react';
 import SettingsMenu from '@/components/SettingsMenu';
 import DonationPopup from '@/components/DonationPopup';
 import { useSettings } from '@/hooks/useSettings';
@@ -19,6 +19,7 @@ const BitcoinConverter = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
   const { t, language } = useLanguage();
+  const [initialLoad, setInitialLoad] = useState(true);
   const { 
     amount, 
     setAmount, 
@@ -58,8 +59,14 @@ const BitcoinConverter = () => {
       setDefaultBtcValue();
     }
     
+    // Set a short timeout to determine if this is the initial load
+    const timer = setTimeout(() => {
+      setInitialLoad(false);
+    }, 5000); // Consider initial load phase to be over after 5 seconds
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(timer);
     };
   }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc]);
 
@@ -122,12 +129,17 @@ const BitcoinConverter = () => {
       </div>
 
       <CurrencySelector 
-        displayCurrencies={displayCurrencies} 
+        displayCurrencies={settings.displayCurrencies} 
         selectedCurrency={selectedCurrency} 
         onCurrencySelect={onCurrencySelect} 
       />
 
-      {isLoading ? (
+      {isLoading && initialLoad ? (
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
+          <LoaderCircle className="h-4 w-4 animate-spin" />
+          <span>{t('converter.loadingRates')}</span>
+        </div>
+      ) : isLoading ? (
         <div className="text-sm text-muted-foreground mb-4">
           {t('converter.gettingRates')}
         </div>
@@ -138,7 +150,7 @@ const BitcoinConverter = () => {
       )}
 
       <ConversionResults 
-        displayCurrencies={displayCurrencies}
+        displayCurrencies={settings.displayCurrencies}
         selectedCurrency={selectedCurrency}
         conversions={conversions}
         onResultClick={copyToClipboard}
