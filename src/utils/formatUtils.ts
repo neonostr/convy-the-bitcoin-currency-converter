@@ -1,3 +1,6 @@
+
+import { Currency } from '@/types/currency.types';
+
 export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
   const locale = 'en-US';
   let formatted: string;
