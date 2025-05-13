@@ -8,6 +8,7 @@ export interface Settings {
   decimalSeparator: '.' | ',';
   includeThouSepWhenCopying: boolean;
   alwaysDefaultToBtc: boolean; // New setting for always defaulting to BTC
+  disableToasts: boolean; // New setting for disabling toast messages
 }
 
 interface SettingsContextType {
@@ -49,6 +50,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       decimalSeparator: '.',  // Default to dot as separator
       includeThouSepWhenCopying: false, // Default to not including thousand separator when copying
       alwaysDefaultToBtc: false, // Default to off for the new setting
+      disableToasts: false, // Default to showing toast messages
     };
   });
 

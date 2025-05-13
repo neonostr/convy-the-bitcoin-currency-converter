@@ -2,10 +2,21 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { toast } from '@/hooks/use-toast';
 
 // Create root and render immediately for faster perceived performance
 const root = createRoot(document.getElementById("root")!)
 root.render(<App />)
+
+// Expose toast function globally for the service worker
+declare global {
+  interface Window {
+    showToast: typeof toast;
+  }
+}
+
+// Expose toast function for service worker updates
+window.showToast = toast;
 
 // Toast: show update banner when SW says "update available"
 function showUpdateToast(sw: ServiceWorker) {
