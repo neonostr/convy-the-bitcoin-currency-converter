@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Create root before SW registration to speed up initial render
+// Create root and render immediately for faster perceived performance
 const root = createRoot(document.getElementById("root")!)
 root.render(<App />)
 
@@ -52,14 +52,13 @@ function showUpdateToast(sw: ServiceWorker) {
   document.body.appendChild(banner);
 }
 
-// Register SW using requestIdleCallback to not block main thread
-// This will improve initial load time while still ensuring SW is registered
+// Register SW using requestIdleCallback with longer delay to prioritize UI rendering
 if ('serviceWorker' in navigator) {
   if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(() => registerServiceWorker(), { timeout: 3000 });
+    window.requestIdleCallback(() => registerServiceWorker(), { timeout: 5000 });
   } else {
-    // Fallback for browsers without requestIdleCallback
-    setTimeout(registerServiceWorker, 1000);
+    // Fallback for browsers without requestIdleCallback - longer delay
+    setTimeout(registerServiceWorker, 3000);
   }
 }
 
@@ -67,12 +66,12 @@ function registerServiceWorker() {
   navigator.serviceWorker.register('/service-worker.js').then(registration => {
     console.log('Service Worker registered with scope:', registration.scope);
     
-    // Check for updates after page is fully loaded
+    // Check for updates after page is fully loaded and idle
     window.addEventListener('load', () => {
       setTimeout(() => {
         registration.update();
         console.log('Checking for Service Worker updates...');
-      }, 3000); // Delay update check to improve initial performance
+      }, 5000); // Longer delay for update check to prioritize UI rendering
     });
 
     // Listen for SW message about new update
