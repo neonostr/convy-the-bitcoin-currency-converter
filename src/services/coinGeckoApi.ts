@@ -18,31 +18,6 @@ import { trackApiCall } from "./usageTracker";
 const MIN_API_CALL_INTERVAL = 30000; // 30 seconds minimum between API calls
 let lastApiCallTime = 0;
 
-// Early prefetch flag to avoid multiple simultaneous first loads
-let hasPrefetched = false;
-
-// Use setTimeout instead of Promise to avoid delaying app load
-// This will trigger a background prefetch after app is loaded
-if ('requestIdleCallback' in window) {
-  window.requestIdleCallback(() => {
-    if (!hasPrefetched) {
-      prefetchRatesInBackground();
-    }
-  }, { timeout: 2000 });
-} else {
-  setTimeout(() => {
-    if (!hasPrefetched) {
-      prefetchRatesInBackground();
-    }
-  }, 2000);
-}
-
-// Prefetch rates without blocking UI
-function prefetchRatesInBackground() {
-  hasPrefetched = true;
-  fetchCoinRates().catch(err => console.error('Background prefetch failed:', err));
-}
-
 export async function fetchCoinRates(): Promise<CoinRates> {
   // First, check if we have valid rates that are fresh enough (less than 60 seconds old)
   const cachedRates = getCachedRates();
@@ -113,6 +88,8 @@ async function performFetch(): Promise<CoinRates> {
       logEvent('coingecko_api_public_failure');
       throw new Error('Invalid response from API');
     }
+    
+    // The usage logging is now done by the edge function
     
     console.log("Bitcoin rates from API:", data.bitcoin);
     

@@ -20,45 +20,47 @@ const loadRatesFromStorage = (): CoinRates => {
   return { ...DEFAULT_INITIAL_RATES };
 };
 
-// Pre-fetched default rates to improve initial load
+// Default initial market rates as fallback (will be dynamically updated)
 export const DEFAULT_INITIAL_RATES: CoinRates = {
   btc: 1,
   sats: 100000000, // 1 BTC = 100,000,000 satoshis
-  usd: 104298,     // Updated with more realistic starting values
-  eur: 93253,
-  chf: 87636, 
-  cny: 751290,
-  jpy: 15387889,
-  gbp: 78406,
-  aud: 161028,
-  cad: 145374,
-  inr: 8873725,
-  rub: 8328415,
-  sek: 1014324,
-  nzd: 175570,
-  krw: 147393430,
-  sgd: 135703,
-  nok: 1079914,
-  mxn: 2022754,
-  brl: 584183,
-  hkd: 813209,
-  try: 4045541,
+  usd: 0,
+  eur: 0,
+  chf: 0,
+  cny: 0,
+  jpy: 0,
+  gbp: 0,
+  aud: 0,
+  cad: 0,
+  inr: 0,
+  rub: 0,
+  sek: 0,
+  nzd: 0,
+  krw: 0,
+  sgd: 0,
+  nok: 0,
+  mxn: 0,
+  brl: 0, 
+  hkd: 0,
+  try: 0,
   lastUpdated: new Date()
 };
 
-// Load cached rates immediately on script execution for faster startup
-let cachedRates: CoinRates = loadRatesFromStorage();
-
 // Mutable variable to store current rates
-export let initialRates: CoinRates = { ...cachedRates };
+export let initialRates: CoinRates = { ...DEFAULT_INITIAL_RATES };
 
 // Cache state
+let cachedRates: CoinRates = loadRatesFromStorage();
 let lastFetchTime: number = 0;
 let isFetchingData: boolean = false;
 let fetchPromise: Promise<CoinRates> | null = null;
 
-// Log rates loading for debugging
-console.log('Initial rates loaded:', initialRates);
+// After initializing cachedRates, update initialRates if needed
+if (cachedRates.lastUpdated) {
+  // If cached rates exist, update initialRates
+  initialRates = { ...cachedRates };
+  console.log('Loaded rates from storage:', initialRates);
+}
 
 export function getCachedRates(): CoinRates {
   return { ...cachedRates };

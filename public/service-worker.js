@@ -1,43 +1,26 @@
 
-// Service Worker for Bitcoin Currency Converter, improved for instant loading
-const CACHE_NAME = 'bitcoin-converter-cache-v5';
-const APP_VERSION = '1.2.0';
+// Service Worker for Bitcoin Currency Converter, improved for instant update & banner UI
+
+const CACHE_NAME = 'bitcoin-converter-cache-v4';
+const APP_VERSION = '1.1.0';
 const APP_URLS_TO_CACHE = [
   '/',
   '/index.html',
   '/src/main.tsx',
   '/src/index.css',
-  '/src/App.tsx',
-  '/manifest.json',
-  '/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png',
-  '/lovable-uploads/94f20957-5441-4a0d-a9c8-9f555a8c5f5f.png',
-  '/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png',
-  '/lovable-uploads/46cf07ac-a8fe-4f54-a73e-b62492896398.png'
+  '/src/App.tsx'
 ];
 
-// Critical assets that should be cached with highest priority
-const CRITICAL_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
-
-// Install the SW and cache critical resources immediately
+// Install the SW and activate it immediately
 self.addEventListener('install', event => {
   event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      
-      // Cache critical assets first for faster startup
-      await cache.addAll(CRITICAL_ASSETS);
-      
-      // Then cache other assets
-      await cache.addAll(APP_URLS_TO_CACHE.filter(url => !CRITICAL_ASSETS.includes(url)));
-      
-      // Activate immediately
-      await self.skipWaiting();
-    })()
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(APP_URLS_TO_CACHE);
+      })
   );
+  // Activate the new SW immediately
+  self.skipWaiting();
 });
 
 // Claim all clients right away for instant activation
@@ -54,76 +37,32 @@ self.addEventListener('activate', event => {
           })
         );
       }),
-      // Take control immediately
       self.clients.claim()
     ])
   );
 });
 
-// Enhanced caching and fetch strategy with network-first for API calls and cache-first for static assets
+// Standard caching and fetch strategy
 self.addEventListener('fetch', event => {
-  // For navigation requests (page loads), try cache first, then network
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      (async () => {
-        try {
-          // Try cache first for instant loading
-          const cachedResponse = await caches.match('/');
-          if (cachedResponse) return cachedResponse;
-          
-          // If not in cache, try network
-          return await fetch(event.request);
-        } catch (error) {
-          // If offline and not in cache, show cached home page
-          return caches.match('/');
-        }
-      })()
+      fetch(event.request)
+        .then(response => response)
+        .catch(() => caches.match('/'))
     );
     return;
   }
-  
-  // For API requests
-  if (event.request.url.includes('/api/') || 
-      event.request.url.includes('coingecko') || 
-      event.request.url.includes('cryptocompare')) {
-    event.respondWith(
-      (async () => {
-        try {
-          // Try network first for fresh data
-          const networkResponse = await fetch(event.request);
-          // Clone and cache the response
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-          return networkResponse;
-        } catch (error) {
-          // If offline, try cached response
-          return caches.match(event.request);
-        }
-      })()
-    );
-    return;
-  }
-  
-  // For static assets, use cache-first strategy for performance
   if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
         .then(response => {
-          // Return from cache if available
-          if (response) {
-            return response;
-          }
-          
-          // If not in cache, fetch from network and cache the result
-          return fetch(event.request)
+          return response || fetch(event.request)
             .then(networkResponse => {
-              // Only cache successful responses
-              if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-                const responseToCache = networkResponse.clone();
+              // Optionally cache the result
+              if (networkResponse && event.request.method === "GET") {
+                const responseClone = networkResponse.clone();
                 caches.open(CACHE_NAME).then(cache => {
-                  cache.put(event.request, responseToCache);
+                  cache.put(event.request, responseClone);
                 });
               }
               return networkResponse;
@@ -133,12 +72,11 @@ self.addEventListener('fetch', event => {
   }
 });
 
-// Cache Bitcoin rates data
+// LISTEN for skipWaiting message from client (for update prompt)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
   if (event.data && event.data.type === 'CACHE_RATES') {
     const ratesData = event.data.payload;
     caches.open(CACHE_NAME).then(cache => {
@@ -149,7 +87,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// When update is available, notify clients
+// When update is available, tell all clients
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
@@ -160,3 +98,4 @@ self.addEventListener('install', event => {
     })
   );
 });
+
