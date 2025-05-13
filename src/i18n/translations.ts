@@ -14,6 +14,11 @@ export const translations: Record<string, Translations> = {
         toggle: 'Enable Price Tracker',
         btcPriceTrackerMode: 'BTC price tracker mode'
       },
+      notifications: {
+        title: 'Notifications',
+        description: 'Control how the app notifies you about updates and changes.',
+        disableToasts: 'Disable toast notifications'
+      },
       numberFormat: {
         title: 'Number Format',
         useCommaAsDecimalSeparator: 'Use comma as decimal separator',
@@ -77,6 +82,11 @@ export const translations: Record<string, Translations> = {
         toggle: 'Activar Seguimiento de Precios',
         btcPriceTrackerMode: 'Modo de seguimiento de precio BTC'
       },
+      notifications: {
+        title: 'Notificaciones',
+        description: 'Controla cómo la aplicación te notifica sobre actualizaciones y cambios.',
+        disableToasts: 'Desactivar notificaciones toast'
+      },
       numberFormat: {
         title: 'Formato de Números',
         useCommaAsDecimalSeparator: 'Usar coma como separador decimal',
@@ -139,6 +149,11 @@ export const translations: Record<string, Translations> = {
         description: "Ist die Funktion aktiviert, zeigt die App bei jedem Öffnen automatisch den aktuellen Wert von 1 BTC an, während du weiterhin eigene Werte eingeben kannst.",
         toggle: 'Preisverfolgung aktivieren',
         btcPriceTrackerMode: 'BTC-Preisverfolgungsmodus'
+      },
+      notifications: {
+        title: 'Benachrichtigungen',
+        description: 'Steuere, wie die App dich über Aktualisierungen und Änderungen informiert.',
+        disableToasts: 'Toast-Benachrichtigungen deaktivieren'
       },
       numberFormat: {
         title: 'Zahlenformat',
