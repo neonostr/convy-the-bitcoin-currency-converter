@@ -1,3 +1,4 @@
+
 import { CoinRates, Currency } from "@/types/currency.types";
 
 // Cache settings - shorter expiry for faster updates when needed
@@ -26,8 +27,6 @@ export const DEFAULT_INITIAL_RATES: CoinRates = {
   brl: 0, 
   hkd: 0,
   try: 0,
-  pln: 0, // Added Polish Zloty
-  zar: 0, // Added South African Rand
   lastUpdated: new Date()
 };
 
@@ -204,9 +203,7 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
     mxn: amountInBtc * rates.mxn,
     brl: amountInBtc * rates.brl,
     hkd: amountInBtc * rates.hkd,
-    try: amountInBtc * rates.try,
-    pln: amountInBtc * rates.pln,
-    zar: amountInBtc * rates.zar
+    try: amountInBtc * rates.try
   };
 }
 

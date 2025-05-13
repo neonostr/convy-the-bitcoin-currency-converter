@@ -1,8 +1,8 @@
 
 // Service Worker for Bitcoin Currency Converter - Optimized for fast startup
 
-const CACHE_NAME = 'bitcoin-converter-cache-v6'; // Increment cache version 
-const APP_VERSION = '1.2.1'; // Increment app version
+const CACHE_NAME = 'bitcoin-converter-cache-v5';
+const APP_VERSION = '1.2.0';
 const APP_URLS_TO_CACHE = [
   '/',
   '/index.html',

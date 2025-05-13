@@ -1,4 +1,3 @@
-
 import { CoinRates } from "@/types/currency.types";
 import { 
   initialRates, 
