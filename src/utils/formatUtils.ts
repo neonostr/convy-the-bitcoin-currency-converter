@@ -83,7 +83,7 @@ export function getCurrencyName(currency: Currency): string {
     case 'try': return 'Turkish Lira (TRY)';
     case 'pln': return 'Polish Zloty (PLN)'; 
     case 'zar': return 'South African Rand (ZAR)';
-    default: return currency.toUpperCase();
+    default: return currency as string;
   }
 }
 
@@ -134,53 +134,29 @@ export function getLastUpdatedFormatted(timestamp: Date): string {
 
 export function getCurrencyLabel(currency: Currency): string {
   switch (currency) {
-    case 'btc':
-      return 'Bitcoin (BTC)';
-    case 'sats':
-      return 'Satoshis (SATS)';
-    case 'usd':
-      return 'US Dollar (USD)';
-    case 'eur':
-      return 'Euro (EUR)';
-    case 'chf':
-      return 'Swiss Franc (CHF)';
-    case 'cny':
-      return 'Chinese Yuan (CNY)';
-    case 'jpy':
-      return 'Japanese Yen (JPY)';
-    case 'gbp':
-      return 'British Pound (GBP)';
-    case 'aud':
-      return 'Australian Dollar (AUD)';
-    case 'cad':
-      return 'Canadian Dollar (CAD)';
-    case 'inr':
-      return 'Indian Rupee (INR)';
-    case 'rub':
-      return 'Russian Ruble (RUB)';
-    case 'sek':
-      return 'Swedish Krona (SEK)';
-    case 'nzd':
-      return 'New Zealand Dollar (NZD)';
-    case 'krw':
-      return 'South Korean Won (KRW)';
-    case 'sgd':
-      return 'Singapore Dollar (SGD)';
-    case 'nok':
-      return 'Norwegian Krone (NOK)';
-    case 'mxn':
-      return 'Mexican Peso (MXN)';
-    case 'brl':
-      return 'Brazilian Real (BRL)';
-    case 'hkd':
-      return 'Hong Kong Dollar (HKD)';
-    case 'try':
-      return 'Turkish Lira (TRY)';
-    case 'pln':
-      return 'Polish Zloty (PLN)';
-    case 'zar':
-      return 'South African Rand (ZAR)';
-    default:
-      return '';
+    case 'btc': return 'Bitcoin (BTC)';
+    case 'sats': return 'Satoshis (SATS)';
+    case 'usd': return 'US Dollar (USD)';
+    case 'eur': return 'Euro (EUR)';
+    case 'chf': return 'Swiss Franc (CHF)';
+    case 'cny': return 'Chinese Yuan (CNY)';
+    case 'jpy': return 'Japanese Yen (JPY)';
+    case 'gbp': return 'British Pound (GBP)';
+    case 'aud': return 'Australian Dollar (AUD)';
+    case 'cad': return 'Canadian Dollar (CAD)';
+    case 'inr': return 'Indian Rupee (INR)';
+    case 'rub': return 'Russian Ruble (RUB)';
+    case 'sek': return 'Swedish Krona (SEK)';
+    case 'nzd': return 'New Zealand Dollar (NZD)';
+    case 'krw': return 'South Korean Won (KRW)';
+    case 'sgd': return 'Singapore Dollar (SGD)';
+    case 'nok': return 'Norwegian Krone (NOK)';
+    case 'mxn': return 'Mexican Peso (MXN)';
+    case 'brl': return 'Brazilian Real (BRL)';
+    case 'hkd': return 'Hong Kong Dollar (HKD)';
+    case 'try': return 'Turkish Lira (TRY)';
+    case 'pln': return 'Polish Zloty (PLN)';
+    case 'zar': return 'South African Rand (ZAR)';
+    default: return '';
   }
 }
