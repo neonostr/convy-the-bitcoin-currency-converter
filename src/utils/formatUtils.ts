@@ -56,7 +56,7 @@ export function formatForCopy(
   return formatted;
 }
 
-export function getCurrencySymbol(currency: string): string {
+export function getCurrencySymbol(currency: Currency): string {
   switch (currency) {
     case 'btc':
       return '₿';
@@ -67,7 +67,7 @@ export function getCurrencySymbol(currency: string): string {
     case 'eur':
       return '€';
     case 'chf':
-      return 'CHF';
+      return 'Fr';
     case 'cny':
       return '¥';
     case 'jpy':
@@ -75,9 +75,9 @@ export function getCurrencySymbol(currency: string): string {
     case 'gbp':
       return '£';
     case 'aud':
-      return 'A$';
+      return 'AU$';
     case 'cad':
-      return 'C$';
+      return 'CA$';
     case 'inr':
       return '₹';
     case 'rub':
@@ -89,7 +89,7 @@ export function getCurrencySymbol(currency: string): string {
     case 'krw':
       return '₩';
     case 'sgd':
-      return 'S$';
+      return 'SG$';
     case 'nok':
       return 'kr';
     case 'mxn':
@@ -100,6 +100,10 @@ export function getCurrencySymbol(currency: string): string {
       return 'HK$';
     case 'try':
       return '₺';
+    case 'pln':
+      return 'zł';
+    case 'zar':
+      return 'R';
     default:
       return '';
   }
@@ -121,29 +125,55 @@ export function getLastUpdatedFormatted(timestamp: Date): string {
   return `${year}-${month}-${day} ${hours}:${minutes}${tzLabel}`;
 }
 
-export function getCurrencyLabel(currency: string): string {
+export function getCurrencyLabel(currency: Currency): string {
   switch (currency) {
-    case 'btc': return 'Bitcoin (BTC)';
-    case 'sats': return 'Satoshis (SATS)';
-    case 'usd': return 'US Dollar (USD)';
-    case 'eur': return 'Euro (EUR)';
-    case 'chf': return 'Swiss Franc (CHF)';
-    case 'cny': return 'Chinese Yuan (CNY)';
-    case 'jpy': return 'Japanese Yen (JPY)';
-    case 'gbp': return 'British Pound (GBP)';
-    case 'aud': return 'Australian Dollar (AUD)';
-    case 'cad': return 'Canadian Dollar (CAD)';
-    case 'inr': return 'Indian Rupee (INR)';
-    case 'rub': return 'Russian Ruble (RUB)';
-    case 'sek': return 'Swedish Krona (SEK)';
-    case 'nzd': return 'New Zealand Dollar (NZD)';
-    case 'krw': return 'South Korean Won (KRW)';
-    case 'sgd': return 'Singapore Dollar (SGD)';
-    case 'nok': return 'Norwegian Krone (NOK)';
-    case 'mxn': return 'Mexican Peso (MXN)';
-    case 'brl': return 'Brazilian Real (BRL)';
-    case 'hkd': return 'Hong Kong Dollar (HKD)';
-    case 'try': return 'Turkish Lira (TRY)';
-    default: return currency.toUpperCase();
+    case 'btc':
+      return 'Bitcoin (BTC)';
+    case 'sats':
+      return 'Satoshis (SATS)';
+    case 'usd':
+      return 'US Dollar (USD)';
+    case 'eur':
+      return 'Euro (EUR)';
+    case 'chf':
+      return 'Swiss Franc (CHF)';
+    case 'cny':
+      return 'Chinese Yuan (CNY)';
+    case 'jpy':
+      return 'Japanese Yen (JPY)';
+    case 'gbp':
+      return 'British Pound (GBP)';
+    case 'aud':
+      return 'Australian Dollar (AUD)';
+    case 'cad':
+      return 'Canadian Dollar (CAD)';
+    case 'inr':
+      return 'Indian Rupee (INR)';
+    case 'rub':
+      return 'Russian Ruble (RUB)';
+    case 'sek':
+      return 'Swedish Krona (SEK)';
+    case 'nzd':
+      return 'New Zealand Dollar (NZD)';
+    case 'krw':
+      return 'South Korean Won (KRW)';
+    case 'sgd':
+      return 'Singapore Dollar (SGD)';
+    case 'nok':
+      return 'Norwegian Krone (NOK)';
+    case 'mxn':
+      return 'Mexican Peso (MXN)';
+    case 'brl':
+      return 'Brazilian Real (BRL)';
+    case 'hkd':
+      return 'Hong Kong Dollar (HKD)';
+    case 'try':
+      return 'Turkish Lira (TRY)';
+    case 'pln':
+      return 'Polish Zloty (PLN)';
+    case 'zar':
+      return 'South African Rand (ZAR)';
+    default:
+      return '';
   }
 }
