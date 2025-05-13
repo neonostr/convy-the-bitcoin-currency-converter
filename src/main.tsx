@@ -3,11 +3,13 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Initialize app as quickly as possible
+const root = createRoot(document.getElementById("root")!);
+root.render(<App />);
+
 // Toast: show update banner when SW says "update available"
 function showUpdateToast(sw: ServiceWorker) {
   // We're using shadcn/toast system for notification
-  // For a simple solution, append a banner div -- but best is to use your toast infra
-  // We'll use window.dispatchEvent for a minimal reference implementation
   const id = 'pwa-update-banner';
   if (document.getElementById(id)) return; // Prevent duplicates
 
@@ -48,17 +50,19 @@ function showUpdateToast(sw: ServiceWorker) {
   document.body.appendChild(banner);
 }
 
-// Register SW and check for updates on every load
+// Register SW after app is rendered for better startup performance
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+  // Use requestIdleCallback to defer non-critical work
+  (window.requestIdleCallback || setTimeout)(() => {
     navigator.serviceWorker.register('/service-worker.js').then(registration => {
-      // Always check for update on every load/app open
-      registration.update();
+      // Update service worker in the background
+      (window.requestIdleCallback || setTimeout)(() => {
+        registration.update();
+      }, 5000); // Check for updates after 5 seconds
 
       // Listen for SW message about new update
       navigator.serviceWorker.addEventListener('message', event => {
         if (event.data && event.data.type === 'SW_UPDATE') {
-          // Show update toast/banner, pass waiting SW if possible
           const waitingSw = registration.waiting || registration.installing;
           if (waitingSw) {
             showUpdateToast(waitingSw);
@@ -66,10 +70,11 @@ if ('serviceWorker' in navigator) {
         }
       });
 
-      // Listen for new SW activation and reload
+      // Show update toast if needed
       if (registration.waiting) {
         showUpdateToast(registration.waiting);
       }
+      
       registration.addEventListener('updatefound', () => {
         const newSw = registration.installing;
         if (newSw) {
@@ -82,11 +87,9 @@ if ('serviceWorker' in navigator) {
       });
     });
 
-    // Listen for controllerchange (when new SW activates after skipWaiting), then reload
+    // Listen for controllerchange, then reload
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();
     });
-  });
+  }, { timeout: 1000 });
 }
-
-createRoot(document.getElementById("root")!).render(<App />);
