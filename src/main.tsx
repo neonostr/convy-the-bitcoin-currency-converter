@@ -52,13 +52,13 @@ function showUpdateToast(sw: ServiceWorker) {
   document.body.appendChild(banner);
 }
 
-// Register SW using requestIdleCallback with longer delay to prioritize UI rendering
+// Register SW using requestIdleCallback with even longer delay to prioritize UI rendering
 if ('serviceWorker' in navigator) {
   if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(() => registerServiceWorker(), { timeout: 5000 });
+    window.requestIdleCallback(() => registerServiceWorker(), { timeout: 10000 });
   } else {
     // Fallback for browsers without requestIdleCallback - longer delay
-    setTimeout(registerServiceWorker, 3000);
+    setTimeout(registerServiceWorker, 5000);
   }
 }
 
@@ -71,7 +71,7 @@ function registerServiceWorker() {
       setTimeout(() => {
         registration.update();
         console.log('Checking for Service Worker updates...');
-      }, 5000); // Longer delay for update check to prioritize UI rendering
+      }, 10000); // Even longer delay for update check to prioritize UI rendering
     });
 
     // Listen for SW message about new update

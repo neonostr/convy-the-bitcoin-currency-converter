@@ -24,6 +24,7 @@ const BitcoinConverter = () => {
     setAmount, 
     selectedCurrency, 
     rates, 
+    isLoading,
     conversions, 
     setConversions,
     handleCurrencySelect, 
@@ -126,7 +127,11 @@ const BitcoinConverter = () => {
         onCurrencySelect={onCurrencySelect} 
       />
 
-      {rates && (
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground mb-4">
+          {t('converter.gettingRates')}
+        </div>
+      ) : rates && (
         <div className="text-sm text-muted-foreground mb-4">
           {t('converter.lastUpdated')} {getLastUpdatedFormatted(rates.lastUpdated)}
         </div>

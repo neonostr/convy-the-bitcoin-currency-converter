@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
@@ -18,7 +19,7 @@ export const useConversion = () => {
   const { t } = useLanguage();
   const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts
   
-  const { data: rates, refetch } = useQuery({
+  const { data: rates, isLoading, refetch } = useQuery({
     queryKey: ['rates'],
     queryFn: fetchCoinRates,
     refetchInterval: (data) => shouldRefetch() ? 60000 : false, // Only refetch every 60s if user is active
@@ -116,6 +117,7 @@ export const useConversion = () => {
     setAmount,
     selectedCurrency,
     rates,
+    isLoading,
     conversions,
     setConversions,
     handleCurrencySelect,
