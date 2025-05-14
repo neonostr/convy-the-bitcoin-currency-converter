@@ -75,7 +75,7 @@ export const useConversion = () => {
     setAmount(sanitizedValue);
   };
 
-  // Effect for handling rate updates with a more noticeable animation
+  // Effect for handling rate updates with a more subtle animation
   useEffect(() => {
     if (rates) {
       // Set the flag to show the update animation
@@ -86,10 +86,10 @@ export const useConversion = () => {
         clearTimeout(updateAnimationTimeoutRef.current);
       }
       
-      // Reset the flag after a longer period (5 seconds) to ensure user notices it
+      // Reset the flag after a shorter period for a subtle effect
       updateAnimationTimeoutRef.current = setTimeout(() => {
         justUpdatedRef.current = false;
-      }, 5000); // Extended from 3s to 5s for more visibility
+      }, 2000); // Reduced to 2 seconds for a more subtle effect
     }
     
     return () => {

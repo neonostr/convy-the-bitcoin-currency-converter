@@ -146,9 +146,9 @@ const BitcoinConverter = () => {
         </div>
       ) : rates && (
         <div 
-          className={`text-sm mb-4 transition-all duration-700 flex items-center justify-center rounded-md px-3 py-1.5
+          className={`text-sm mb-4 transition-all duration-300 
             ${justUpdated.current ? 
-              'bg-bitcoin-orange/15 text-bitcoin-orange font-semibold border border-bitcoin-orange/30 shadow-sm animate-[pulse_2s_ease-in-out]' : 
+              'bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md' : 
               'text-muted-foreground'
             }`}
         >
