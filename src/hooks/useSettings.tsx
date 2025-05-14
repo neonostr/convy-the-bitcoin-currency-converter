@@ -7,7 +7,8 @@ export interface Settings {
   displayCurrencies: Currency[];
   decimalSeparator: '.' | ',';
   includeThouSepWhenCopying: boolean;
-  alwaysDefaultToBtc: boolean; // New setting for always defaulting to BTC
+  alwaysDefaultToBtc: boolean;
+  disableToasts: boolean; // New setting for disabling toasts
 }
 
 interface SettingsContextType {
@@ -16,7 +17,7 @@ interface SettingsContextType {
   toggleTheme: () => void;
   updateDisplayCurrencies: (currencies: Currency[]) => void;
   allCurrencies: Currency[];
-  appVersion: string; // Add version number
+  appVersion: string;
 }
 
 const DEFAULT_CURRENCIES: Currency[] = ['btc', 'sats', 'usd', 'eur', 'chf', 'gbp'];
@@ -24,7 +25,7 @@ const ALL_CURRENCIES: Currency[] = [
   'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
   'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
 ];
-const APP_VERSION = '1.0.0'; // Add version constant
+const APP_VERSION = '1.0.0';
 
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -49,6 +50,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       decimalSeparator: '.',  // Default to dot as separator
       includeThouSepWhenCopying: false, // Default to not including thousand separator when copying
       alwaysDefaultToBtc: false, // Default to off for the new setting
+      disableToasts: false, // Default to showing toasts
     };
   });
 
