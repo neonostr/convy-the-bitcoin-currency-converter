@@ -1,6 +1,6 @@
 
 import { useSettings } from './useSettings';
-import { useToast as useShadcnToast, toast as shadcnToast } from './use-toast';
+import { useToast as useShadcnToast, toast as shadcnToast } from '@/hooks/use-toast';
 
 export function useAppToast() {
   const { settings } = useSettings();
