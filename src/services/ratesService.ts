@@ -27,6 +27,8 @@ export const DEFAULT_INITIAL_RATES: CoinRates = {
   brl: 0, 
   hkd: 0,
   try: 0,
+  pln: 0,
+  zar: 0,
   lastUpdated: new Date()
 };
 
@@ -203,7 +205,9 @@ export function convertCurrency(amount: number, fromCurrency: Currency, rates: C
     mxn: amountInBtc * rates.mxn,
     brl: amountInBtc * rates.brl,
     hkd: amountInBtc * rates.hkd,
-    try: amountInBtc * rates.try
+    try: amountInBtc * rates.try,
+    pln: amountInBtc * rates.pln,
+    zar: amountInBtc * rates.zar
   };
 }
 

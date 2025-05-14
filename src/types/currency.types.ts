@@ -1,6 +1,6 @@
 
 export type Currency = 'btc' | 'sats' | 'usd' | 'eur' | 'chf' | 'cny' | 'jpy' | 'gbp' | 'aud' | 'cad' | 'inr' | 'rub' | 
-                      'sek' | 'nzd' | 'krw' | 'sgd' | 'nok' | 'mxn' | 'brl' | 'hkd' | 'try';
+                      'sek' | 'nzd' | 'krw' | 'sgd' | 'nok' | 'mxn' | 'brl' | 'hkd' | 'try' | 'pln' | 'zar';
 
 export interface CoinRates {
   btc: number;
@@ -24,6 +24,8 @@ export interface CoinRates {
   brl: number;
   hkd: number;
   try: number;
+  pln: number;
+  zar: number;
   lastUpdated: Date;
 }
 
@@ -48,5 +50,7 @@ export interface CoinGeckoResponse {
     brl?: number;
     hkd?: number;
     try?: number;
+    pln?: number;
+    zar?: number;
   };
 }
