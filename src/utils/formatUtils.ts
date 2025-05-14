@@ -1,4 +1,3 @@
-
 export function formatCurrency(value: number, currency: string, decimalSeparator: string = '.'): string {
   const locale = 'en-US';
   let formatted: string;
@@ -101,10 +100,6 @@ export function getCurrencySymbol(currency: string): string {
       return 'HK$';
     case 'try':
       return '₺';
-    case 'pln':
-      return 'zł';
-    case 'zar':
-      return 'R';
     default:
       return '';
   }
@@ -149,8 +144,6 @@ export function getCurrencyLabel(currency: string): string {
     case 'brl': return 'Brazilian Real (BRL)';
     case 'hkd': return 'Hong Kong Dollar (HKD)';
     case 'try': return 'Turkish Lira (TRY)';
-    case 'pln': return 'Polish Złoty (PLN)';
-    case 'zar': return 'South African Rand (ZAR)';
-    default: return currency as string;
+    default: return currency.toUpperCase();
   }
 }
