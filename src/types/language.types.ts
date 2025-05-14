@@ -13,11 +13,6 @@ export interface Translations {
       toggle: string;
       btcPriceTrackerMode: string;
     };
-    notifications: {
-      title: string;
-      description: string;
-      disableToasts: string;
-    };
     numberFormat: {
       title: string;
       useCommaAsDecimalSeparator: string;
