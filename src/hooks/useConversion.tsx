@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
@@ -75,7 +74,7 @@ export const useConversion = () => {
     setAmount(sanitizedValue);
   };
 
-  // Effect for handling rate updates with a more subtle animation
+  // Effect for handling rate updates with a very subtle, brief animation
   useEffect(() => {
     if (rates) {
       // Set the flag to show the update animation
@@ -86,10 +85,10 @@ export const useConversion = () => {
         clearTimeout(updateAnimationTimeoutRef.current);
       }
       
-      // Reset the flag after a shorter period for a subtle effect
+      // Reset the flag after a very short period (1 second) for a very subtle effect
       updateAnimationTimeoutRef.current = setTimeout(() => {
         justUpdatedRef.current = false;
-      }, 2000); // Reduced to 2 seconds for a more subtle effect
+      }, 1000); // Reduced to just 1 second for a very subtle blink
     }
     
     return () => {
@@ -97,6 +96,28 @@ export const useConversion = () => {
         clearTimeout(updateAnimationTimeoutRef.current);
       }
     };
+  }, [rates]);
+  
+  // Ensure animation doesn't get stuck by clearing it after timeout, even if user is inactive
+  useEffect(() => {
+    const animationSafetyCheck = setInterval(() => {
+      if (justUpdatedRef.current && updateAnimationTimeoutRef.current) {
+        const timeSinceLastUpdate = rates?.lastUpdated 
+          ? Date.now() - new Date(rates.lastUpdated).getTime() 
+          : Infinity;
+          
+        // If it's been more than 2 seconds since the update, force reset the animation
+        if (timeSinceLastUpdate > 2000) {
+          justUpdatedRef.current = false;
+          if (updateAnimationTimeoutRef.current) {
+            clearTimeout(updateAnimationTimeoutRef.current);
+            updateAnimationTimeoutRef.current = null;
+          }
+        }
+      }
+    }, 2000); // Check every 2 seconds
+    
+    return () => clearInterval(animationSafetyCheck);
   }, [rates]);
 
   // Trigger a refresh when activity is detected and data is stale

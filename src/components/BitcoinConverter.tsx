@@ -146,11 +146,11 @@ const BitcoinConverter = () => {
         </div>
       ) : rates && (
         <div 
-          className={`text-sm mb-4 transition-all duration-300 
-            ${justUpdated.current ? 
-              'bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md' : 
-              'text-muted-foreground'
-            }`}
+          className={`text-sm mb-4 transition-all duration-300 ${
+            justUpdated.current 
+              ? 'text-foreground font-medium' 
+              : 'text-muted-foreground'
+          }`}
         >
           {t('converter.lastUpdated')} {getLastUpdatedFormatted(rates.lastUpdated)}
         </div>
