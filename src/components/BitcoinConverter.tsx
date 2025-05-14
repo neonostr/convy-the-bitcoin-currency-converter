@@ -31,7 +31,8 @@ const BitcoinConverter = () => {
     handleCurrencySelect, 
     handleInputChange,
     recordUserActivity,
-    setDefaultBtcValue
+    setDefaultBtcValue,
+    justUpdated
   } = useConversion();
 
   useEffect(() => {
@@ -144,7 +145,7 @@ const BitcoinConverter = () => {
           {t('converter.gettingRates')}
         </div>
       ) : rates && (
-        <div className="text-sm text-muted-foreground mb-4">
+        <div className={`text-sm mb-4 transition-all duration-300 ${justUpdated.current ? 'bg-bitcoin-orange/10 text-bitcoin-orange font-medium px-2 py-1 rounded-md animate-pulse' : 'text-muted-foreground'}`}>
           {t('converter.lastUpdated')} {getLastUpdatedFormatted(rates.lastUpdated)}
         </div>
       )}
