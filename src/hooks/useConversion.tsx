@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
@@ -17,7 +18,7 @@ export const useConversion = () => {
   const { userActive, recordUserActivity, shouldRefetch, lastToastTime } = useActivity();
   const { t } = useLanguage();
   const justUpdatedRef = useRef<boolean>(false);
-  const updateAnimationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const updateAnimationTimeoutRef = useRef<number | null>(null);
   
   const { data: rates, isLoading, refetch } = useQuery({
     queryKey: ['rates'],
@@ -74,7 +75,7 @@ export const useConversion = () => {
     setAmount(sanitizedValue);
   };
 
-  // Effect for handling rate updates with a very subtle, brief animation
+  // Effect for handling rate updates with a guaranteed completion animation
   useEffect(() => {
     if (rates) {
       // Set the flag to show the update animation
@@ -82,42 +83,49 @@ export const useConversion = () => {
       
       // Clear any existing timeout
       if (updateAnimationTimeoutRef.current) {
-        clearTimeout(updateAnimationTimeoutRef.current);
+        window.clearTimeout(updateAnimationTimeoutRef.current);
+        updateAnimationTimeoutRef.current = null;
       }
       
-      // Reset the flag after a very short period (1 second) for a very subtle effect
-      updateAnimationTimeoutRef.current = setTimeout(() => {
+      // Use window.setTimeout instead of Node's setTimeout for browser compatibility
+      // and ensure it completes regardless of user activity
+      updateAnimationTimeoutRef.current = window.setTimeout(() => {
         justUpdatedRef.current = false;
-      }, 1000); // Reduced to just 1 second for a very subtle blink
+        updateAnimationTimeoutRef.current = null;
+      }, 1000); // Very brief 1 second blink
     }
     
     return () => {
       if (updateAnimationTimeoutRef.current) {
-        clearTimeout(updateAnimationTimeoutRef.current);
+        window.clearTimeout(updateAnimationTimeoutRef.current);
+        updateAnimationTimeoutRef.current = null;
       }
     };
   }, [rates]);
   
-  // Ensure animation doesn't get stuck by clearing it after timeout, even if user is inactive
+  // Backup safety check that runs on a regular interval regardless of user interaction
   useEffect(() => {
-    const animationSafetyCheck = setInterval(() => {
-      if (justUpdatedRef.current && updateAnimationTimeoutRef.current) {
-        const timeSinceLastUpdate = rates?.lastUpdated 
-          ? Date.now() - new Date(rates.lastUpdated).getTime() 
-          : Infinity;
-          
-        // If it's been more than 2 seconds since the update, force reset the animation
-        if (timeSinceLastUpdate > 2000) {
+    // Create an interval that runs every second to ensure animation doesn't get stuck
+    const animationSafetyInterval = window.setInterval(() => {
+      // If the animation is still showing but should have ended by now
+      if (justUpdatedRef.current && rates?.lastUpdated) {
+        const timeSinceUpdate = Date.now() - new Date(rates.lastUpdated).getTime();
+        
+        // If it's been more than 1.5 seconds since the update, force reset the animation
+        if (timeSinceUpdate > 1500) {
           justUpdatedRef.current = false;
+          
           if (updateAnimationTimeoutRef.current) {
-            clearTimeout(updateAnimationTimeoutRef.current);
+            window.clearTimeout(updateAnimationTimeoutRef.current);
             updateAnimationTimeoutRef.current = null;
           }
         }
       }
-    }, 2000); // Check every 2 seconds
+    }, 1000); // Check every second - this ensures the animation can't get stuck for more than ~2 seconds
     
-    return () => clearInterval(animationSafetyCheck);
+    return () => {
+      window.clearInterval(animationSafetyInterval);
+    };
   }, [rates]);
 
   // Trigger a refresh when activity is detected and data is stale
