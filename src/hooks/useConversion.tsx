@@ -13,11 +13,11 @@ export const useConversion = () => {
   const [amount, setAmount] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('btc');
   const [conversions, setConversions] = useState<Record<string, number>>({});
+  const [rateUpdateIndicator, setRateUpdateIndicator] = useState<boolean>(false);
   const { settings } = useSettings();
   const { toast } = useToast();
   const { userActive, recordUserActivity, shouldRefetch, lastToastTime } = useActivity();
   const { t } = useLanguage();
-  const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts
   
   const { data: rates, isLoading, refetch } = useQuery({
     queryKey: ['rates'],
@@ -74,25 +74,29 @@ export const useConversion = () => {
     setAmount(sanitizedValue);
   };
 
-  // Effect for handling rate updates - but limit toast frequency and don't show when in settings
+  // Effect for handling rate updates - use subtle indicator instead of toast
   useEffect(() => {
     if (rates) {
-      // Only show toast if enough time has passed since the last one
-      // and if we're not in a sheet/modal (checking for body class)
-      const now = Date.now();
-      const isSheetOpen = document.querySelector('[role="dialog"]') !== null;
+      // Show subtle indicator when rates update
+      setRateUpdateIndicator(true);
       
-      // Never use any hardcoded fallback for toast, always use translation
-      if (now - lastToastTime.current > MIN_TOAST_INTERVAL && !isSheetOpen) {
-        toast({
-          title: t('converter.ratesUpdated.title'), // translation key for every language
-          description: t('converter.ratesUpdated.description'), // translation key
-          duration: 3000,
-        });
-        lastToastTime.current = now;
-      }
+      // Create a timeout to hide the indicator after 1 second
+      const indicatorTimeout = setTimeout(() => {
+        setRateUpdateIndicator(false);
+      }, 1000);
+      
+      // Safety timeout in case the animation gets stuck
+      const safetyTimeout = setTimeout(() => {
+        setRateUpdateIndicator(false);
+      }, 1500);
+      
+      // Clean up timeouts
+      return () => {
+        clearTimeout(indicatorTimeout);
+        clearTimeout(safetyTimeout);
+      };
     }
-  }, [rates, toast, lastToastTime, t]);
+  }, [rates]);
 
   // Trigger a refresh when activity is detected and data is stale
   useEffect(() => {
@@ -123,6 +127,7 @@ export const useConversion = () => {
     handleCurrencySelect,
     handleInputChange,
     recordUserActivity,
-    setDefaultBtcValue
+    setDefaultBtcValue,
+    rateUpdateIndicator
   };
 };
