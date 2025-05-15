@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
 import { useSettings } from './useSettings';
@@ -17,8 +17,7 @@ export const useConversion = () => {
   const { toast } = useToast();
   const { userActive, recordUserActivity, shouldRefetch, lastToastTime } = useActivity();
   const { t } = useLanguage();
-  const justUpdatedRef = useRef<boolean>(false);
-  const updateAnimationTimeoutRef = useRef<number | null>(null);
+  const MIN_TOAST_INTERVAL = 30000; // 30 seconds between toasts
   
   const { data: rates, isLoading, refetch } = useQuery({
     queryKey: ['rates'],
@@ -75,58 +74,25 @@ export const useConversion = () => {
     setAmount(sanitizedValue);
   };
 
-  // Effect for handling rate updates with a guaranteed completion animation
+  // Effect for handling rate updates - but limit toast frequency and don't show when in settings
   useEffect(() => {
     if (rates) {
-      // Set the flag to show the update animation
-      justUpdatedRef.current = true;
+      // Only show toast if enough time has passed since the last one
+      // and if we're not in a sheet/modal (checking for body class)
+      const now = Date.now();
+      const isSheetOpen = document.querySelector('[role="dialog"]') !== null;
       
-      // Clear any existing timeout
-      if (updateAnimationTimeoutRef.current) {
-        window.clearTimeout(updateAnimationTimeoutRef.current);
-        updateAnimationTimeoutRef.current = null;
+      // Never use any hardcoded fallback for toast, always use translation
+      if (now - lastToastTime.current > MIN_TOAST_INTERVAL && !isSheetOpen) {
+        toast({
+          title: t('converter.ratesUpdated.title'), // translation key for every language
+          description: t('converter.ratesUpdated.description'), // translation key
+          duration: 3000,
+        });
+        lastToastTime.current = now;
       }
-      
-      // Use window.setTimeout instead of Node's setTimeout for browser compatibility
-      // and ensure it completes regardless of user activity
-      updateAnimationTimeoutRef.current = window.setTimeout(() => {
-        justUpdatedRef.current = false;
-        updateAnimationTimeoutRef.current = null;
-      }, 1000); // Very brief 1 second blink
     }
-    
-    return () => {
-      if (updateAnimationTimeoutRef.current) {
-        window.clearTimeout(updateAnimationTimeoutRef.current);
-        updateAnimationTimeoutRef.current = null;
-      }
-    };
-  }, [rates]);
-  
-  // Backup safety check that runs on a regular interval regardless of user interaction
-  useEffect(() => {
-    // Create an interval that runs every second to ensure animation doesn't get stuck
-    const animationSafetyInterval = window.setInterval(() => {
-      // If the animation is still showing but should have ended by now
-      if (justUpdatedRef.current && rates?.lastUpdated) {
-        const timeSinceUpdate = Date.now() - new Date(rates.lastUpdated).getTime();
-        
-        // If it's been more than 1.5 seconds since the update, force reset the animation
-        if (timeSinceUpdate > 1500) {
-          justUpdatedRef.current = false;
-          
-          if (updateAnimationTimeoutRef.current) {
-            window.clearTimeout(updateAnimationTimeoutRef.current);
-            updateAnimationTimeoutRef.current = null;
-          }
-        }
-      }
-    }, 1000); // Check every second - this ensures the animation can't get stuck for more than ~2 seconds
-    
-    return () => {
-      window.clearInterval(animationSafetyInterval);
-    };
-  }, [rates]);
+  }, [rates, toast, lastToastTime, t]);
 
   // Trigger a refresh when activity is detected and data is stale
   useEffect(() => {
@@ -157,7 +123,6 @@ export const useConversion = () => {
     handleCurrencySelect,
     handleInputChange,
     recordUserActivity,
-    setDefaultBtcValue,
-    justUpdated: justUpdatedRef
+    setDefaultBtcValue
   };
 };
