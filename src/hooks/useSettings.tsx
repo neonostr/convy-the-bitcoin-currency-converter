@@ -8,6 +8,7 @@ export interface Settings {
   decimalSeparator: '.' | ',';
   includeThouSepWhenCopying: boolean;
   alwaysDefaultToBtc: boolean;
+  showRateUpdateNotifications: boolean;
 }
 
 interface SettingsContextType {
@@ -49,6 +50,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       decimalSeparator: '.',  // Default to dot as separator
       includeThouSepWhenCopying: false, // Default to not including thousand separator when copying
       alwaysDefaultToBtc: false, // Default to off for the new setting
+      showRateUpdateNotifications: true, // Default to showing notifications
     };
   });
 

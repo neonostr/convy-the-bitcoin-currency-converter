@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Currency, CoinRates } from '@/types/currency.types';
@@ -77,22 +76,24 @@ export const useConversion = () => {
   // Effect for handling rate updates - but limit toast frequency and don't show when in settings
   useEffect(() => {
     if (rates) {
-      // Only show toast if enough time has passed since the last one
+      // Only show toast if notifications are enabled, enough time has passed since the last one
       // and if we're not in a sheet/modal (checking for body class)
       const now = Date.now();
       const isSheetOpen = document.querySelector('[role="dialog"]') !== null;
       
-      // Never use any hardcoded fallback for toast, always use translation
-      if (now - lastToastTime.current > MIN_TOAST_INTERVAL && !isSheetOpen) {
+      // Check if notifications are enabled in settings
+      if (settings.showRateUpdateNotifications && 
+          now - lastToastTime.current > MIN_TOAST_INTERVAL && 
+          !isSheetOpen) {
         toast({
-          title: t('converter.ratesUpdated.title'), // translation key for every language
-          description: t('converter.ratesUpdated.description'), // translation key
+          title: t('converter.ratesUpdated.title'),
+          description: t('converter.ratesUpdated.description'),
           duration: 3000,
         });
         lastToastTime.current = now;
       }
     }
-  }, [rates, toast, lastToastTime, t]);
+  }, [rates, toast, lastToastTime, t, settings.showRateUpdateNotifications]);
 
   // Trigger a refresh when activity is detected and data is stale
   useEffect(() => {

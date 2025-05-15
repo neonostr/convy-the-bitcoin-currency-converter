@@ -12,6 +12,8 @@ export interface Translations {
       description: string;
       toggle: string;
       btcPriceTrackerMode: string;
+      showRateNotifications: string;
+      notificationsDescription: string;
     };
     numberFormat: {
       title: string;
