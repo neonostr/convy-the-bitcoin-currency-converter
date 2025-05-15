@@ -5,8 +5,11 @@ import './index.css'
 
 // Polyfill requestIdleCallback globally if needed
 if (typeof window !== 'undefined') {
-  if (!('requestIdleCallback' in window)) {
-    window.requestIdleCallback = function(callback, options) {
+  // TypeScript needs this type guard
+  const win = window as Window;
+  
+  if (!('requestIdleCallback' in win)) {
+    win.requestIdleCallback = function(callback, options) {
       const start = Date.now();
       return setTimeout(function() {
         callback({
@@ -18,7 +21,7 @@ if (typeof window !== 'undefined') {
       }, options?.timeout || 1);
     };
 
-    window.cancelIdleCallback = function(id) {
+    win.cancelIdleCallback = function(id) {
       clearTimeout(id);
     };
   }
