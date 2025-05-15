@@ -6,12 +6,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/hooks/useSettings";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { initializeServiceWorkerSync } from "@/services/ratesService";
 
 // Lazy load pages but with a smaller chunk size for faster initial load
-const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+// Import Index directly instead of lazy loading for faster initial render
+import Index from "./pages/Index";
 
 // Optimize query client config for faster startup
 const queryClient = new QueryClient({
@@ -26,9 +27,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize service worker sync as early as possible
+// Initialize service worker sync in a non-blocking way
 if (typeof window !== 'undefined') {
-  initializeServiceWorkerSync();
+  setTimeout(() => {
+    initializeServiceWorkerSync();
+  }, 100);
 }
 
 const App = () => (
@@ -41,7 +44,11 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={
+                <Suspense fallback={<div className="p-4">Loading...</div>}>
+                  <NotFound />
+                </Suspense>
+              } />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
@@ -50,5 +57,4 @@ const App = () => (
   </QueryClientProvider>
 );
 
-// Export for React to render
 export default App;
