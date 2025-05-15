@@ -13,6 +13,22 @@ import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
 import { logAppOpen } from "@/services/eventLogger";
 
+// Polyfill for requestIdleCallback
+const requestIdleCallbackPolyfill = (callback: IdleRequestCallback, options?: IdleRequestOptions) => {
+  const start = Date.now();
+  return setTimeout(() => {
+    callback({
+      didTimeout: false,
+      timeRemaining: () => Math.max(0, 50 - (Date.now() - start))
+    });
+  }, options?.timeout || 1);
+};
+
+// Use the native implementation if available, otherwise use our polyfill
+const requestIdle = typeof window !== 'undefined' && 'requestIdleCallback' in window 
+  ? window.requestIdleCallback 
+  : requestIdleCallbackPolyfill;
+
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -41,7 +57,8 @@ const BitcoinConverter = () => {
     
     // Super-delayed non-critical operations
     if (typeof window !== 'undefined') {
-      requestIdleCallback(() => {
+      // Use our safe implementation
+      requestIdle(() => {
         const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
         if (!hasLoggedOpen) {
           logAppOpen();
@@ -71,7 +88,8 @@ const BitcoinConverter = () => {
     
     // Delay setting default BTC value to not block UI rendering
     if (settings.alwaysDefaultToBtc) {
-      requestIdleCallback(() => {
+      // Use our safe implementation
+      requestIdle(() => {
         setDefaultBtcValue();
       }, { timeout: 500 });
     }

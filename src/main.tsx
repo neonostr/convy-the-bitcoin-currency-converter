@@ -3,6 +3,25 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Polyfill requestIdleCallback globally if needed
+if (typeof window !== 'undefined' && !('requestIdleCallback' in window)) {
+  window.requestIdleCallback = function(callback, options) {
+    const start = Date.now();
+    return setTimeout(function() {
+      callback({
+        didTimeout: false,
+        timeRemaining: function() {
+          return Math.max(0, 50 - (Date.now() - start));
+        }
+      });
+    }, options?.timeout || 1);
+  };
+
+  window.cancelIdleCallback = function(id) {
+    clearTimeout(id);
+  };
+}
+
 // Create root and render IMMEDIATELY for fastest perceived performance
 const root = createRoot(document.getElementById("root")!)
 root.render(<App />)
