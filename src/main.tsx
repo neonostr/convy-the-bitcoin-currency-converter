@@ -60,58 +60,52 @@ function showUpdateToast(sw: ServiceWorker) {
 
 // Register SW using requestIdleCallback with even longer delay to prioritize UI rendering
 if ('serviceWorker' in navigator) {
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(() => registerServiceWorker(), { timeout: 10000 });
-  } else {
-    // Fallback for browsers without requestIdleCallback - longer delay
-    setTimeout(registerServiceWorker, 5000);
-  }
-}
+  // Delay service worker registration even further for immediate UI rendering
+  setTimeout(() => {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      console.log('Service Worker registered with scope:', registration.scope);
+      
+      // Check for updates after page is fully loaded and idle
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          registration.update();
+          console.log('Checking for Service Worker updates...');
+        }, 10000); // Even longer delay for update check to prioritize UI rendering
+      });
 
-function registerServiceWorker() {
-  navigator.serviceWorker.register('/service-worker.js').then(registration => {
-    console.log('Service Worker registered with scope:', registration.scope);
-    
-    // Check for updates after page is fully loaded and idle
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        registration.update();
-        console.log('Checking for Service Worker updates...');
-      }, 10000); // Even longer delay for update check to prioritize UI rendering
-    });
-
-    // Listen for SW message about new update
-    navigator.serviceWorker.addEventListener('message', event => {
-      if (event.data && event.data.type === 'SW_UPDATE') {
-        // Show update toast/banner, pass waiting SW if possible
-        const waitingSw = registration.waiting || registration.installing;
-        if (waitingSw) {
-          showUpdateToast(waitingSw);
-        }
-      }
-    });
-
-    // Listen for new SW activation and reload
-    if (registration.waiting) {
-      showUpdateToast(registration.waiting);
-    }
-    registration.addEventListener('updatefound', () => {
-      const newSw = registration.installing;
-      if (newSw) {
-        newSw.addEventListener('statechange', () => {
-          if (newSw.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateToast(newSw);
+      // Listen for SW message about new update
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'SW_UPDATE') {
+          // Show update toast/banner, pass waiting SW if possible
+          const waitingSw = registration.waiting || registration.installing;
+          if (waitingSw) {
+            showUpdateToast(waitingSw);
           }
-        });
-      }
-    });
-  }).catch(error => {
-    console.error('Service Worker registration failed:', error);
-  });
+        }
+      });
 
-  // Listen for controllerchange (when new SW activates after skipWaiting), then reload
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    console.log('New Service Worker controller, reloading for fresh content...');
-    window.location.reload();
-  });
+      // Listen for new SW activation and reload
+      if (registration.waiting) {
+        showUpdateToast(registration.waiting);
+      }
+      registration.addEventListener('updatefound', () => {
+        const newSw = registration.installing;
+        if (newSw) {
+          newSw.addEventListener('statechange', () => {
+            if (newSw.state === 'installed' && navigator.serviceWorker.controller) {
+              showUpdateToast(newSw);
+            }
+          });
+        }
+      });
+    }).catch(error => {
+      console.error('Service Worker registration failed:', error);
+    });
+
+    // Listen for controllerchange (when new SW activates after skipWaiting), then reload
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.log('New Service Worker controller, reloading for fresh content...');
+      window.location.reload();
+    });
+  }, 5000); // Extremely delayed registration to ensure UI is visible immediately
 }

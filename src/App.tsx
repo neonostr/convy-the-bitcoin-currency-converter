@@ -7,12 +7,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/hooks/useSettings";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { lazy, Suspense } from "react";
-import { initializeServiceWorkerSync } from "@/services/ratesService";
 
-// Lazy load pages but with a smaller chunk size for faster initial load
-const NotFound = lazy(() => import("./pages/NotFound"));
 // Import Index directly instead of lazy loading for faster initial render
 import Index from "./pages/Index";
+
+// Lazy load non-critical pages
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Optimize query client config for faster startup
 const queryClient = new QueryClient({
@@ -29,9 +29,12 @@ const queryClient = new QueryClient({
 
 // Initialize service worker sync in a non-blocking way
 if (typeof window !== 'undefined') {
+  // Defer the service worker initialization to after rendering
   setTimeout(() => {
-    initializeServiceWorkerSync();
-  }, 100);
+    import("@/services/ratesService").then(module => {
+      module.initializeServiceWorkerSync();
+    });
+  }, 3000);
 }
 
 const App = () => (

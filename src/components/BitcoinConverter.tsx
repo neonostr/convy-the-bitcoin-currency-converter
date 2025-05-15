@@ -20,6 +20,7 @@ const BitcoinConverter = () => {
   const { settings } = useSettings();
   const { t, language } = useLanguage();
   const [initialLoad, setInitialLoad] = useState(true);
+  const [isVisible, setIsVisible] = useState(true); // Control component visibility
   const { 
     amount, 
     setAmount, 
@@ -34,14 +35,20 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
 
+  // Immediately mark the component as visible on first render
   useEffect(() => {
-    const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
-    if (!hasLoggedOpen) {
-      logAppOpen();
-      sessionStorage.setItem('app_open_logged', 'true');
-    }
+    setIsVisible(true);
     
-    recordUserActivity();
+    // Delay this non-critical logging to prioritize UI rendering
+    setTimeout(() => {
+      const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
+      if (!hasLoggedOpen) {
+        logAppOpen();
+        sessionStorage.setItem('app_open_logged', 'true');
+      }
+      
+      recordUserActivity();
+    }, 500);
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -55,8 +62,11 @@ const BitcoinConverter = () => {
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
+    // Delay setting default BTC value to not block UI rendering
     if (settings.alwaysDefaultToBtc) {
-      setDefaultBtcValue();
+      setTimeout(() => {
+        setDefaultBtcValue();
+      }, 100);
     }
     
     // Set a short timeout to determine if this is the initial load

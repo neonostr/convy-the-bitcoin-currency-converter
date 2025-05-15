@@ -24,7 +24,7 @@ const ALL_CURRENCIES: Currency[] = [
   'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
   'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
 ];
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -32,32 +32,40 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 // Provider component
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<Settings>(() => {
-    const savedSettings = localStorage.getItem('bitcoin-converter-settings');
-    
-    if (savedSettings) {
-      try {
+    // Try-catch to prevent any localStorage errors from blocking UI rendering
+    try {
+      const savedSettings = localStorage.getItem('bitcoin-converter-settings');
+      
+      if (savedSettings) {
         return JSON.parse(savedSettings);
-      } catch (error) {
-        console.error('Failed to parse saved settings:', error);
       }
+    } catch (error) {
+      console.error('Failed to parse saved settings:', error);
     }
     
-    // Default settings
+    // Default settings - simplified for faster loading
     return {
-      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      theme: 'light', // Will be overridden by main.tsx's early theme application
       displayCurrencies: DEFAULT_CURRENCIES,
-      decimalSeparator: '.',  // Default to dot as separator
-      includeThouSepWhenCopying: false, // Default to not including thousand separator when copying
-      alwaysDefaultToBtc: false, // Default to off for the new setting
-      showRateUpdateNotifications: true, // Default to showing notifications
+      decimalSeparator: '.',
+      includeThouSepWhenCopying: false,
+      alwaysDefaultToBtc: false,
+      showRateUpdateNotifications: true,
     };
   });
 
   useEffect(() => {
-    // Save settings to localStorage whenever they change
-    localStorage.setItem('bitcoin-converter-settings', JSON.stringify(settings));
+    // Save settings to localStorage whenever they change - but defer this operation
+    setTimeout(() => {
+      try {
+        localStorage.setItem('bitcoin-converter-settings', JSON.stringify(settings));
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+      }
+    }, 100);
     
-    // Update theme on document
+    // Update theme on document - this is actually handled earlier in main.tsx now
+    // but we'll keep it here as a fallback
     const { theme } = settings;
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
