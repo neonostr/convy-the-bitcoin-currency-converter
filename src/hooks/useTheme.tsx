@@ -4,14 +4,10 @@ import { useState, useEffect } from 'react';
 type Theme = 'light' | 'dark';
 
 export function useTheme() {
+  // Use the theme already set in main.tsx for instant UI
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check if theme was previously set
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) return savedTheme;
-    
-    // Check for system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
+    const root = window.document.documentElement;
+    return root.classList.contains('dark') ? 'dark' : 'light';
   });
 
   useEffect(() => {
@@ -21,7 +17,11 @@ export function useTheme() {
     root.classList.add(theme);
     
     // Save to localStorage
-    localStorage.setItem('theme', theme);
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {
+      console.error('Failed to save theme to localStorage', e);
+    }
   }, [theme]);
 
   return { theme, setTheme };

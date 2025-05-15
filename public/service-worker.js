@@ -1,5 +1,5 @@
 
-// Service Worker for Bitcoin Currency Converter - Optimized for fast startup
+// Service Worker for Bitcoin Currency Converter - Ultra optimized for fast startup
 
 const CACHE_NAME = 'bitcoin-converter-cache-v5';
 const APP_VERSION = '1.2.0';
@@ -54,42 +54,65 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Optimized fetch strategy - network first with cache fallback for API, 
-// cache first with network fallback for static assets
+// Ultra-optimized fetch strategy - prioritize cache for IMMEDIATE rendering
 self.addEventListener('fetch', event => {
-  // For navigation requests (HTML pages), use network-first strategy
-  if (event.request.mode === 'navigate') {
+  // For HTML/app shell requests, use cache-first for instant rendering
+  if (event.request.mode === 'navigate' || 
+      event.request.url.endsWith('.html') || 
+      event.request.url.endsWith('.js') || 
+      event.request.url.endsWith('.css') || 
+      event.request.url.includes('font')) {
+    
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          console.log('Navigation request served from network');
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, response.clone());
-            return response;
-          });
-        })
-        .catch(() => {
-          console.log('Navigation request falling back to cache');
-          return caches.match('/');
+      caches.match(event.request)
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            // Background fetch to update cache
+            fetch(event.request).then(networkResponse => {
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, networkResponse);
+              });
+            }).catch(() => {/* Silently fail background fetch */});
+            
+            return cachedResponse;
+          }
+          
+          return fetch(event.request)
+            .then(networkResponse => {
+              let responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+              return networkResponse;
+            });
         })
     );
     return;
   }
 
-  // For API requests
+  // For API requests, use network-first but don't block UI
   if (event.request.url.includes('/api/') || 
       event.request.url.includes('coingecko') || 
       event.request.url.includes('supabase')) {
+    
+    // Don't wait for API responses, let them happen in background
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, response.clone());
-            return response;
-          });
-        })
-        .catch(() => {
-          return caches.match(event.request);
+      caches.match(event.request)
+        .then(cachedResponse => {
+          const fetchPromise = fetch(event.request)
+            .then(networkResponse => {
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, networkResponse.clone());
+              });
+              return networkResponse;
+            })
+            .catch(() => {
+              if (cachedResponse) return cachedResponse;
+              throw new Error('No network and no cache');
+            });
+          
+          // Return cached response immediately if available
+          return cachedResponse || fetchPromise;
         })
     );
     return;
@@ -100,16 +123,14 @@ self.addEventListener('fetch', event => {
     caches.match(event.request)
       .then(cachedResponse => {
         if (cachedResponse) {
-          console.log('Resource served from cache:', event.request.url);
-          // Fetch in background to update cache for next time
+          // Background fetch to update cache without blocking
           fetch(event.request)
             .then(networkResponse => {
               caches.open(CACHE_NAME).then(cache => {
                 cache.put(event.request, networkResponse);
-                console.log('Updated cache for:', event.request.url);
               });
             })
-            .catch(err => console.log('Background fetch failed:', err));
+            .catch(() => {/* Ignore errors in background fetch */});
           
           return cachedResponse;
         }
@@ -117,28 +138,23 @@ self.addEventListener('fetch', event => {
         // Not in cache, get from network
         return fetch(event.request)
           .then(networkResponse => {
-            // Clone the response before using it
-            const clonedResponse = networkResponse.clone();
-            
-            // Cache valid responses
             if (networkResponse.ok && event.request.method === "GET") {
               caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, clonedResponse);
-                console.log('Cached new resource:', event.request.url);
+                cache.put(event.request, networkResponse.clone());
               });
             }
-            
             return networkResponse;
           });
       })
   );
 });
 
-// Listen for skipWaiting message from client (for update prompt)
+// Listen for skipWaiting message from client
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  
   // Improved rates caching
   if (event.data && event.data.type === 'CACHE_RATES') {
     const ratesData = event.data.payload;
@@ -146,7 +162,6 @@ self.addEventListener('message', (event) => {
       const ratesBlob = new Blob([JSON.stringify(ratesData)], { type: 'application/json' });
       const ratesResponse = new Response(ratesBlob);
       cache.put('bitcoin-rates-data', ratesResponse);
-      console.log('Bitcoin rates cached for offline use');
     });
   }
 });

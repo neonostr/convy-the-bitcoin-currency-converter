@@ -1,5 +1,4 @@
-
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin, LoaderCircle } from 'lucide-react';
@@ -18,7 +17,7 @@ const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { settings } = useSettings();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [initialLoad, setInitialLoad] = useState(true);
   const [isVisible, setIsVisible] = useState(true); // Control component visibility
   const { 
@@ -35,20 +34,28 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
 
-  // Immediately mark the component as visible on first render
+  // Set visible immediately to prioritize UI rendering
   useEffect(() => {
+    // Set visible immediately
     setIsVisible(true);
     
-    // Delay this non-critical logging to prioritize UI rendering
-    setTimeout(() => {
-      const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
-      if (!hasLoggedOpen) {
-        logAppOpen();
-        sessionStorage.setItem('app_open_logged', 'true');
-      }
-      
-      recordUserActivity();
-    }, 500);
+    // Super-delayed non-critical operations
+    if (typeof window !== 'undefined') {
+      requestIdleCallback(() => {
+        const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
+        if (!hasLoggedOpen) {
+          logAppOpen();
+          sessionStorage.setItem('app_open_logged', 'true');
+        }
+        
+        recordUserActivity();
+        
+        // End initial load state after a while
+        setTimeout(() => {
+          setInitialLoad(false);
+        }, 5000);
+      }, { timeout: 1000 });
+    }
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -64,19 +71,13 @@ const BitcoinConverter = () => {
     
     // Delay setting default BTC value to not block UI rendering
     if (settings.alwaysDefaultToBtc) {
-      setTimeout(() => {
+      requestIdleCallback(() => {
         setDefaultBtcValue();
-      }, 100);
+      }, { timeout: 500 });
     }
-    
-    // Set a short timeout to determine if this is the initial load
-    const timer = setTimeout(() => {
-      setInitialLoad(false);
-    }, 5000); // Consider initial load phase to be over after 5 seconds
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearTimeout(timer);
     };
   }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc]);
 

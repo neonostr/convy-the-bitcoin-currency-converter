@@ -8,7 +8,7 @@ import { SettingsProvider } from "@/hooks/useSettings";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { lazy, Suspense } from "react";
 
-// Import Index directly instead of lazy loading for faster initial render
+// Import Index directly for fastest initial render
 import Index from "./pages/Index";
 
 // Lazy load non-critical pages
@@ -19,22 +19,18 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity, // Keep data fresh forever
-      gcTime: 1000 * 60 * 60 * 24, // Cache for 24 hours (previously cacheTime)
-      retry: 2, // Reduce retry attempts for faster feedback
-      retryDelay: 1000, // Shorter retry delay
+      gcTime: 1000 * 60 * 60 * 24, // Cache for 24 hours
+      retry: 1, // Minimal retry
       networkMode: 'online', // Don't waste time retrying when offline
     },
   },
 });
 
-// Initialize service worker sync in a non-blocking way
+// Create a minimal empty window.showToast for the service worker to use
 if (typeof window !== 'undefined') {
-  // Defer the service worker initialization to after rendering
-  setTimeout(() => {
-    import("@/services/ratesService").then(module => {
-      module.initializeServiceWorkerSync();
-    });
-  }, 3000);
+  (window as any).showToast = (window as any).showToast || function(opts: any) {
+    console.log('Toast:', opts.title, opts.description);
+  };
 }
 
 const App = () => (
@@ -42,8 +38,6 @@ const App = () => (
     <LanguageProvider>
       <SettingsProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -54,6 +48,8 @@ const App = () => (
               } />
             </Routes>
           </BrowserRouter>
+          <Toaster />
+          <Sonner />
         </TooltipProvider>
       </SettingsProvider>
     </LanguageProvider>
