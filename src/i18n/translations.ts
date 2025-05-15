@@ -12,7 +12,9 @@ export const translations: Record<string, Translations> = {
         title: 'Price Tracker',
         description: "When enabled, the app will automatically show the current value of 1 BTC each time you open it, while still allowing you to input your own values.",
         toggle: 'Enable Price Tracker',
-        btcPriceTrackerMode: 'BTC price tracker mode'
+        btcPriceTrackerMode: 'BTC price tracker mode',
+        showRateNotifications: 'Show rate update notifications',
+        notificationsDescription: 'When enabled, you will get a notification each time rates are automatically updated.'
       },
       numberFormat: {
         title: 'Number Format',
@@ -75,7 +77,9 @@ export const translations: Record<string, Translations> = {
         title: 'Seguimiento de Precios',
         description: "Cuando está habilitado, la aplicación mostrará automáticamente el valor actual de 1 BTC cada vez que la abras, y aún podrás ingresar tus propios valores.",
         toggle: 'Activar Seguimiento de Precios',
-        btcPriceTrackerMode: 'Modo de seguimiento de precio BTC'
+        btcPriceTrackerMode: 'Modo de seguimiento de precio BTC',
+        showRateNotifications: 'Mostrar notificaciones de actualización de tipos de cambio',
+        notificationsDescription: 'Cuando está habilitado, recibirás una notificación cada vez que las tasas se actualicen automáticamente.'
       },
       numberFormat: {
         title: 'Formato de Números',
@@ -138,7 +142,9 @@ export const translations: Record<string, Translations> = {
         title: 'Preisverfolgung',
         description: "Ist die Funktion aktiviert, zeigt die App bei jedem Öffnen automatisch den aktuellen Wert von 1 BTC an, während du weiterhin eigene Werte eingeben kannst.",
         toggle: 'Preisverfolgung aktivieren',
-        btcPriceTrackerMode: 'BTC-Preisverfolgungsmodus'
+        btcPriceTrackerMode: 'BTC-Preisverfolgungsmodus',
+        showRateNotifications: 'Benachrichtigungen zu Kurs-Updates anzeigen',
+        notificationsDescription: 'Wenn aktiviert, erhältst du eine Benachrichtigung, sobald die Kurse automatisch aktualisiert werden.'
       },
       numberFormat: {
         title: 'Zahlenformat',
