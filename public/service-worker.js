@@ -1,22 +1,24 @@
 
 // Service Worker for Bitcoin Currency Converter - Ultra optimized for fast startup
 
-const CACHE_NAME = 'bitcoin-converter-cache-v5';
-const APP_VERSION = '1.2.0';
+const CACHE_NAME = 'bitcoin-converter-cache-v6';
+const APP_VERSION = '1.2.1';
 const APP_URLS_TO_CACHE = [
   '/',
   '/index.html',
+  '/manifest.json',
   '/src/main.tsx',
   '/src/index.css',
   '/src/App.tsx',
-  '/manifest.json',
   '/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png',
   '/lovable-uploads/94f20957-5441-4a0d-a9c8-9f555a8c5f5f.png'
 ];
 
-// Pre-cache essential assets during installation for faster startup
+// Skip waiting immediately to ensure the new SW takes over
 self.addEventListener('install', event => {
   console.log('Service Worker installing...');
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -25,7 +27,6 @@ self.addEventListener('install', event => {
       })
       .then(() => {
         console.log('Pre-caching complete');
-        self.skipWaiting(); // Activate new SW immediately
       })
   );
 });
@@ -67,52 +68,35 @@ self.addEventListener('fetch', event => {
       caches.match(event.request)
         .then(cachedResponse => {
           if (cachedResponse) {
-            // Background fetch to update cache
-            fetch(event.request).then(networkResponse => {
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, networkResponse);
-              });
-            }).catch(() => {/* Silently fail background fetch */});
-            
+            // Return cached response immediately
             return cachedResponse;
           }
           
+          // If not in cache, get from network
           return fetch(event.request)
             .then(networkResponse => {
-              let responseToCache = networkResponse.clone();
+              // Don't cache error responses
+              if (!networkResponse || networkResponse.status !== 200) {
+                return networkResponse;
+              }
+              
+              // Cache successful responses
+              const responseToCache = networkResponse.clone();
               caches.open(CACHE_NAME).then(cache => {
                 cache.put(event.request, responseToCache);
               });
-              return networkResponse;
-            });
-        })
-    );
-    return;
-  }
-
-  // For API requests, use network-first but don't block UI
-  if (event.request.url.includes('/api/') || 
-      event.request.url.includes('coingecko') || 
-      event.request.url.includes('supabase')) {
-    
-    // Don't wait for API responses, let them happen in background
-    event.respondWith(
-      caches.match(event.request)
-        .then(cachedResponse => {
-          const fetchPromise = fetch(event.request)
-            .then(networkResponse => {
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, networkResponse.clone());
-              });
+              
               return networkResponse;
             })
-            .catch(() => {
-              if (cachedResponse) return cachedResponse;
-              throw new Error('No network and no cache');
+            .catch(err => {
+              console.error('Fetch failed:', err);
+              // Return a simple fallback page for navigation requests
+              if (event.request.mode === 'navigate') {
+                return new Response('<html><body><h1>App is offline</h1><p>Please check your connection.</p></body></html>', 
+                  { headers: { 'Content-Type': 'text/html' } });
+              }
+              throw err;
             });
-          
-          // Return cached response immediately if available
-          return cachedResponse || fetchPromise;
         })
     );
     return;
@@ -123,27 +107,27 @@ self.addEventListener('fetch', event => {
     caches.match(event.request)
       .then(cachedResponse => {
         if (cachedResponse) {
-          // Background fetch to update cache without blocking
-          fetch(event.request)
-            .then(networkResponse => {
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, networkResponse);
-              });
-            })
-            .catch(() => {/* Ignore errors in background fetch */});
-          
           return cachedResponse;
         }
 
         // Not in cache, get from network
         return fetch(event.request)
           .then(networkResponse => {
+            // Clone the response
+            const responseToCache = networkResponse.clone();
+            
+            // Cache it for future use if it's a GET
             if (networkResponse.ok && event.request.method === "GET") {
               caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, networkResponse.clone());
+                cache.put(event.request, responseToCache);
               });
             }
+            
             return networkResponse;
+          })
+          .catch(err => {
+            console.error('Network fetch failed:', err);
+            throw err;
           });
       })
   );
@@ -168,12 +152,9 @@ self.addEventListener('message', (event) => {
 
 // When update is available, notify all clients
 self.addEventListener('install', event => {
-  self.skipWaiting();
-  event.waitUntil(
-    self.clients.matchAll({type: "window"}).then(clients => {
-      clients.forEach(client => {
-        client.postMessage({type: 'SW_UPDATE'});
-      });
-    })
-  );
+  self.clients.matchAll({type: "window"}).then(clients => {
+    clients.forEach(client => {
+      client.postMessage({type: 'SW_UPDATE'});
+    });
+  });
 });

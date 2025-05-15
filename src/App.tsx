@@ -6,10 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/hooks/useSettings";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import { lazy, Suspense } from "react";
-
-// Import Index directly for fastest initial render
 import Index from "./pages/Index";
+import { lazy, Suspense } from "react";
 
 // Lazy load non-critical pages
 const NotFound = lazy(() => import("./pages/NotFound"));
