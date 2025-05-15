@@ -1,22 +1,6 @@
 
 import { CoinRates, Currency } from "@/types/currency.types";
 
-// Polyfill for requestIdleCallback
-const requestIdleCallbackPolyfill = (callback: IdleRequestCallback, options?: IdleRequestOptions) => {
-  const start = Date.now();
-  return setTimeout(() => {
-    callback({
-      didTimeout: false,
-      timeRemaining: () => Math.max(0, 50 - (Date.now() - start))
-    });
-  }, options?.timeout || 1);
-};
-
-// Use the native implementation if available, otherwise use our polyfill
-const requestIdle = typeof window !== 'undefined' && 'requestIdleCallback' in window 
-  ? window.requestIdleCallback 
-  : requestIdleCallbackPolyfill;
-
 // Cache settings - shorter expiry for faster updates when needed
 export const CACHE_EXPIRY_TIME = 60000; // 60 seconds in milliseconds
 

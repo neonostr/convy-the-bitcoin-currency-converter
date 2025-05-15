@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
+
+import React, { useRef, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin, LoaderCircle } from 'lucide-react';
@@ -13,27 +14,11 @@ import { getLastUpdatedFormatted } from '@/utils/formatUtils';
 import { Currency } from '@/types/currency.types';
 import { logAppOpen } from "@/services/eventLogger";
 
-// Polyfill for requestIdleCallback
-const requestIdleCallbackPolyfill = (callback: IdleRequestCallback, options?: IdleRequestOptions) => {
-  const start = Date.now();
-  return setTimeout(() => {
-    callback({
-      didTimeout: false,
-      timeRemaining: () => Math.max(0, 50 - (Date.now() - start))
-    });
-  }, options?.timeout || 1);
-};
-
-// Use the native implementation if available, otherwise use our polyfill
-const requestIdle = typeof window !== 'undefined' && 'requestIdleCallback' in window 
-  ? window.requestIdleCallback 
-  : requestIdleCallbackPolyfill;
-
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { settings } = useSettings();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [initialLoad, setInitialLoad] = useState(true);
   const [isVisible, setIsVisible] = useState(true); // Control component visibility
   const { 
@@ -50,29 +35,20 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
 
-  // Set visible immediately to prioritize UI rendering
+  // Immediately mark the component as visible on first render
   useEffect(() => {
-    // Set visible immediately
     setIsVisible(true);
     
-    // Super-delayed non-critical operations
-    if (typeof window !== 'undefined') {
-      // Use our safe implementation
-      requestIdle(() => {
-        const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
-        if (!hasLoggedOpen) {
-          logAppOpen();
-          sessionStorage.setItem('app_open_logged', 'true');
-        }
-        
-        recordUserActivity();
-        
-        // End initial load state after a while
-        setTimeout(() => {
-          setInitialLoad(false);
-        }, 5000);
-      }, { timeout: 1000 });
-    }
+    // Delay this non-critical logging to prioritize UI rendering
+    setTimeout(() => {
+      const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
+      if (!hasLoggedOpen) {
+        logAppOpen();
+        sessionStorage.setItem('app_open_logged', 'true');
+      }
+      
+      recordUserActivity();
+    }, 500);
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -88,14 +64,19 @@ const BitcoinConverter = () => {
     
     // Delay setting default BTC value to not block UI rendering
     if (settings.alwaysDefaultToBtc) {
-      // Use our safe implementation
-      requestIdle(() => {
+      setTimeout(() => {
         setDefaultBtcValue();
-      }, { timeout: 500 });
+      }, 100);
     }
+    
+    // Set a short timeout to determine if this is the initial load
+    const timer = setTimeout(() => {
+      setInitialLoad(false);
+    }, 5000); // Consider initial load phase to be over after 5 seconds
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(timer);
     };
   }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc]);
 
