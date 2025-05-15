@@ -3,6 +3,12 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Apply theme immediately before any rendering happens
+if (typeof window !== 'undefined') {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.classList.add(savedTheme);
+}
+
 // Create root and render immediately for faster perceived performance
 const root = createRoot(document.getElementById("root")!)
 root.render(<App />)
