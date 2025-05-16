@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { Currency } from '@/types/currency.types';
 
@@ -45,7 +46,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     
     // Default settings - simplified for faster loading
     return {
-      theme: 'light', // Will be overridden by main.tsx's early theme application
+      theme: 'dark', // Changed default theme to dark
       displayCurrencies: DEFAULT_CURRENCIES,
       decimalSeparator: '.',
       includeThouSepWhenCopying: false,

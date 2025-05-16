@@ -22,6 +22,7 @@ const AppearanceSettings = () => {
           id="theme-toggle"
           checked={settings.theme === 'dark'}
           onCheckedChange={toggleTheme}
+          defaultChecked={true}
         />
         <div className="flex items-center space-x-2">
           <Moon className="h-4 w-4 text-muted-foreground" />

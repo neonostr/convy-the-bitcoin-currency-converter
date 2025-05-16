@@ -9,9 +9,8 @@ export function useTheme() {
     const savedTheme = localStorage.getItem('theme') as Theme;
     if (savedTheme) return savedTheme;
     
-    // Check for system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
+    // Default to dark mode instead of checking system preference
+    return 'dark';
   });
 
   useEffect(() => {
