@@ -19,14 +19,8 @@ const BitcoinConverter = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
   const { t, language } = useLanguage();
-  
-  // Check if running as PWA
-  const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
-  
-  // In PWA mode, skip initial load animation
-  const [initialLoad, setInitialLoad] = useState(!isPWA);
-  const [isVisible, setIsVisible] = useState(true);
-  
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [isVisible, setIsVisible] = useState(true); // Control component visibility
   const { 
     amount, 
     setAmount, 
@@ -54,7 +48,7 @@ const BitcoinConverter = () => {
       }
       
       recordUserActivity();
-    }, isPWA ? 200 : 500); // Shorter timeout in PWA mode
+    }, 500);
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -72,20 +66,19 @@ const BitcoinConverter = () => {
     if (settings.alwaysDefaultToBtc) {
       setTimeout(() => {
         setDefaultBtcValue();
-      }, isPWA ? 50 : 100); // Faster in PWA mode
+      }, 100);
     }
     
     // Set a short timeout to determine if this is the initial load
-    // In PWA mode, make this timeout much shorter
     const timer = setTimeout(() => {
       setInitialLoad(false);
-    }, isPWA ? 1000 : 5000);
+    }, 5000); // Consider initial load phase to be over after 5 seconds
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearTimeout(timer);
     };
-  }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc, isPWA]);
+  }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc]);
 
   const { displayCurrencies } = settings;
 
@@ -121,11 +114,8 @@ const BitcoinConverter = () => {
     }
   };
 
-  // Add a class specifically for PWA mode
-  const containerClass = `flex flex-col items-center w-full max-w-md mx-auto p-4 ${isPWA ? '' : 'animate-fade-in'}`;
-
   return (
-    <div className={containerClass}>
+    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
       <div className="flex items-center justify-between w-full mb-6">
         <div className="flex items-center space-x-2">
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />

@@ -1,61 +1,32 @@
 
-// Service Worker for Bitcoin Currency Converter - Optimized for instant startup
+// Service Worker for Bitcoin Currency Converter - Optimized for fast startup
 
-const CACHE_NAME = 'bitcoin-converter-cache-v7';
-const APP_VERSION = '1.3.0';
-
-// Critical app shell resources - these MUST load instantly for PWA
-const CRITICAL_APP_SHELL = [
+const CACHE_NAME = 'bitcoin-converter-cache-v5';
+const APP_VERSION = '1.2.0';
+const APP_URLS_TO_CACHE = [
   '/',
   '/index.html',
-  '/src/index.css'
-];
-
-// Additional app shell resources - still important but secondary priority
-const APP_SHELL_URLS = [
-  '/manifest.json',
-  '/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png', // App icon
   '/src/main.tsx',
-  '/src/App.tsx'
-];
-
-// Additional assets to cache but with lower priority
-const ADDITIONAL_URLS = [
+  '/src/index.css',
+  '/src/App.tsx',
+  '/manifest.json',
   '/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png',
   '/lovable-uploads/94f20957-5441-4a0d-a9c8-9f555a8c5f5f.png'
 ];
 
-// Pre-cache app shell during installation for immediate startup
+// Pre-cache essential assets during installation for faster startup
 self.addEventListener('install', event => {
   console.log('Service Worker installing...');
-  
-  // Split caching into three operations: critical, shell, and non-critical
   event.waitUntil(
-    Promise.all([
-      // 1. Cache critical resources with highest priority - must complete
-      caches.open(CACHE_NAME + '-critical').then(cache => {
-        console.log('Caching critical resources for instant startup');
-        return cache.addAll(CRITICAL_APP_SHELL);
-      }),
-      
-      // 2. Cache app shell with high priority - should complete
-      caches.open(CACHE_NAME + '-shell').then(cache => {
-        console.log('Caching app shell for quick startup');
-        // Don't await - proceed even if this isn't complete
-        cache.addAll(APP_SHELL_URLS);
-      }),
-      
-      // 3. Cache additional assets with lower priority - nice to have
-      caches.open(CACHE_NAME).then(cache => {
-        console.log('Caching additional assets in background');
-        // We don't await this - let it happen in background
-        cache.addAll(ADDITIONAL_URLS);
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Caching app shell and assets for fast startup');
+        return cache.addAll(APP_URLS_TO_CACHE);
       })
-    ])
-    .then(() => {
-      console.log('Critical pre-caching complete');
-      self.skipWaiting(); // Activate new SW immediately
-    })
+      .then(() => {
+        console.log('Pre-caching complete');
+        self.skipWaiting(); // Activate new SW immediately
+      })
   );
 });
 
@@ -68,7 +39,7 @@ self.addEventListener('activate', event => {
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
-            if (![CACHE_NAME, CACHE_NAME + '-shell', CACHE_NAME + '-critical'].includes(cacheName)) {
+            if (cacheName !== CACHE_NAME) {
               console.log('Deleting outdated cache:', cacheName);
               return caches.delete(cacheName);
             }
@@ -83,116 +54,82 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Ultra-optimized fetch strategy:
-// 1. Critical resources: Cache-only for absolute immediate loading
-// 2. App shell: Cache-first (almost instant loading)
-// 3. API calls: Network-first with cached fallback
-// 4. Other assets: Stale-while-revalidate
+// Optimized fetch strategy - network first with cache fallback for API, 
+// cache first with network fallback for static assets
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-  
-  // For critical resources like index.html in PWA mode, use cache-only
-  if (CRITICAL_APP_SHELL.some(path => url.pathname === path || 
-      (path === '/' && url.pathname === '/') ||
-      (path === '/index.html' && url.pathname === '/'))) {
-    
-    // PWA mode needs absolute immediate cache response
-    if (event.request.mode === 'navigate' && 
-        event.request.headers.get('Accept')?.includes('text/html')) {
-      
-      event.respondWith(
-        caches.open(CACHE_NAME + '-critical')
-          .then(cache => cache.match('/index.html') || cache.match('/'))
-          .then(response => {
-            // If we have a cached response, use it immediately
-            if (response) return response;
-            
-            // If no cached response (first load), fetch from network
-            return fetch(event.request).catch(() => {
-              return caches.open(CACHE_NAME + '-shell')
-                .then(shellCache => shellCache.match('/index.html') || shellCache.match('/'));
-            });
-          })
-      );
-      return;
-    }
-  }
-
-  // For navigation requests (HTML pages), use cache-first for instant loading
+  // For navigation requests (HTML pages), use network-first strategy
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.open(CACHE_NAME + '-shell').then(cache => 
-        cache.match('/').then(response => {
-          const fetchPromise = fetch(event.request)
-            .then(networkResponse => {
-              cache.put(event.request, networkResponse.clone());
-              return networkResponse;
-            })
-            .catch(() => response || caches.match('/'));
-          
-          // Return cached response immediately for instant loading
-          return response || fetchPromise;
+      fetch(event.request)
+        .then(response => {
+          console.log('Navigation request served from network');
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
         })
-      )
+        .catch(() => {
+          console.log('Navigation request falling back to cache');
+          return caches.match('/');
+        })
     );
     return;
   }
 
-  // For API requests - network first, fallback to cache
+  // For API requests
   if (event.request.url.includes('/api/') || 
       event.request.url.includes('coingecko') || 
       event.request.url.includes('supabase')) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseClone);
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, response.clone());
+            return response;
           });
-          return response;
         })
         .catch(() => {
-          return caches.match(event.request).then(cachedResponse => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // If we don't have a cached API response, return cached rates
-            if (event.request.url.includes('coingecko')) {
-              return caches.match('bitcoin-rates-data');
-            }
-            return new Response(JSON.stringify({error: 'Network error'}), {
-              headers: {'Content-Type': 'application/json'}
-            });
-          });
+          return caches.match(event.request);
         })
     );
     return;
   }
 
-  // For all other requests (assets, scripts, etc), use stale-while-revalidate
+  // For all other requests, try cache first for fastest loading
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Clone the request because it's a stream that can only be consumed once
-        const fetchPromise = fetch(event.request.clone())
-          .then(networkResponse => {
-            // Only cache valid responses
-            if (networkResponse.ok && event.request.method === "GET") {
-              const responseToCache = networkResponse.clone();
+        if (cachedResponse) {
+          console.log('Resource served from cache:', event.request.url);
+          // Fetch in background to update cache for next time
+          fetch(event.request)
+            .then(networkResponse => {
               caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, responseToCache);
+                cache.put(event.request, networkResponse);
+                console.log('Updated cache for:', event.request.url);
+              });
+            })
+            .catch(err => console.log('Background fetch failed:', err));
+          
+          return cachedResponse;
+        }
+
+        // Not in cache, get from network
+        return fetch(event.request)
+          .then(networkResponse => {
+            // Clone the response before using it
+            const clonedResponse = networkResponse.clone();
+            
+            // Cache valid responses
+            if (networkResponse.ok && event.request.method === "GET") {
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, clonedResponse);
+                console.log('Cached new resource:', event.request.url);
               });
             }
+            
             return networkResponse;
-          })
-          .catch(error => {
-            console.error('Fetch failed:', error);
-            // If network fetch fails, return the cached response as is
-            return cachedResponse;
           });
-        
-        // Return cached response immediately if available, otherwise wait for network
-        return cachedResponse || fetchPromise;
       })
   );
 });
@@ -202,7 +139,6 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
   // Improved rates caching
   if (event.data && event.data.type === 'CACHE_RATES') {
     const ratesData = event.data.payload;

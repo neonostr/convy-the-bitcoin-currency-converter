@@ -3,20 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Define requestIdleCallback types that match the existing DOM types
-// to avoid conflicts with built-in TypeScript definitions
-declare global {
-  interface Window {
-    // Use the standard DOM types instead of redefining them
-    requestIdleCallback: (
-      callback: IdleRequestCallback,
-      options?: IdleRequestOptions
-    ) => number;
-    cancelIdleCallback: (handle: number) => void;
-  }
-}
-
-// Apply theme immediately before any rendering happens to prevent flash
+// Apply theme immediately before any rendering happens
 if (typeof window !== 'undefined') {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.classList.add(savedTheme);
