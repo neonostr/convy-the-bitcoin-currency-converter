@@ -22,11 +22,13 @@ const App = () => {
   const queryClient = useMemo(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: Infinity, // Keep data fresh forever
+        staleTime: isPWA ? Infinity : 1000 * 60 * 5, // Keep data fresh forever in PWA mode
         gcTime: 1000 * 60 * 60 * 24, // Cache for 24 hours (previously cacheTime)
-        retry: isPWA ? 1 : 2, // Reduce retry attempts for faster feedback in PWA mode
-        retryDelay: isPWA ? 3000 : 1000, // Longer retry delay for PWA to prioritize UI
-        networkMode: isPWA ? 'always' : 'online', // In PWA, don't block on network
+        retry: isPWA ? 0 : 2, // No retries in PWA mode for faster initial render
+        retryDelay: 1000,
+        networkMode: isPWA ? 'always' : 'online', // In PWA, don't wait for network checks
+        refetchOnWindowFocus: !isPWA, // Disable refetch on focus in PWA mode
+        refetchOnMount: !isPWA, // Disable refetch on mount in PWA mode
       },
     },
   }), [isPWA]);

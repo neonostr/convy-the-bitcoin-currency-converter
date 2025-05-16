@@ -25,7 +25,7 @@ const ALL_CURRENCIES: Currency[] = [
   'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
   'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
 ];
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.1.0'; // Reverted back to 1.1.0 as requested
 
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -46,7 +46,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     
     // Default settings - simplified for faster loading
     return {
-      theme: 'dark', // Changed default theme to dark
+      theme: 'dark', // Dark theme by default
       displayCurrencies: DEFAULT_CURRENCIES,
       decimalSeparator: '.',
       includeThouSepWhenCopying: false,
@@ -55,23 +55,22 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     };
   });
 
+  // For PWA mode, prioritize UI rendering over settings management
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+
   useEffect(() => {
-    // Save settings to localStorage whenever they change - but defer this operation
-    setTimeout(() => {
+    // Save settings to localStorage whenever they change
+    // For PWA, use a longer delay to prioritize initial rendering
+    const saveTimeout = setTimeout(() => {
       try {
         localStorage.setItem('bitcoin-converter-settings', JSON.stringify(settings));
       } catch (error) {
         console.error('Failed to save settings:', error);
       }
-    }, 100);
+    }, isPWA ? 1000 : 100); // Longer delay for PWA
     
-    // Update theme on document - this is actually handled earlier in main.tsx now
-    // but we'll keep it here as a fallback
-    const { theme } = settings;
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-  }, [settings]);
+    return () => clearTimeout(saveTimeout);
+  }, [settings, isPWA]);
 
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -95,7 +94,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         toggleTheme, 
         updateDisplayCurrencies, 
         allCurrencies: ALL_CURRENCIES,
-        appVersion: APP_VERSION
+        appVersion: APP_VERSION // Using the reverted version number
       }}
     >
       {children}

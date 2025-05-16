@@ -6,9 +6,9 @@ const Index = () => {
   // Check if running as PWA
   const isPWA = window.matchMedia('(display-mode: standalone)').matches;
   
-  // For PWA mode, we prioritize immediate UI rendering
+  // For PWA mode, we always set isLoaded to true for immediate rendering
   // For browser mode, we can afford a nicer transition
-  const [isLoaded, setIsLoaded] = useState(isPWA);
+  const [isLoaded, setIsLoaded] = useState(isPWA ? true : false);
 
   useEffect(() => {
     // In browser mode, we show a brief loading transition
@@ -19,18 +19,9 @@ const Index = () => {
   }, [isPWA, isLoaded]);
 
   // In PWA mode, render immediately without any transitions or delays
-  if (isPWA) {
-    return (
-      <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-        <BitcoinConverter />
-      </div>
-    );
-  }
-
-  // In browser mode, we can afford more elegant transitions
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      {isLoaded ? <BitcoinConverter /> : null}
+      {(isPWA || isLoaded) ? <BitcoinConverter /> : null}
     </div>
   );
 };
