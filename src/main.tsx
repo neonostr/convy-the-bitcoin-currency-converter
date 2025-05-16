@@ -3,25 +3,16 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Define requestIdleCallback and cancelIdleCallback types to fix TypeScript errors
-interface RequestIdleCallbackOptions {
-  timeout: number;
-}
-
-type RequestIdleCallbackHandle = number;
-type RequestIdleCallbackDeadline = {
-  readonly didTimeout: boolean;
-  timeRemaining: () => number;
-};
-
-// Add types to window object
+// Define requestIdleCallback types that match the existing DOM types
+// to avoid conflicts with built-in TypeScript definitions
 declare global {
   interface Window {
+    // Use the standard DOM types instead of redefining them
     requestIdleCallback: (
-      callback: (deadline: RequestIdleCallbackDeadline) => void,
-      opts?: RequestIdleCallbackOptions
-    ) => RequestIdleCallbackHandle;
-    cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
+      callback: IdleRequestCallback,
+      options?: IdleRequestOptions
+    ) => number;
+    cancelIdleCallback: (handle: number) => void;
   }
 }
 

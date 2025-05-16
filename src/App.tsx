@@ -50,23 +50,30 @@ const App = () => {
     // Import data fetching utilities without blocking initial render
     const preloadRates = async () => {
       try {
-        const { getCachedRates, fetchBitcoinRates } = await import('@/services/coinGeckoApi');
+        const { fetchCoinRates } = await import('@/services/coinGeckoApi');
+        const { getCachedRates } = await import('@/services/ratesService');
+        
         const cachedRates = getCachedRates();
         // If we have cached rates, no need to fetch immediately
         if (cachedRates && Object.keys(cachedRates).length > 0) {
           return;
         }
         // Otherwise fetch rates in the background
-        fetchBitcoinRates().catch(console.error);
+        fetchCoinRates().catch(console.error);
       } catch (error) {
         console.error('Failed to preload rates:', error);
       }
     };
     
     // Start preloading data without blocking the UI
-    requestIdleCallback(() => {
-      preloadRates();
-    });
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(() => {
+        preloadRates();
+      });
+    } else {
+      // Fallback for browsers that don't support requestIdleCallback
+      setTimeout(preloadRates, 1000);
+    }
     
     // Expose the toast function for the service worker
     if (typeof window !== 'undefined') {
