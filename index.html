@@ -12,7 +12,7 @@
     <meta name="description" content="Convert Bitcoin and track BTC prices with confidence. A beautiful, fast, and completely private currency converter with real-time price tracking that works offline. No tracking, no data collection - just simple and secure conversions." />
     <meta name="author" content="neonostr" />
 
-    <!-- Critical CSS inlined for instant rendering - Enhanced for immediate display -->
+    <!-- Critical CSS inlined for instant rendering -->
     <style>
       /* Minimal critical CSS for initial rendering */
       :root {
@@ -39,14 +39,13 @@
         height: 100%;
       }
 
-      /* Apply instant display to root and PWA containers */
       #root {
         display: flex;
         height: 100%;
         width: 100%;
       }
       
-      /* App shell now uses style-based immediate rendering */
+      /* App shell styles */
       #app-shell {
         position: fixed;
         z-index: 10;
@@ -61,34 +60,41 @@
         background-color: hsl(var(--background));
       }
       
-      /* Enhanced display mode detection */
-      @media (display-mode: browser) {
-        #app-shell {
-          opacity: 0;
-          pointer-events: none;
-        }
-      }
-      
+      /* PWA-specific styles */
       @media (display-mode: standalone) {
+        /* Hide app shell immediately in PWA mode */
+        #app-shell {
+          display: none !important;
+        }
+        
+        /* Prevent scroll issues in PWA */
         body {
           overscroll-behavior: none;
           position: fixed;
           width: 100%;
           height: 100%;
         }
+        
         #root {
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
         }
+        
+        /* Disable animations in PWA mode */
         .animate-fade-in,
         .animate-slide-up {
           animation: none !important;
           opacity: 1 !important;
           transform: translateY(0) !important;
         }
+        
+        /* Force immediate display of content in PWA mode */
+        * {
+          transition: none !important;
+        }
       }
       
-      /* Shared styles between shell and app with immediate render */
+      /* App shell components */
       .app-container {
         display: flex;
         flex-direction: column;
@@ -163,7 +169,7 @@
       }
     </style>
 
-    <!-- Early theme detection and immediate rendering -->
+    <!-- Early theme detection script -->
     <script>
       (function() {
         try {
@@ -172,13 +178,9 @@
             (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
           document.documentElement.classList.add(savedTheme);
           
-          // Set PWA display mode class immediately
+          // Detect PWA mode and set class early
           if (window.matchMedia('(display-mode: standalone)').matches) {
             document.documentElement.classList.add('is-pwa');
-            document.body.classList.add('pwa-mode');
-            
-            // Add special class to prioritize content and improve perceived performance
-            document.documentElement.classList.add('instant-render');
           }
         } catch (e) {}
       })();
@@ -209,7 +211,7 @@
     <link rel="icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" type="image/png" />
     <link rel="apple-touch-icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" />
     
-    <!-- Preload essential assets - enhanced for instant loading -->
+    <!-- Preload essential assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preload" href="/src/index.css" as="style">
     <link rel="preload" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" as="image">
@@ -217,7 +219,7 @@
   </head>
 
   <body>
-    <!-- App shell for instant rendering - Enhanced for PWA -->
+    <!-- App shell for initial rendering - Only visible in browser mode -->
     <div id="app-shell">
       <div class="app-container">
         <div class="app-header">
@@ -247,25 +249,35 @@
     <!-- Root element for React -->
     <div id="root"></div>
     
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <!-- Important scripts -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
     
     <script>
-      // More aggressive approach to hide shell once content is ready
+      // Improved PWA detection and shell hiding
       window.addEventListener('DOMContentLoaded', function() {
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-          // In PWA mode, we need to be extremely aggressive with rendering
-          // We hide the shell as soon as React starts rendering
-          const observer = new MutationObserver(function(mutations) {
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+        
+        if (isPWA) {
+          // In PWA mode, hide shell immediately
+          const shell = document.getElementById('app-shell');
+          if (shell) {
+            shell.style.display = 'none';
+          }
+          
+          // Add PWA-specific class to body
+          document.body.classList.add('pwa-mode');
+          
+          // Setup mutation observer to check for content
+          const observer = new MutationObserver(function() {
             const hasContent = document.querySelector('#root > div');
             if (hasContent) {
+              // If content is rendered, ensure shell is hidden
               const shell = document.getElementById('app-shell');
               if (shell) {
-                // Instant hiding in PWA mode - no transition
                 shell.style.display = 'none';
-                observer.disconnect();
               }
+              observer.disconnect();
             }
           });
           
@@ -273,14 +285,14 @@
             childList: true,
             subtree: true
           });
-
-          // Backup timer to hide shell even if React is slow
+          
+          // Backup timer
           setTimeout(function() {
             const shell = document.getElementById('app-shell');
-            if (shell && shell.style.display !== 'none') {
+            if (shell) {
               shell.style.display = 'none';
             }
-          }, 200); // Very aggressive timeout
+          }, 100);
         }
       });
     </script>

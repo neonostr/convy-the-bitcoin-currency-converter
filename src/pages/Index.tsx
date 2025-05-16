@@ -7,41 +7,46 @@ const Index = () => {
   // Check if running as PWA - detect standalone mode
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // Track whether the full component has loaded
-  // In PWA mode, we start with isFullyLoaded = true to skip the fade-in
+  // In PWA mode, we start with fully loaded state true to skip the animation
+  // In browser mode, we start with false to show the animation
   const [isFullyLoaded, setIsFullyLoaded] = useState(isPWA);
   
   useEffect(() => {
-    // In PWA mode, mark as fully loaded immediately to prevent any delay
+    // In PWA mode, immediately hide the app shell
     if (isPWA) {
       setIsFullyLoaded(true);
-      // Immediately hide any shell or placeholder
       const appShell = document.getElementById('app-shell');
       if (appShell) {
         appShell.style.display = 'none';
       }
     } else {
-      // If not in PWA mode, handle the fade-in effect as before
-      const timer = requestAnimationFrame(() => {
+      // If not in PWA mode, use animation frame for smooth transition
+      const timer = setTimeout(() => {
         setIsFullyLoaded(true);
-      });
+      }, 300); // Short delay for shell-to-app transition
       
-      return () => cancelAnimationFrame(timer);
+      return () => clearTimeout(timer);
     }
   }, [isPWA]);
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      {/* Only show AppShell in browser mode, not in PWA mode */}
+      {/* App shell only shown in browser mode */}
       {!isPWA && (
-        <div className={`absolute transition-opacity duration-300 ${isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <div 
+          className={`absolute transition-opacity duration-300 ${
+            isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
           <AppShell onReady={() => console.log('App shell rendered')} />
         </div>
       )}
       
-      {/* Real component with fade-in effect (only in browser mode), immediate in PWA mode */}
+      {/* Real component with fade-in effect in browser mode, immediate in PWA mode */}
       <div 
-        className={`w-full ${!isPWA ? `transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}` : ''}`}
+        className={`w-full ${
+          !isPWA ? `transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}` : ''
+        }`}
         aria-hidden={!isFullyLoaded}
       >
         <BitcoinConverter />

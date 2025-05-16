@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -20,12 +19,12 @@ const BitcoinConverter = () => {
   const { settings } = useSettings();
   const { t, language } = useLanguage();
   
-  // Check if running as PWA for optimization
+  // Check if running as PWA - for optimizations
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // In PWA mode, skip animations and delays
+  // Skip initial loading animation in PWA mode
   const [initialLoad, setInitialLoad] = useState(!isPWA);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(isPWA);
   
   const { 
     amount, 
@@ -41,13 +40,13 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
 
-  // PWA-specific optimization: render immediately without animations or delays
   useEffect(() => {
-    setIsVisible(true);
-    
-    // Ultra-optimized startup procedure based on display mode
+    // In PWA mode, show content immediately with no delay
     if (isPWA) {
-      // In PWA mode: do everything synchronously for instant display
+      setIsVisible(true);
+      setInitialLoad(false);
+      
+      // Execute startup procedures synchronously
       logAppOpen();
       sessionStorage.setItem('app_open_logged', 'true');
       recordUserActivity();
@@ -55,11 +54,11 @@ const BitcoinConverter = () => {
       if (settings.alwaysDefaultToBtc) {
         setDefaultBtcValue();
       }
-      
-      // Skip initial load state
-      setInitialLoad(false);
     } else {
-      // In browser mode: maintain the original behavior with animations
+      // Standard browser behavior with transitions
+      setIsVisible(true);
+      
+      // Standard browser timing for initialization
       setTimeout(() => {
         const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
         if (!hasLoggedOpen) {
@@ -70,17 +69,14 @@ const BitcoinConverter = () => {
         recordUserActivity();
       }, 500);
       
-      // Normal delayed initialization for browser mode
-      setTimeout(() => {
-        if (settings.alwaysDefaultToBtc) {
-          setDefaultBtcValue();
-        }
-      }, 100);
+      if (settings.alwaysDefaultToBtc) {
+        setTimeout(() => setDefaultBtcValue(), 100);
+      }
       
-      // Original behavior for initial load state in browser
+      // Standard browser timing for initial load state
       const timer = setTimeout(() => {
         setInitialLoad(false);
-      }, 5000);
+      }, 2000);
       
       return () => clearTimeout(timer);
     }
@@ -136,7 +132,7 @@ const BitcoinConverter = () => {
     }
   };
 
-  // Dynamically determine container class based on mode
+  // Apply different container classes based on mode
   const containerClass = isPWA 
     ? 'flex flex-col items-center w-full max-w-md mx-auto p-4' // No animation in PWA
     : `flex flex-col items-center w-full max-w-md mx-auto p-4 ${!initialLoad ? 'animate-fade-in' : ''}`;

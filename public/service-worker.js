@@ -1,102 +1,87 @@
+
 // Service Worker for Bitcoin Currency Converter - Optimized for instant startup
 
-const CACHE_NAME = 'bitcoin-converter-cache-v8';
-const APP_VERSION = '1.3.1';
+const CACHE_NAME = 'bitcoin-converter-cache-v9';
+const APP_VERSION = '1.3.2';
 
-// Most critical resources - these must load instantly for PWA launch screen
-const CRITICAL_PWA_ASSETS = [
+// Ultra-critical PWA assets - these must load instantly for PWA to appear
+const ULTRA_CRITICAL_ASSETS = [
   '/',
-  '/index.html'
-];
-
-// Critical app shell resources - these MUST load instantly for PWA
-const CRITICAL_APP_SHELL = [
+  '/index.html',
   '/src/index.css',
   '/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png' // App icon
 ];
 
-// Additional app shell resources - still important but secondary priority
-const APP_SHELL_URLS = [
+// Additional critical app resources
+const CRITICAL_APP_SHELL = [
   '/manifest.json',
   '/src/main.tsx',
-  '/src/App.tsx'
+  '/src/App.tsx',
+  '/src/pages/Index.tsx',
+  '/src/components/BitcoinConverter.tsx'
 ];
 
-// Additional assets to cache but with lower priority
-const ADDITIONAL_URLS = [
+// Lower priority assets
+const ADDITIONAL_ASSETS = [
   '/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png',
   '/lovable-uploads/94f20957-5441-4a0d-a9c8-9f555a8c5f5f.png'
 ];
 
-// Maximum-aggressive pre-cache strategy for PWA launch screen
+// Aggressive blocking installation strategy for ultra-fast PWA startup
 self.addEventListener('install', event => {
-  console.log('Service Worker installing with ultra-fast startup optimization...');
+  console.log('Service Worker installing with ultra-fast PWA startup optimization...');
   
-  // Split caching into immediate (blocking) and background operations
+  // Block installation until ultra-critical assets are cached
   event.waitUntil(
     Promise.all([
-      // 1. Ultra-critical PWA assets - MUST complete before SW activates
-      caches.open(CACHE_NAME + '-pwa-launch').then(cache => {
-        console.log('Caching PWA launch assets for instant startup');
-        return cache.addAll(CRITICAL_PWA_ASSETS);
+      // 1. Cache ultra-critical assets - MUST be complete before SW activates
+      caches.open(CACHE_NAME + '-ultra').then(cache => {
+        console.log('Caching ultra-critical PWA assets for instant startup');
+        return cache.addAll(ULTRA_CRITICAL_ASSETS);
       }),
       
-      // 2. Critical resources - still high priority but can be fetched in parallel
+      // 2. Start caching critical shell assets in parallel but don't block activation
       caches.open(CACHE_NAME + '-critical').then(cache => {
-        console.log('Caching critical resources for instant startup');
-        // Don't block activation on this, but start it immediately
+        console.log('Caching critical app shell');
         cache.addAll(CRITICAL_APP_SHELL);
-      }),
-      
-      // 3. App shell - important but not blocking
-      caches.open(CACHE_NAME + '-shell').then(cache => {
-        console.log('Caching app shell for quick startup');
-        // Background task - don't even await
-        setTimeout(() => {
-          cache.addAll(APP_SHELL_URLS);
-        }, 100);
-      }),
-      
-      // 4. Additional assets - lowest priority
-      new Promise(resolve => {
-        setTimeout(() => {
-          caches.open(CACHE_NAME).then(cache => {
-            console.log('Caching additional assets in background');
-            cache.addAll(ADDITIONAL_URLS);
-          });
-          resolve();
-        }, 300); // Even more delayed
       })
     ])
     .then(() => {
-      console.log('Critical pre-caching complete - activating immediately');
-      self.skipWaiting(); // Activate new SW immediately
+      console.log('Ultra-critical pre-caching complete - activating immediately');
+      self.skipWaiting(); // Activate instantly
+      
+      // Cache additional assets after activation
+      setTimeout(() => {
+        caches.open(CACHE_NAME).then(cache => {
+          console.log('Caching additional assets in background');
+          cache.addAll(ADDITIONAL_ASSETS);
+        });
+      }, 1000);
     })
   );
 });
 
-// Ultra-aggressive fetch strategy with immediate index.html response
+// Ultra-aggressive fetch strategy optimized for PWA instant launch
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   
-  // For PWA launch screen (root path or index.html), use maximum-aggressive strategy
-  if (event.request.mode === 'navigate' ||
-      url.pathname === '/' || 
-      url.pathname === '/index.html') {
-    
+  // Special handling for navigation requests in PWA mode
+  if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match('/index.html')
         .then(cachedResponse => {
           if (cachedResponse) {
-            // Always return cached index.html immediately for instant startup
+            // Return cached index.html immediately for instant PWA startup
             // Network fetch happens in background to update cache
-            fetch(event.request).then(networkResponse => {
-              if (networkResponse.ok) {
-                caches.open(CACHE_NAME + '-pwa-launch').then(cache => {
-                  cache.put('/index.html', networkResponse);
-                });
-              }
-            }).catch(() => {});
+            fetch(event.request)
+              .then(networkResponse => {
+                if (networkResponse.ok) {
+                  caches.open(CACHE_NAME + '-ultra').then(cache => {
+                    cache.put('/index.html', networkResponse);
+                  });
+                }
+              })
+              .catch(() => {});
             
             return cachedResponse;
           }
@@ -108,60 +93,38 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For all other requests, use the existing strategy
-  const url2 = new URL(event.request.url);
-  
-  // For critical resources like index.html in PWA mode, use cache-only
-  if (CRITICAL_APP_SHELL.some(path => url2.pathname === path || 
-      (path === '/' && url2.pathname === '/') ||
-      (path === '/index.html' && url2.pathname === '/'))) {
-    
-    // PWA mode needs absolute immediate cache response
-    if (event.request.mode === 'navigate' && 
-        event.request.headers.get('Accept')?.includes('text/html')) {
-      
-      event.respondWith(
-        caches.open(CACHE_NAME + '-critical')
-          .then(cache => cache.match('/index.html') || cache.match('/'))
-          .then(response => {
-            // If we have a cached response, use it immediately
-            if (response) return response;
-            
-            // If no cached response (first load), fetch from network
-            return fetch(event.request).catch(() => {
-              return caches.open(CACHE_NAME + '-shell')
-                .then(shellCache => shellCache.match('/index.html') || shellCache.match('/'));
-            });
-          })
-      );
-      return;
-    }
-  }
-
-  // For navigation requests (HTML pages), use cache-first for instant loading
-  if (event.request.mode === 'navigate') {
+  // For critical assets, use cache-first strategy
+  if (ULTRA_CRITICAL_ASSETS.includes(url.pathname) || 
+      CRITICAL_APP_SHELL.includes(url.pathname)) {
     event.respondWith(
-      caches.open(CACHE_NAME + '-shell').then(cache => 
-        cache.match('/').then(response => {
-          const fetchPromise = fetch(event.request)
-            .then(networkResponse => {
-              cache.put(event.request, networkResponse.clone());
-              return networkResponse;
-            })
-            .catch(() => response || caches.match('/'));
-          
+      caches.match(event.request)
+        .then(cachedResponse => {
           // Return cached response immediately for instant loading
-          return response || fetchPromise;
+          if (cachedResponse) {
+            // Update cache in background
+            fetch(event.request)
+              .then(networkResponse => {
+                if (networkResponse.ok) {
+                  caches.open(CACHE_NAME + '-ultra').then(cache => {
+                    cache.put(event.request, networkResponse);
+                  });
+                }
+              })
+              .catch(() => {});
+            
+            return cachedResponse;
+          }
+          
+          // Fallback to network if not cached yet
+          return fetch(event.request);
         })
-      )
     );
     return;
   }
 
   // For API requests - network first, fallback to cache
   if (event.request.url.includes('/api/') || 
-      event.request.url.includes('coingecko') || 
-      event.request.url.includes('supabase')) {
+      event.request.url.includes('coingecko')) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
@@ -176,10 +139,12 @@ self.addEventListener('fetch', event => {
             if (cachedResponse) {
               return cachedResponse;
             }
+            
             // If we don't have a cached API response, return cached rates
             if (event.request.url.includes('coingecko')) {
               return caches.match('bitcoin-rates-data');
             }
+            
             return new Response(JSON.stringify({error: 'Network error'}), {
               headers: {'Content-Type': 'application/json'}
             });
@@ -189,7 +154,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For all other requests (assets, scripts, etc), use stale-while-revalidate
+  // For all other requests, use stale-while-revalidate strategy
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
@@ -205,8 +170,7 @@ self.addEventListener('fetch', event => {
             }
             return networkResponse;
           })
-          .catch(error => {
-            console.error('Fetch failed:', error);
+          .catch(() => {
             // If network fetch fails, return the cached response as is
             return cachedResponse;
           });
@@ -217,13 +181,13 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Listen for skipWaiting message from client (for update prompt)
+// Listen for skipWaiting message from client
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
   
-  // Improved rates caching
+  // Cache rates data for offline use
   if (event.data && event.data.type === 'CACHE_RATES') {
     const ratesData = event.data.payload;
     caches.open(CACHE_NAME).then(cache => {
@@ -235,14 +199,36 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// When update is available, notify all clients
-self.addEventListener('install', event => {
-  self.skipWaiting();
+// Notify clients when update is available
+self.addEventListener('activate', event => {
   event.waitUntil(
-    self.clients.matchAll({type: "window"}).then(clients => {
-      clients.forEach(client => {
-        client.postMessage({type: 'SW_UPDATE'});
+    self.clients.claim().then(() => {
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({type: 'SW_UPDATE'});
+        });
       });
+    })
+  );
+});
+
+// Improved cache cleanup on activation
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames
+          .filter(cacheName => {
+            return cacheName.startsWith('bitcoin-converter-cache-') && 
+                  cacheName !== CACHE_NAME &&
+                  cacheName !== CACHE_NAME + '-ultra' &&
+                  cacheName !== CACHE_NAME + '-critical';
+          })
+          .map(cacheName => {
+            console.log('Deleting outdated cache:', cacheName);
+            return caches.delete(cacheName);
+          })
+      );
     })
   );
 });

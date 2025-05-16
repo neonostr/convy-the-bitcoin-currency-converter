@@ -90,10 +90,11 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }
-
-  /* Apply special styles to PWA mode */
-  @media all and (display-mode: standalone) {
-    /* Prevent the black screen flash */
+  
+  /* Strict separation between PWA and browser modes */
+  /* Only apply these styles in PWA mode */
+  @media (display-mode: standalone) {
+    /* Essential PWA styles for immediate rendering */
     html, body, #root {
       background-color: hsl(var(--background));
       display: block !important;
@@ -101,9 +102,8 @@
       opacity: 1 !important;
     }
     
-    /* Fix scrolling issues */
+    /* PWA-specific scrolling handling */
     body {
-      /* Prevent pull-to-refresh */
       overflow: hidden;
       position: fixed;
       width: 100%;
@@ -116,33 +116,35 @@
       width: 100%;
       -webkit-overflow-scrolling: touch;
     }
-
-    /* PWA specific - optimize initial loading - disable ANY animations */
-    .animate-fade-in {
-      animation: none !important;
-      opacity: 1 !important;
-    }
     
-    .animate-slide-up {
+    /* Disable ALL animations in PWA mode */
+    .animate-fade-in, .animate-slide-up {
       animation: none !important;
       opacity: 1 !important;
       transform: translateY(0) !important;
     }
-
-    /* Force all transitions to be instant in PWA mode */
+    
+    /* Force transitions to be instant in PWA mode */
     * {
       transition: none !important;
+      animation: none !important;
     }
-
-    /* Ensure that the app has immediate visibility */
+    
+    /* Force immediate visibility */
     #app-container, .app-container {
       opacity: 1 !important;
       visibility: visible !important;
+    }
+    
+    /* Hide app shell in PWA mode */
+    #app-shell {
+      display: none !important;
     }
   }
 }
 
 @layer utilities {
+  /* Animation classes - only applied in browser mode */
   .animate-fade-in {
     animation: fadeIn 0.3s ease-in-out;
     animation-fill-mode: both;
@@ -196,11 +198,13 @@
   content-visibility: auto;
 }
 
-/* PWA instant render classes */
-.pwa-no-animation * {
-  animation: none !important;
-  transition: none !important;
-  opacity: 1 !important;
+/* PWA instant render classes - explicitly limited to PWA mode */
+@media (display-mode: standalone) {
+  .pwa-no-animation * {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+  }
 }
 
 /* Fix for white flash in PWA */
