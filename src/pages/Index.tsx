@@ -7,13 +7,12 @@ const Index = () => {
   // Check if running as PWA - detect standalone mode
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // In PWA mode, we start with fully loaded state true to skip the animation
-  // In browser mode, we start with false to show the animation
+  // We'll use a shorter transition for browser mode
   const [isFullyLoaded, setIsFullyLoaded] = useState(isPWA);
   
   useEffect(() => {
-    // In PWA mode, immediately hide the app shell
     if (isPWA) {
+      // In PWA mode, immediately hide the app shell and show main content
       setIsFullyLoaded(true);
       const appShell = document.getElementById('app-shell');
       if (appShell) {
@@ -21,9 +20,10 @@ const Index = () => {
       }
     } else {
       // If not in PWA mode, use animation frame for smooth transition
+      // but make it much shorter to ensure content appears quickly
       const timer = setTimeout(() => {
         setIsFullyLoaded(true);
-      }, 300); // Short delay for shell-to-app transition
+      }, 300); // Very short delay for shell-to-app transition
       
       return () => clearTimeout(timer);
     }
@@ -31,9 +31,10 @@ const Index = () => {
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      {/* App shell only shown in browser mode */}
+      {/* App shell only shown in browser mode, for a very short time */}
       {!isPWA && (
         <div 
+          id="browser-app-shell"
           className={`absolute transition-opacity duration-300 ${
             isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}

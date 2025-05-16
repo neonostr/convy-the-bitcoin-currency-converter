@@ -130,7 +130,7 @@
       animation: none !important;
     }
     
-    /* Force immediate visibility */
+    /* Force immediate visibility for PWA mode */
     #app-container, .app-container {
       opacity: 1 !important;
       visibility: visible !important;
@@ -140,6 +140,14 @@
     #app-shell {
       display: none !important;
     }
+  }
+  
+  /* Regular browser styles - ensure content is visible */
+  #browser-app-shell {
+    position: absolute;
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.3s ease;
   }
 }
 

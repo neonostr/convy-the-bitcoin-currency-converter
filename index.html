@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -91,6 +92,13 @@
         /* Force immediate display of content in PWA mode */
         * {
           transition: none !important;
+        }
+      }
+
+      /* Make sure browser mode shows content after a short delay */
+      @media not (display-mode: standalone) {
+        .app-container {
+          opacity: 1;
         }
       }
       
@@ -254,7 +262,7 @@
     <script type="module" src="/src/main.tsx"></script>
     
     <script>
-      // Improved PWA detection and shell hiding
+      // Improved PWA detection and shell handling
       window.addEventListener('DOMContentLoaded', function() {
         const isPWA = window.matchMedia('(display-mode: standalone)').matches;
         
@@ -267,33 +275,31 @@
           
           // Add PWA-specific class to body
           document.body.classList.add('pwa-mode');
-          
-          // Setup mutation observer to check for content
-          const observer = new MutationObserver(function() {
-            const hasContent = document.querySelector('#root > div');
-            if (hasContent) {
-              // If content is rendered, ensure shell is hidden
-              const shell = document.getElementById('app-shell');
-              if (shell) {
-                shell.style.display = 'none';
-              }
-              observer.disconnect();
-            }
-          });
-          
-          observer.observe(document.getElementById('root'), {
-            childList: true,
-            subtree: true
-          });
-          
-          // Backup timer
+        } else {
+          // In browser mode, make sure the content appears after a short delay
           setTimeout(function() {
+            const rootContent = document.querySelector('#root > div');
+            if (rootContent) {
+              rootContent.style.opacity = '1';
+            }
+          }, 300);
+        }
+        
+        // Setup mutation observer to check for content in both modes
+        const observer = new MutationObserver(function(mutations) {
+          if (document.querySelector('#root > div')) {
             const shell = document.getElementById('app-shell');
-            if (shell) {
+            if (shell && isPWA) {
               shell.style.display = 'none';
             }
-          }, 100);
-        }
+            observer.disconnect();
+          }
+        });
+        
+        observer.observe(document.getElementById('root'), {
+          childList: true,
+          subtree: true
+        });
       });
     </script>
   </body>
