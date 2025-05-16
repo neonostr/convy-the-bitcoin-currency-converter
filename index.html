@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -37,16 +38,16 @@
         color: hsl(var(--foreground));
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
+      /* Important: Hide app shell in PWA mode, only show in browser */
       #app-shell {
-        display: flex;
-        min-height: 100vh;
-        align-items: center;
-        justify-content: center;
+        display: none;
       }
-      /* Only show app shell in PWA mode */
       @media not all and (display-mode: standalone) {
         #app-shell {
-          display: none;
+          display: flex;
+          min-height: 100vh;
+          align-items: center;
+          justify-content: center;
         }
       }
       @media (display-mode: standalone) {
@@ -134,8 +135,11 @@
             (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
           document.documentElement.classList.add(savedTheme);
           
-          // Only show shell in PWA mode
-          if (window.matchMedia('(display-mode: standalone)').matches) {
+          // Only show shell in browser mode, not PWA
+          if (!window.matchMedia('(display-mode: standalone)').matches) {
+            document.documentElement.classList.add('browser-mode');
+          } else {
+            // In PWA mode, add PWA class immediately
             document.documentElement.classList.add('is-pwa');
           }
         } catch (e) {}
@@ -174,7 +178,7 @@
   </head>
 
   <body>
-    <!-- App shell for instant rendering - Only visible in PWA mode -->
+    <!-- App shell for instant rendering - Only visible in browser mode -->
     <div id="app-shell">
       <div class="app-container">
         <div class="app-header">
@@ -209,10 +213,10 @@
     <script type="module" src="/src/main.tsx"></script>
     
     <script>
-      // Hide app shell once React is mounted
+      // Only in browser mode, hide app shell once React is mounted
       window.addEventListener('load', function() {
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-          // In PWA mode, keep shell visible until React renders
+        // Skip all this logic in PWA mode - PWA should render immediately
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
           const observer = new MutationObserver(function(mutations) {
             const hasContent = document.querySelector('#root > div');
             if (hasContent) {

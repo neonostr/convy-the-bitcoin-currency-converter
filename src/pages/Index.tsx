@@ -7,33 +7,38 @@ const Index = () => {
   // Check if running as PWA
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // Track whether the full component has loaded
-  // In PWA mode, we start with isFullyLoaded = true to skip the fade-in
+  // In PWA mode, always start fully loaded with no transitions
   const [isFullyLoaded, setIsFullyLoaded] = useState(isPWA);
   
   useEffect(() => {
     // If not in PWA mode, handle the fade-in effect
     if (!isPWA) {
-      const timer = requestAnimationFrame(() => {
+      const timer = setTimeout(() => {
         setIsFullyLoaded(true);
-      });
+      }, 100); // Shorter timeout for better perceived performance
       
-      return () => cancelAnimationFrame(timer);
+      return () => clearTimeout(timer);
     }
   }, [isPWA]);
 
+  // In PWA mode, render only the BitcoinConverter with no transitions
+  if (isPWA) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background pwa-mode">
+        <BitcoinConverter />
+      </div>
+    );
+  }
+
+  // In browser mode, show both with transition
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      {/* Only show AppShell in browser mode, not in PWA mode */}
-      {!isPWA && (
-        <div className={`absolute transition-opacity duration-300 ${isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <AppShell onReady={() => console.log('App shell rendered')} />
-        </div>
-      )}
+      <div className={`absolute transition-opacity duration-300 ${isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <AppShell onReady={() => console.log('App shell rendered')} />
+      </div>
       
-      {/* Real component with fade-in effect (only in browser mode) */}
       <div 
-        className={`w-full ${!isPWA ? `transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}` : ''}`}
+        className={`w-full transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}`}
         aria-hidden={!isFullyLoaded}
       >
         <BitcoinConverter />

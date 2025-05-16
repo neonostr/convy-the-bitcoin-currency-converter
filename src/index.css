@@ -93,7 +93,7 @@
 
   /* Apply special styles to PWA mode */
   @media all and (display-mode: standalone) {
-    /* Fix scrolling issues */
+    /* Critical PWA styles - these must be minimal for fastest rendering */
     body {
       /* Prevent pull-to-refresh */
       overflow: hidden;
@@ -109,16 +109,20 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* PWA specific - optimize initial loading */
-    .animate-fade-in {
-      animation: none !important;
+    /* Make sure content is visible immediately in PWA mode */
+    .pwa-mode {
       opacity: 1 !important;
+      animation: none !important;
+      transition: none !important;
     }
-    
-    .animate-slide-up {
+
+    /* Disable all animations in PWA mode for instant rendering */
+    .animate-fade-in,
+    .animate-slide-up,
+    .transition-opacity {
       animation: none !important;
+      transition: none !important;
       opacity: 1 !important;
-      transform: translateY(0) !important;
     }
   }
 }
