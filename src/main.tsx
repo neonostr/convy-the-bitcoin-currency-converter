@@ -47,9 +47,8 @@ setTimeout(() => {
         const id = 'pwa-update-banner';
         if (document.getElementById(id)) return; // Prevent duplicates
 
-        // Use imported toast function instead of window.showToast
-        toast({
-          title: "Update verfügbar!",
+        // Fix: Use toast correctly according to sonner's API
+        toast("Update verfügbar!", {
           description: "Eine neue Version von Convy ist da. Klicke zum Aktualisieren.",
           action: {
             label: "Neu laden",
