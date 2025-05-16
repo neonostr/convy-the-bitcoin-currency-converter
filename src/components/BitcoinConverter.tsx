@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -19,12 +20,12 @@ const BitcoinConverter = () => {
   const { settings } = useSettings();
   const { t, language } = useLanguage();
   
-  // Check if running as PWA - for optimizations
+  // Check if running as PWA
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // Skip initial loading animation in PWA mode
+  // In PWA mode, skip initial load animation
   const [initialLoad, setInitialLoad] = useState(!isPWA);
-  const [isVisible, setIsVisible] = useState(isPWA);
+  const [isVisible, setIsVisible] = useState(true);
   
   const { 
     amount, 
@@ -40,46 +41,20 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
 
+  // Immediately mark the component as visible on first render
   useEffect(() => {
-    // In PWA mode, show content immediately with no delay
-    if (isPWA) {
-      setIsVisible(true);
-      setInitialLoad(false);
+    setIsVisible(true);
+    
+    // Delay this non-critical logging to prioritize UI rendering
+    setTimeout(() => {
+      const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
+      if (!hasLoggedOpen) {
+        logAppOpen();
+        sessionStorage.setItem('app_open_logged', 'true');
+      }
       
-      // Execute startup procedures synchronously
-      logAppOpen();
-      sessionStorage.setItem('app_open_logged', 'true');
       recordUserActivity();
-      
-      if (settings.alwaysDefaultToBtc) {
-        setDefaultBtcValue();
-      }
-    } else {
-      // Standard browser behavior with transitions
-      setIsVisible(true);
-      
-      // Standard browser timing for initialization
-      setTimeout(() => {
-        const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
-        if (!hasLoggedOpen) {
-          logAppOpen();
-          sessionStorage.setItem('app_open_logged', 'true');
-        }
-        
-        recordUserActivity();
-      }, 500);
-      
-      if (settings.alwaysDefaultToBtc) {
-        setTimeout(() => setDefaultBtcValue(), 100);
-      }
-      
-      // Standard browser timing for initial load state
-      const timer = setTimeout(() => {
-        setInitialLoad(false);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
+    }, isPWA ? 200 : 500); // Shorter timeout in PWA mode
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -93,8 +68,22 @@ const BitcoinConverter = () => {
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
+    // Delay setting default BTC value to not block UI rendering
+    if (settings.alwaysDefaultToBtc) {
+      setTimeout(() => {
+        setDefaultBtcValue();
+      }, isPWA ? 50 : 100); // Faster in PWA mode
+    }
+    
+    // Set a short timeout to determine if this is the initial load
+    // In PWA mode, make this timeout much shorter
+    const timer = setTimeout(() => {
+      setInitialLoad(false);
+    }, isPWA ? 1000 : 5000);
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(timer);
     };
   }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc, isPWA]);
 
@@ -132,10 +121,8 @@ const BitcoinConverter = () => {
     }
   };
 
-  // Apply different container classes based on mode
-  const containerClass = isPWA 
-    ? 'flex flex-col items-center w-full max-w-md mx-auto p-4' // No animation in PWA
-    : `flex flex-col items-center w-full max-w-md mx-auto p-4 ${!initialLoad ? 'animate-fade-in' : ''}`;
+  // Add a class specifically for PWA mode
+  const containerClass = `flex flex-col items-center w-full max-w-md mx-auto p-4 ${isPWA ? '' : 'animate-fade-in'}`;
 
   return (
     <div className={containerClass}>
@@ -157,7 +144,7 @@ const BitcoinConverter = () => {
           value={amount}
           onFocus={handleInputFocus}
           onChange={(e) => handleInputChange(e.target.value)}
-          autoFocus={!isPWA} // No autofocus in PWA mode to prevent keyboard pop-up
+          autoFocus
         />
       </div>
 
