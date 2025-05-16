@@ -1,20 +1,23 @@
-
 // Service Worker for Bitcoin Currency Converter - Optimized for instant startup
 
-const CACHE_NAME = 'bitcoin-converter-cache-v7';
-const APP_VERSION = '1.3.0';
+const CACHE_NAME = 'bitcoin-converter-cache-v8';
+const APP_VERSION = '1.3.1';
+
+// Most critical resources - these must load instantly for PWA launch screen
+const CRITICAL_PWA_ASSETS = [
+  '/',
+  '/index.html'
+];
 
 // Critical app shell resources - these MUST load instantly for PWA
 const CRITICAL_APP_SHELL = [
-  '/',
-  '/index.html',
-  '/src/index.css'
+  '/src/index.css',
+  '/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png' // App icon
 ];
 
 // Additional app shell resources - still important but secondary priority
 const APP_SHELL_URLS = [
   '/manifest.json',
-  '/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png', // App icon
   '/src/main.tsx',
   '/src/App.tsx'
 ];
@@ -25,76 +28,93 @@ const ADDITIONAL_URLS = [
   '/lovable-uploads/94f20957-5441-4a0d-a9c8-9f555a8c5f5f.png'
 ];
 
-// Pre-cache app shell during installation for immediate startup
+// Maximum-aggressive pre-cache strategy for PWA launch screen
 self.addEventListener('install', event => {
-  console.log('Service Worker installing...');
+  console.log('Service Worker installing with ultra-fast startup optimization...');
   
-  // Split caching into three operations: critical, shell, and non-critical
+  // Split caching into immediate (blocking) and background operations
   event.waitUntil(
     Promise.all([
-      // 1. Cache critical resources with highest priority - must complete
+      // 1. Ultra-critical PWA assets - MUST complete before SW activates
+      caches.open(CACHE_NAME + '-pwa-launch').then(cache => {
+        console.log('Caching PWA launch assets for instant startup');
+        return cache.addAll(CRITICAL_PWA_ASSETS);
+      }),
+      
+      // 2. Critical resources - still high priority but can be fetched in parallel
       caches.open(CACHE_NAME + '-critical').then(cache => {
         console.log('Caching critical resources for instant startup');
-        return cache.addAll(CRITICAL_APP_SHELL);
+        // Don't block activation on this, but start it immediately
+        cache.addAll(CRITICAL_APP_SHELL);
       }),
       
-      // 2. Cache app shell with high priority - should complete
+      // 3. App shell - important but not blocking
       caches.open(CACHE_NAME + '-shell').then(cache => {
         console.log('Caching app shell for quick startup');
-        // Don't await - proceed even if this isn't complete
-        cache.addAll(APP_SHELL_URLS);
+        // Background task - don't even await
+        setTimeout(() => {
+          cache.addAll(APP_SHELL_URLS);
+        }, 100);
       }),
       
-      // 3. Cache additional assets with lower priority - nice to have
-      caches.open(CACHE_NAME).then(cache => {
-        console.log('Caching additional assets in background');
-        // We don't await this - let it happen in background
-        cache.addAll(ADDITIONAL_URLS);
+      // 4. Additional assets - lowest priority
+      new Promise(resolve => {
+        setTimeout(() => {
+          caches.open(CACHE_NAME).then(cache => {
+            console.log('Caching additional assets in background');
+            cache.addAll(ADDITIONAL_URLS);
+          });
+          resolve();
+        }, 300); // Even more delayed
       })
     ])
     .then(() => {
-      console.log('Critical pre-caching complete');
+      console.log('Critical pre-caching complete - activating immediately');
       self.skipWaiting(); // Activate new SW immediately
     })
   );
 });
 
-// Clear old caches and take control of clients immediately
-self.addEventListener('activate', event => {
-  console.log('Service Worker activating...');
-  event.waitUntil(
-    Promise.all([
-      // Clean up old caches
-      caches.keys().then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(cacheName => {
-            if (![CACHE_NAME, CACHE_NAME + '-shell', CACHE_NAME + '-critical'].includes(cacheName)) {
-              console.log('Deleting outdated cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      }),
-      // Take control of all clients immediately
-      self.clients.claim().then(() => {
-        console.log('Service Worker is now controlling all clients');
-      })
-    ])
-  );
-});
-
-// Ultra-optimized fetch strategy:
-// 1. Critical resources: Cache-only for absolute immediate loading
-// 2. App shell: Cache-first (almost instant loading)
-// 3. API calls: Network-first with cached fallback
-// 4. Other assets: Stale-while-revalidate
+// Ultra-aggressive fetch strategy with immediate index.html response
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   
+  // For PWA launch screen (root path or index.html), use maximum-aggressive strategy
+  if (event.request.mode === 'navigate' ||
+      url.pathname === '/' || 
+      url.pathname === '/index.html') {
+    
+    event.respondWith(
+      caches.match('/index.html')
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            // Always return cached index.html immediately for instant startup
+            // Network fetch happens in background to update cache
+            fetch(event.request).then(networkResponse => {
+              if (networkResponse.ok) {
+                caches.open(CACHE_NAME + '-pwa-launch').then(cache => {
+                  cache.put('/index.html', networkResponse);
+                });
+              }
+            }).catch(() => {});
+            
+            return cachedResponse;
+          }
+          
+          // Fallback to network if not cached yet (first load)
+          return fetch(event.request);
+        })
+    );
+    return;
+  }
+
+  // For all other requests, use the existing strategy
+  const url2 = new URL(event.request.url);
+  
   // For critical resources like index.html in PWA mode, use cache-only
-  if (CRITICAL_APP_SHELL.some(path => url.pathname === path || 
-      (path === '/' && url.pathname === '/') ||
-      (path === '/index.html' && url.pathname === '/'))) {
+  if (CRITICAL_APP_SHELL.some(path => url2.pathname === path || 
+      (path === '/' && url2.pathname === '/') ||
+      (path === '/index.html' && url2.pathname === '/'))) {
     
     // PWA mode needs absolute immediate cache response
     if (event.request.mode === 'navigate' && 

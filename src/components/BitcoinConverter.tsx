@@ -20,10 +20,10 @@ const BitcoinConverter = () => {
   const { settings } = useSettings();
   const { t, language } = useLanguage();
   
-  // Check if running as PWA
+  // Check if running as PWA for optimization
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // In PWA mode, skip initial load animation
+  // In PWA mode, skip animations and delays
   const [initialLoad, setInitialLoad] = useState(!isPWA);
   const [isVisible, setIsVisible] = useState(true);
   
@@ -41,20 +41,49 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
 
-  // Immediately mark the component as visible on first render
+  // PWA-specific optimization: render immediately without animations or delays
   useEffect(() => {
     setIsVisible(true);
     
-    // Delay this non-critical logging to prioritize UI rendering
-    setTimeout(() => {
-      const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
-      if (!hasLoggedOpen) {
-        logAppOpen();
-        sessionStorage.setItem('app_open_logged', 'true');
+    // Ultra-optimized startup procedure based on display mode
+    if (isPWA) {
+      // In PWA mode: do everything synchronously for instant display
+      logAppOpen();
+      sessionStorage.setItem('app_open_logged', 'true');
+      recordUserActivity();
+      
+      if (settings.alwaysDefaultToBtc) {
+        setDefaultBtcValue();
       }
       
-      recordUserActivity();
-    }, isPWA ? 200 : 500); // Shorter timeout in PWA mode
+      // Skip initial load state
+      setInitialLoad(false);
+    } else {
+      // In browser mode: maintain the original behavior with animations
+      setTimeout(() => {
+        const hasLoggedOpen = sessionStorage.getItem('app_open_logged');
+        if (!hasLoggedOpen) {
+          logAppOpen();
+          sessionStorage.setItem('app_open_logged', 'true');
+        }
+        
+        recordUserActivity();
+      }, 500);
+      
+      // Normal delayed initialization for browser mode
+      setTimeout(() => {
+        if (settings.alwaysDefaultToBtc) {
+          setDefaultBtcValue();
+        }
+      }, 100);
+      
+      // Original behavior for initial load state in browser
+      const timer = setTimeout(() => {
+        setInitialLoad(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -68,22 +97,8 @@ const BitcoinConverter = () => {
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Delay setting default BTC value to not block UI rendering
-    if (settings.alwaysDefaultToBtc) {
-      setTimeout(() => {
-        setDefaultBtcValue();
-      }, isPWA ? 50 : 100); // Faster in PWA mode
-    }
-    
-    // Set a short timeout to determine if this is the initial load
-    // In PWA mode, make this timeout much shorter
-    const timer = setTimeout(() => {
-      setInitialLoad(false);
-    }, isPWA ? 1000 : 5000);
-    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearTimeout(timer);
     };
   }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc, isPWA]);
 
@@ -121,8 +136,10 @@ const BitcoinConverter = () => {
     }
   };
 
-  // Add a class specifically for PWA mode
-  const containerClass = `flex flex-col items-center w-full max-w-md mx-auto p-4 ${isPWA ? '' : 'animate-fade-in'}`;
+  // Dynamically determine container class based on mode
+  const containerClass = isPWA 
+    ? 'flex flex-col items-center w-full max-w-md mx-auto p-4' // No animation in PWA
+    : `flex flex-col items-center w-full max-w-md mx-auto p-4 ${!initialLoad ? 'animate-fade-in' : ''}`;
 
   return (
     <div className={containerClass}>
@@ -144,7 +161,7 @@ const BitcoinConverter = () => {
           value={amount}
           onFocus={handleInputFocus}
           onChange={(e) => handleInputChange(e.target.value)}
-          autoFocus
+          autoFocus={!isPWA} // No autofocus in PWA mode to prevent keyboard pop-up
         />
       </div>
 

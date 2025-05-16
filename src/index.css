@@ -93,6 +93,14 @@
 
   /* Apply special styles to PWA mode */
   @media all and (display-mode: standalone) {
+    /* Prevent the black screen flash */
+    html, body, #root {
+      background-color: hsl(var(--background));
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
     /* Fix scrolling issues */
     body {
       /* Prevent pull-to-refresh */
@@ -109,7 +117,7 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* PWA specific - optimize initial loading */
+    /* PWA specific - optimize initial loading - disable ANY animations */
     .animate-fade-in {
       animation: none !important;
       opacity: 1 !important;
@@ -119,6 +127,17 @@
       animation: none !important;
       opacity: 1 !important;
       transform: translateY(0) !important;
+    }
+
+    /* Force all transitions to be instant in PWA mode */
+    * {
+      transition: none !important;
+    }
+
+    /* Ensure that the app has immediate visibility */
+    #app-container, .app-container {
+      opacity: 1 !important;
+      visibility: visible !important;
     }
   }
 }
@@ -175,4 +194,16 @@
 /* Improve perceived performance with content-visibility */
 .content-visibility-auto {
   content-visibility: auto;
+}
+
+/* PWA instant render classes */
+.pwa-no-animation * {
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+}
+
+/* Fix for white flash in PWA */
+.is-pwa, .is-pwa body, .is-pwa #root {
+  background-color: hsl(var(--background)) !important;
 }

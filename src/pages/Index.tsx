@@ -4,7 +4,7 @@ import BitcoinConverter from "@/components/BitcoinConverter";
 import AppShell from "@/components/AppShell";
 
 const Index = () => {
-  // Check if running as PWA
+  // Check if running as PWA - detect standalone mode
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
   // Track whether the full component has loaded
@@ -12,8 +12,16 @@ const Index = () => {
   const [isFullyLoaded, setIsFullyLoaded] = useState(isPWA);
   
   useEffect(() => {
-    // If not in PWA mode, handle the fade-in effect
-    if (!isPWA) {
+    // In PWA mode, mark as fully loaded immediately to prevent any delay
+    if (isPWA) {
+      setIsFullyLoaded(true);
+      // Immediately hide any shell or placeholder
+      const appShell = document.getElementById('app-shell');
+      if (appShell) {
+        appShell.style.display = 'none';
+      }
+    } else {
+      // If not in PWA mode, handle the fade-in effect as before
       const timer = requestAnimationFrame(() => {
         setIsFullyLoaded(true);
       });
@@ -31,7 +39,7 @@ const Index = () => {
         </div>
       )}
       
-      {/* Real component with fade-in effect (only in browser mode) */}
+      {/* Real component with fade-in effect (only in browser mode), immediate in PWA mode */}
       <div 
         className={`w-full ${!isPWA ? `transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}` : ''}`}
         aria-hidden={!isFullyLoaded}
