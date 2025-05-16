@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -82,26 +81,12 @@
         }
         
         /* Disable animations in PWA mode */
-        .animate-fade-in,
-        .animate-slide-up {
-          animation: none !important;
-          opacity: 1 !important;
-          transform: translateY(0) !important;
-        }
-        
-        /* Force immediate display of content in PWA mode */
         * {
           transition: none !important;
+          animation: none !important;
         }
       }
 
-      /* Make sure browser mode shows content after a short delay */
-      @media not (display-mode: standalone) {
-        .app-container {
-          opacity: 1;
-        }
-      }
-      
       /* App shell components */
       .app-container {
         display: flex;
@@ -262,36 +247,33 @@
     <script type="module" src="/src/main.tsx"></script>
     
     <script>
-      // Improved PWA detection and shell handling
+      // Simplified shell and app transition
       window.addEventListener('DOMContentLoaded', function() {
         const isPWA = window.matchMedia('(display-mode: standalone)').matches;
         
+        // In PWA mode, hide app shell immediately and show content
         if (isPWA) {
-          // In PWA mode, hide shell immediately
           const shell = document.getElementById('app-shell');
           if (shell) {
             shell.style.display = 'none';
           }
-          
-          // Add PWA-specific class to body
           document.body.classList.add('pwa-mode');
-        } else {
-          // In browser mode, make sure the content appears after a short delay
-          setTimeout(function() {
-            const rootContent = document.querySelector('#root > div');
-            if (rootContent) {
-              rootContent.style.opacity = '1';
-            }
-          }, 300);
         }
-        
-        // Setup mutation observer to check for content in both modes
+
+        // Listen for content being added to root
         const observer = new MutationObserver(function(mutations) {
-          if (document.querySelector('#root > div')) {
-            const shell = document.getElementById('app-shell');
-            if (shell && isPWA) {
-              shell.style.display = 'none';
+          const hasContent = document.querySelector('#root > div');
+          
+          if (hasContent) {
+            // If we're in PWA mode, make sure shell is hidden
+            if (isPWA) {
+              const shell = document.getElementById('app-shell');
+              if (shell) {
+                shell.style.display = 'none';
+              }
             }
+            
+            // No need to continue observing after content appears
             observer.disconnect();
           }
         });

@@ -7,35 +7,33 @@ const Index = () => {
   // Check if running as PWA - detect standalone mode
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // We'll use a shorter transition for browser mode
+  // In PWA mode, we start with fully loaded state true to skip animation completely
   const [isFullyLoaded, setIsFullyLoaded] = useState(isPWA);
   
   useEffect(() => {
     if (isPWA) {
-      // In PWA mode, immediately hide the app shell and show main content
+      // In PWA mode, immediately show main content with no transition
       setIsFullyLoaded(true);
       const appShell = document.getElementById('app-shell');
       if (appShell) {
         appShell.style.display = 'none';
       }
     } else {
-      // If not in PWA mode, use animation frame for smooth transition
-      // but make it much shorter to ensure content appears quickly
-      const timer = setTimeout(() => {
+      // In browser mode, use a very short transition
+      // This ensures the main content appears quickly
+      setTimeout(() => {
         setIsFullyLoaded(true);
-      }, 300); // Very short delay for shell-to-app transition
-      
-      return () => clearTimeout(timer);
+      }, 100); // Very short delay for better perceived performance
     }
   }, [isPWA]);
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      {/* App shell only shown in browser mode, for a very short time */}
+      {/* App shell only shown briefly in browser mode */}
       {!isPWA && (
         <div 
           id="browser-app-shell"
-          className={`absolute transition-opacity duration-300 ${
+          className={`fixed inset-0 z-10 flex items-center justify-center transition-opacity duration-200 ${
             isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
@@ -43,10 +41,10 @@ const Index = () => {
         </div>
       )}
       
-      {/* Real component with fade-in effect in browser mode, immediate in PWA mode */}
+      {/* Main content - immediately visible in PWA, fades in for browser */}
       <div 
         className={`w-full ${
-          !isPWA ? `transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}` : ''
+          !isPWA ? `transition-opacity duration-200 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}` : ''
         }`}
         aria-hidden={!isFullyLoaded}
       >

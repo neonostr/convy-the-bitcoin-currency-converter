@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bitcoin } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
@@ -11,7 +11,6 @@ import { useSettings } from '@/hooks/useSettings';
  */
 const AppShell: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   const { settings } = useSettings();
-  const [visible, setVisible] = useState(true);
   
   useEffect(() => {
     // Signal that the shell is ready, can be used for metrics

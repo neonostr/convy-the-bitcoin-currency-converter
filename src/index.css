@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -91,8 +90,7 @@
     -webkit-touch-callout: none;
   }
   
-  /* Strict separation between PWA and browser modes */
-  /* Only apply these styles in PWA mode */
+  /* PWA MODE - Strict separation between PWA and browser modes */
   @media (display-mode: standalone) {
     /* Essential PWA styles for immediate rendering */
     html, body, #root {
@@ -118,16 +116,9 @@
     }
     
     /* Disable ALL animations in PWA mode */
-    .animate-fade-in, .animate-slide-up {
-      animation: none !important;
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-    
-    /* Force transitions to be instant in PWA mode */
     * {
-      transition: none !important;
       animation: none !important;
+      transition: none !important;
     }
     
     /* Force immediate visibility for PWA mode */
@@ -137,29 +128,28 @@
     }
     
     /* Hide app shell in PWA mode */
-    #app-shell {
+    #app-shell, #browser-app-shell {
       display: none !important;
     }
   }
   
-  /* Regular browser styles - ensure content is visible */
+  /* Regular browser styles - controls app shell behavior */
   #browser-app-shell {
-    position: absolute;
-    z-index: 10;
+    background-color: hsl(var(--background));
     opacity: 1;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.2s ease;
   }
 }
 
 @layer utilities {
   /* Animation classes - only applied in browser mode */
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.2s ease-in-out;
     animation-fill-mode: both;
   }
   
   .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.2s ease-out;
     animation-fill-mode: both;
   }
   
