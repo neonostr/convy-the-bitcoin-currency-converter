@@ -91,8 +91,9 @@
     -webkit-touch-callout: none;
   }
 
-  /* Apply these styles only to the PWA version */
+  /* Apply special styles to PWA mode */
   @media all and (display-mode: standalone) {
+    /* Fix scrolling issues */
     body {
       /* Prevent pull-to-refresh */
       overflow: hidden;
@@ -106,6 +107,18 @@
       height: 100%;
       width: 100%;
       -webkit-overflow-scrolling: touch;
+    }
+
+    /* PWA specific - optimize initial loading */
+    .animate-fade-in {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+    
+    .animate-slide-up {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: translateY(0) !important;
     }
   }
 }
