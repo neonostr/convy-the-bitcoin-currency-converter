@@ -1,27 +1,33 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import BitcoinConverter from "@/components/BitcoinConverter";
 
 const Index = () => {
   // Check if running as PWA
   const isPWA = window.matchMedia('(display-mode: standalone)').matches;
   
-  // For PWA mode, we always set isLoaded to true for immediate rendering
+  // For PWA mode, render immediately without any state or effects
+  if (isPWA) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
+        <BitcoinConverter />
+      </div>
+    );
+  }
+  
   // For browser mode, we can afford a nicer transition
-  const [isLoaded, setIsLoaded] = useState(isPWA ? true : false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    // In browser mode, we show a brief loading transition
-    if (!isPWA && !isLoaded) {
-      const timer = setTimeout(() => setIsLoaded(true), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isPWA, isLoaded]);
+  // In browser mode, show immediately without additional effects
+  // This simplifies the component and reduces render steps
+  if (!isLoaded) {
+    // Use requestAnimationFrame for smoother transition in browser mode
+    requestAnimationFrame(() => setIsLoaded(true));
+  }
 
-  // In PWA mode, render immediately without any transitions or delays
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      {(isPWA || isLoaded) ? <BitcoinConverter /> : null}
+      {isLoaded ? <BitcoinConverter /> : null}
     </div>
   );
 };

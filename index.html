@@ -37,10 +37,16 @@
     <link rel="icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" type="image/png" />
     <link rel="apple-touch-icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" />
     
-    <!-- Enhanced Critical inline CSS for PWA mode - ensures immediate UI visibility -->
+    <!-- Ultra-critical inline CSS for PWA mode - essential for eliminating the black screen -->
     <style>
-      /* Improved critical CSS for PWA mode - ensures immediate UI visibility */
+      /* Critical inline CSS to eliminate black screen in PWA mode */
       @media all and (display-mode: standalone) {
+        /* Set instant dark mode colors for immediate visibility */
+        html {
+          background-color: hsl(222.2, 84%, 4.9%) !important;
+          color: hsl(210, 40%, 98%) !important;
+        }
+        
         body, html {
           background-color: hsl(222.2, 84%, 4.9%) !important; /* Dark background */
           color: hsl(210, 40%, 98%) !important;  /* Light text */
@@ -49,6 +55,7 @@
           height: 100%;
           overflow: auto !important;
         }
+        
         #root {
           opacity: 1 !important;
           visibility: visible !important;
@@ -56,30 +63,48 @@
           height: 100% !important;
           min-height: 100dvh !important;
         }
+        
         /* Force immediate display for Bitcoin converter container */
         .animate-fade-in, 
-        .flex.flex-col.items-center.w-full.max-w-md.mx-auto.p-4 {
+        .flex.flex-col.items-center.w-full.max-w-md.mx-auto.p-4,
+        .flex.min-h-\\[100dvh\\].items-center.justify-center.p-4.bg-background {
           opacity: 1 !important;
           animation: none !important;
           display: flex !important;
           visibility: visible !important;
+          background-color: hsl(222.2, 84%, 4.9%) !important; /* Dark mode background */
         }
+        
         /* Force Bitcoin icon visible */
         .text-bitcoin-orange {
           opacity: 1 !important;
           visibility: visible !important;
-          color: hsl(28, 100%, 54%) !important;
+          color: hsl(28, 100%, 54%) !important; /* Bitcoin orange */
         }
+        
         /* Ensure input is visible */
         input, button {
           opacity: 1 !important;
           visibility: visible !important;
+        }
+        
+        /* Disable all animations */
+        *, *::before, *::after {
+          animation: none !important;
+          transition: none !important;
         }
       }
     </style>
   </head>
 
   <body>
+    <!-- For PWA: Set background color immediately to prevent black screen -->
+    <script>
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        document.documentElement.classList.add('dark');
+        document.body.style.backgroundColor = 'hsl(222.2, 84%, 4.9%)';
+      }
+    </script>
     <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>

@@ -4,56 +4,54 @@ import { useState, useEffect } from 'react';
 type Theme = 'light' | 'dark';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // For PWA, always use dark theme initially for immediate UI rendering
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      return 'dark'; // Default to dark in PWA mode for immediate rendering
+  // Check if running as PWA - used for optimizations
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+  
+  // For PWA, we always start with dark theme and don't check localStorage
+  // This ensures immediate rendering without any flicker
+  const [theme, setTheme] = useState<Theme>('dark');
+  
+  // Only in browser mode, try to load theme from localStorage after initial render
+  useEffect(() => {
+    if (!isPWA) {
+      try {
+        const savedTheme = localStorage.getItem('theme') as Theme;
+        if (savedTheme) {
+          setTheme(savedTheme);
+        }
+      } catch (e) {
+        console.error("Error accessing localStorage:", e);
+      }
     }
-    
-    // For browser mode, we can afford to check localStorage
-    try {
-      const savedTheme = localStorage.getItem('theme') as Theme;
-      if (savedTheme) return savedTheme;
-    } catch (e) {
-      console.error("Error accessing localStorage:", e);
-    }
-    
-    // Default to dark theme
-    return 'dark';
-  });
+  }, [isPWA]);
 
   useEffect(() => {
-    const isPWA = window.matchMedia('(display-mode: standalone)').matches;
-    
-    // Update theme attribute on document - do it synchronously for PWA
+    // For PWA, update DOM synchronously without any delay
     if (isPWA) {
-      // For PWA, update theme immediately
       document.documentElement.classList.remove('light', 'dark');
       document.documentElement.classList.add(theme);
-    } else {
-      // For browser, can use the normal flow
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(theme);
-    }
-    
-    // Save to localStorage - defer this for PWA to prioritize rendering
-    if (isPWA) {
+      
+      // Save to localStorage with a delay for PWA to prioritize rendering
       setTimeout(() => {
         try {
           localStorage.setItem('theme', theme);
         } catch (e) {
           console.error("Error writing to localStorage:", e);
         }
-      }, 1000); // Significant delay for PWA
+      }, 1000);
     } else {
+      // For browser, normal flow is fine
+      const root = window.document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+      
       try {
         localStorage.setItem('theme', theme);
       } catch (e) {
         console.error("Error writing to localStorage:", e);
       }
     }
-  }, [theme]);
+  }, [theme, isPWA]);
 
   return { theme, setTheme };
 }

@@ -38,8 +38,8 @@ const App = () => {
       <LanguageProvider>
         <SettingsProvider>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
+            {!isPWA && <Toaster />}
+            {!isPWA && <Sonner />}
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -50,6 +50,8 @@ const App = () => {
                 } />
               </Routes>
             </BrowserRouter>
+            {isPWA && <Toaster />}
+            {isPWA && <Sonner />}
           </TooltipProvider>
         </SettingsProvider>
       </LanguageProvider>

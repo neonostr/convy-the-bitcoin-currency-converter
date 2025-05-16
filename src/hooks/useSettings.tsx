@@ -32,7 +32,22 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 // Provider component
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
+  // Check if running as PWA - do this early for instant rendering in PWA mode
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+  
   const [settings, setSettings] = useState<Settings>(() => {
+    // For PWA, use simplified default settings to speed initial render
+    if (isPWA) {
+      return {
+        theme: 'dark', // Dark theme by default for PWA
+        displayCurrencies: DEFAULT_CURRENCIES,
+        decimalSeparator: '.',
+        includeThouSepWhenCopying: false,
+        alwaysDefaultToBtc: false,
+        showRateUpdateNotifications: true,
+      };
+    }
+    
     // Try-catch to prevent any localStorage errors from blocking UI rendering
     try {
       const savedSettings = localStorage.getItem('bitcoin-converter-settings');
@@ -54,9 +69,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       showRateUpdateNotifications: true,
     };
   });
-
-  // For PWA mode, prioritize UI rendering over settings management
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches;
 
   useEffect(() => {
     // Save settings to localStorage whenever they change
