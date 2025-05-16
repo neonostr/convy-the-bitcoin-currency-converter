@@ -33,9 +33,11 @@ const Index = () => {
   // In browser mode, show both with transition
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      <div className={`absolute transition-opacity duration-300 ${isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-        <AppShell onReady={() => console.log('App shell rendered')} />
-      </div>
+      {!isFullyLoaded && (
+        <div className="absolute transition-opacity duration-300 opacity-100">
+          <AppShell onReady={() => console.log('App shell rendered')} />
+        </div>
+      )}
       
       <div 
         className={`w-full transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}`}
