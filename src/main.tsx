@@ -3,7 +3,29 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Apply theme immediately before any rendering happens
+// Define requestIdleCallback and cancelIdleCallback types to fix TypeScript errors
+interface RequestIdleCallbackOptions {
+  timeout: number;
+}
+
+type RequestIdleCallbackHandle = number;
+type RequestIdleCallbackDeadline = {
+  readonly didTimeout: boolean;
+  timeRemaining: () => number;
+};
+
+// Add types to window object
+declare global {
+  interface Window {
+    requestIdleCallback: (
+      callback: (deadline: RequestIdleCallbackDeadline) => void,
+      opts?: RequestIdleCallbackOptions
+    ) => RequestIdleCallbackHandle;
+    cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
+  }
+}
+
+// Apply theme immediately before any rendering happens to prevent flash
 if (typeof window !== 'undefined') {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.classList.add(savedTheme);
