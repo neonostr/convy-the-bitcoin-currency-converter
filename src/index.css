@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -89,70 +90,67 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }
-  
-  /* PWA MODE - Strict separation between PWA and browser modes */
-  @media (display-mode: standalone) {
-    /* Essential PWA styles for immediate rendering */
-    html, body, #root {
-      background-color: hsl(var(--background));
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    }
-    
-    /* PWA-specific scrolling handling */
-    body {
-      overflow: hidden;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-    }
-    
-    #root {
-      overflow-y: auto;
-      height: 100%;
-      width: 100%;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Disable ALL animations in PWA mode */
-    * {
-      animation: none !important;
-      transition: none !important;
-    }
-    
-    /* Force immediate visibility for PWA mode */
-    #app-container, .app-container {
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-    
-    /* Hide app shell in PWA mode */
-    #app-shell, #browser-app-shell {
-      display: none !important;
-    }
+}
+
+/* ===== PWA-SPECIFIC STYLES ===== */
+@media (display-mode: standalone) {
+  /* Essential PWA styles for immediate rendering */
+  html, body, #root {
+    background-color: hsl(var(--background));
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
-  /* Regular browser styles - controls app shell behavior */
+  /* PWA-specific scrolling handling */
+  body {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+  
+  #root {
+    overflow-y: auto;
+    height: 100%;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Disable ALL animations in PWA mode */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  /* Hide app shells in PWA mode */
+  #app-shell, 
   #browser-app-shell {
-    background-color: hsl(var(--background));
-    opacity: 1;
-    transition: opacity 0.2s ease;
+    display: none !important;
   }
 }
 
-@layer utilities {
-  /* Animation classes - only applied in browser mode */
+/* ===== BROWSER-SPECIFIC STYLES ===== */
+/* Regular browser styles - controls app shell behavior */
+@media not all and (display-mode: standalone) {
+  #browser-app-shell {
+    background-color: hsl(var(--background));
+  }
+  
+  /* Animation classes for browser mode */
   .animate-fade-in {
-    animation: fadeIn 0.2s ease-in-out;
+    animation: fadeIn 0.3s ease-in-out;
     animation-fill-mode: both;
   }
   
   .animate-slide-up {
-    animation: slideUp 0.2s ease-out;
+    animation: slideUp 0.3s ease-out;
     animation-fill-mode: both;
   }
-  
+}
+
+/* ===== SHARED UTILITY CLASSES ===== */
+@layer utilities {
   .animate-pulse {
     animation: pulse 1.5s ease-in-out infinite;
   }
@@ -160,8 +158,13 @@
   .overscroll-none {
     overscroll-behavior: none;
   }
+  
+  .content-visibility-auto {
+    content-visibility: auto;
+  }
 }
 
+/* ===== ANIMATIONS ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -188,20 +191,6 @@
   }
   50% {
     opacity: 0.5;
-  }
-}
-
-/* Improve perceived performance with content-visibility */
-.content-visibility-auto {
-  content-visibility: auto;
-}
-
-/* PWA instant render classes - explicitly limited to PWA mode */
-@media (display-mode: standalone) {
-  .pwa-no-animation * {
-    animation: none !important;
-    transition: none !important;
-    opacity: 1 !important;
   }
 }
 

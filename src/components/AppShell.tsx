@@ -13,7 +13,7 @@ const AppShell: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
   const { settings } = useSettings();
   
   useEffect(() => {
-    // Signal that the shell is ready, can be used for metrics
+    // Signal that the shell is ready
     if (onReady) {
       onReady();
     }
@@ -27,7 +27,6 @@ const AppShell: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
           <h1 className="text-2xl font-bold">Bitcoin Converter</h1>
         </div>
         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-          {/* Settings icon placeholder */}
           <div className="w-4 h-4 rounded-sm bg-muted-foreground/40"></div>
         </div>
       </div>

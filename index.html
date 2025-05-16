@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -247,41 +248,20 @@
     <script type="module" src="/src/main.tsx"></script>
     
     <script>
-      // Simplified shell and app transition
+      // Simplified PWA detection and shell handling
       window.addEventListener('DOMContentLoaded', function() {
+        // Check if running in PWA mode
         const isPWA = window.matchMedia('(display-mode: standalone)').matches;
         
-        // In PWA mode, hide app shell immediately and show content
         if (isPWA) {
+          // In PWA mode, immediately hide the shell and mark body
           const shell = document.getElementById('app-shell');
-          if (shell) {
-            shell.style.display = 'none';
-          }
+          if (shell) shell.style.display = 'none';
           document.body.classList.add('pwa-mode');
+        } else {
+          // In browser mode, let React handle the transition
+          // The shell will remain visible until React removes it
         }
-
-        // Listen for content being added to root
-        const observer = new MutationObserver(function(mutations) {
-          const hasContent = document.querySelector('#root > div');
-          
-          if (hasContent) {
-            // If we're in PWA mode, make sure shell is hidden
-            if (isPWA) {
-              const shell = document.getElementById('app-shell');
-              if (shell) {
-                shell.style.display = 'none';
-              }
-            }
-            
-            // No need to continue observing after content appears
-            observer.disconnect();
-          }
-        });
-        
-        observer.observe(document.getElementById('root'), {
-          childList: true,
-          subtree: true
-        });
       });
     </script>
   </body>
