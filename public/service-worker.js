@@ -1,8 +1,8 @@
 
 // Service Worker for Bitcoin Currency Converter - Optimized for instant startup
 
-const CACHE_NAME = 'bitcoin-converter-cache-v9';
-const APP_VERSION = '1.3.2';
+const CACHE_NAME = 'bitcoin-converter-cache-v10';
+const APP_VERSION = '1.3.3';
 
 // Ultra-critical PWA assets - these must load instantly for PWA to appear
 const ULTRA_CRITICAL_ASSETS = [
@@ -31,24 +31,26 @@ const ADDITIONAL_ASSETS = [
 self.addEventListener('install', event => {
   console.log('Service Worker installing with ultra-fast PWA startup optimization...');
   
+  // Skip waiting immediately to activate as soon as possible
+  self.skipWaiting();
+  
   // Block installation until ultra-critical assets are cached
   event.waitUntil(
     Promise.all([
-      // 1. Cache ultra-critical assets - MUST be complete before SW activates
+      // 1. Cache ultra-critical assets
       caches.open(CACHE_NAME + '-ultra').then(cache => {
         console.log('Caching ultra-critical PWA assets for instant startup');
         return cache.addAll(ULTRA_CRITICAL_ASSETS);
       }),
       
-      // 2. Start caching critical shell assets in parallel but don't block activation
+      // 2. Start caching critical shell assets in parallel
       caches.open(CACHE_NAME + '-critical').then(cache => {
         console.log('Caching critical app shell');
-        cache.addAll(CRITICAL_APP_SHELL);
+        return cache.addAll(CRITICAL_APP_SHELL);
       })
     ])
     .then(() => {
-      console.log('Ultra-critical pre-caching complete - activating immediately');
-      self.skipWaiting(); // Activate instantly
+      console.log('Ultra-critical pre-caching complete');
       
       // Cache additional assets after activation
       setTimeout(() => {
@@ -57,6 +59,31 @@ self.addEventListener('install', event => {
           cache.addAll(ADDITIONAL_ASSETS);
         });
       }, 1000);
+    })
+  );
+});
+
+// Claim clients immediately on activation
+self.addEventListener('activate', event => {
+  event.waitUntil(clients.claim());
+  console.log('Service worker activated and claiming all clients immediately');
+  
+  // Clean up old caches
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames
+          .filter(cacheName => {
+            return cacheName.startsWith('bitcoin-converter-cache-') && 
+                  cacheName !== CACHE_NAME &&
+                  cacheName !== CACHE_NAME + '-ultra' &&
+                  cacheName !== CACHE_NAME + '-critical';
+          })
+          .map(cacheName => {
+            console.log('Deleting outdated cache:', cacheName);
+            return caches.delete(cacheName);
+          })
+      );
     })
   );
 });
@@ -70,24 +97,21 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match('/index.html')
         .then(cachedResponse => {
-          if (cachedResponse) {
-            // Return cached index.html immediately for instant PWA startup
-            // Network fetch happens in background to update cache
-            fetch(event.request)
-              .then(networkResponse => {
-                if (networkResponse.ok) {
-                  caches.open(CACHE_NAME + '-ultra').then(cache => {
-                    cache.put('/index.html', networkResponse);
-                  });
-                }
-              })
-              .catch(() => {});
-            
-            return cachedResponse;
-          }
+          const fetchPromise = fetch(event.request)
+            .then(networkResponse => {
+              if (networkResponse.ok) {
+                caches.open(CACHE_NAME + '-ultra').then(cache => {
+                  cache.put('/index.html', networkResponse.clone());
+                });
+              }
+              return networkResponse;
+            })
+            .catch(() => cachedResponse || new Response('Offline', {
+              status: 503,
+              statusText: 'Service Unavailable'
+            }));
           
-          // Fallback to network if not cached yet (first load)
-          return fetch(event.request);
+          return cachedResponse || fetchPromise;
         })
     );
     return;
@@ -99,16 +123,17 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(event.request)
         .then(cachedResponse => {
-          // Return cached response immediately for instant loading
+          // Return cached response immediately
           if (cachedResponse) {
             // Update cache in background
             fetch(event.request)
               .then(networkResponse => {
                 if (networkResponse.ok) {
                   caches.open(CACHE_NAME + '-ultra').then(cache => {
-                    cache.put(event.request, networkResponse);
+                    cache.put(event.request, networkResponse.clone());
                   });
                 }
+                return networkResponse;
               })
               .catch(() => {});
             
@@ -158,7 +183,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Clone the request because it's a stream that can only be consumed once
+        // Clone the request because it's a stream
         const fetchPromise = fetch(event.request.clone())
           .then(networkResponse => {
             // Only cache valid responses
@@ -170,10 +195,7 @@ self.addEventListener('fetch', event => {
             }
             return networkResponse;
           })
-          .catch(() => {
-            // If network fetch fails, return the cached response as is
-            return cachedResponse;
-          });
+          .catch(() => cachedResponse);
         
         // Return cached response immediately if available, otherwise wait for network
         return cachedResponse || fetchPromise;
@@ -181,7 +203,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Listen for skipWaiting message from client
+// Listen for skipWaiting message
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -201,34 +223,9 @@ self.addEventListener('message', (event) => {
 
 // Notify clients when update is available
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    self.clients.claim().then(() => {
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({type: 'SW_UPDATE'});
-        });
-      });
-    })
-  );
-});
-
-// Improved cache cleanup on activation
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames
-          .filter(cacheName => {
-            return cacheName.startsWith('bitcoin-converter-cache-') && 
-                  cacheName !== CACHE_NAME &&
-                  cacheName !== CACHE_NAME + '-ultra' &&
-                  cacheName !== CACHE_NAME + '-critical';
-          })
-          .map(cacheName => {
-            console.log('Deleting outdated cache:', cacheName);
-            return caches.delete(cacheName);
-          })
-      );
-    })
-  );
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({type: 'SW_UPDATE'});
+    });
+  });
 });

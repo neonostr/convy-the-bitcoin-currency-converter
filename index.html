@@ -244,23 +244,32 @@
     <div id="root"></div>
     
     <!-- Important scripts -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
     
     <script>
-      // Simplified PWA detection and shell handling
-      window.addEventListener('DOMContentLoaded', function() {
+      // Simple script to hide the shell when the app is ready
+      document.addEventListener('DOMContentLoaded', function() {
         // Check if running in PWA mode
         const isPWA = window.matchMedia('(display-mode: standalone)').matches;
         
         if (isPWA) {
-          // In PWA mode, immediately hide the shell and mark body
+          // In PWA mode, immediately hide the shell
           const shell = document.getElementById('app-shell');
           if (shell) shell.style.display = 'none';
-          document.body.classList.add('pwa-mode');
         } else {
-          // In browser mode, let React handle the transition
-          // The shell will remain visible until React removes it
+          // In browser mode, hide shell after main content loads
+          window.addEventListener('load', function() {
+            setTimeout(function() {
+              const shell = document.getElementById('app-shell');
+              if (shell) {
+                shell.style.opacity = '0';
+                shell.style.transition = 'opacity 0.3s ease';
+                setTimeout(function() {
+                  shell.style.display = 'none';
+                }, 300);
+              }
+            }, 100);
+          });
         }
       });
     </script>

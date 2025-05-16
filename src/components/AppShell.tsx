@@ -1,24 +1,13 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bitcoin } from 'lucide-react';
-import { useSettings } from '@/hooks/useSettings';
 
 /**
- * AppShell is a minimal component that renders instantly while the main app loads
- * It has the exact same layout as BitcoinConverter but with skeleton loaders
- * This prevents layout shift when the real component loads
+ * AppShell is a static component that renders skeleton loaders
+ * while the main app loads. It has the exact same layout as BitcoinConverter.
  */
-const AppShell: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
-  const { settings } = useSettings();
-  
-  useEffect(() => {
-    // Signal that the shell is ready
-    if (onReady) {
-      onReady();
-    }
-  }, [onReady]);
-
+const AppShell: React.FC = () => {
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto p-4">
       <div className="flex items-center justify-between w-full mb-6">
@@ -44,7 +33,7 @@ const AppShell: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
       <Skeleton className="h-4 w-48 mb-4" />
 
       <div className="w-full space-y-4">
-        {Array(Math.min(settings?.displayCurrencies?.length || 4, 4)).fill(0).map((_, i) => (
+        {Array(4).fill(0).map((_, i) => (
           <Skeleton key={i} className="h-12 w-full" />
         ))}
       </div>

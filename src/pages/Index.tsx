@@ -1,31 +1,31 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import BitcoinConverter from "@/components/BitcoinConverter";
 import AppShell from "@/components/AppShell";
 
 const Index = () => {
-  // Check if running as PWA - detect standalone mode
+  // Check if running as PWA
   const isPWA = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches;
   
-  // In PWA mode, we skip the loading state entirely
-  const [isFullyLoaded, setIsFullyLoaded] = useState(isPWA);
+  // State to control when to show the main content
+  const [showContent, setShowContent] = useState(isPWA);
   
   useEffect(() => {
+    // In PWA mode, immediately show content with no transitions
     if (isPWA) {
-      // In PWA mode, immediately show main content
-      setIsFullyLoaded(true);
-    } else {
-      // In browser mode, allow a minimal delay before showing main content
-      // Just enough time for AppShell to render first
-      const timer = setTimeout(() => {
-        setIsFullyLoaded(true);
-      }, 50);
-      
-      return () => clearTimeout(timer);
+      setShowContent(true);
+      return;
     }
+    
+    // In browser mode, show content after a short delay
+    const timer = setTimeout(() => {
+      setShowContent(true);
+    }, 300); // Short delay for browser mode
+    
+    return () => clearTimeout(timer);
   }, [isPWA]);
-
-  // In PWA mode, just return the BitcoinConverter directly - no transitions
+  
+  // In PWA mode, render only BitcoinConverter with no shell or transitions
   if (isPWA) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
@@ -34,23 +34,19 @@ const Index = () => {
     );
   }
   
-  // In browser mode, handle the transition between app shell and main content
+  // In browser mode, handle shell and main content visibility
   return (
     <div className="flex min-h-[100dvh] items-center justify-center p-4 bg-background">
-      {/* App shell - visible until main content loads */}
-      <div 
-        id="browser-app-shell"
-        className={`fixed inset-0 z-10 flex items-center justify-center bg-background transition-opacity duration-300 ${
-          isFullyLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
-        }`}
-      >
-        <AppShell onReady={() => console.log('App shell rendered')} />
-      </div>
+      {/* App shell - only shown initially */}
+      {!showContent && (
+        <div className="w-full">
+          <AppShell />
+        </div>
+      )}
       
-      {/* Main content - hidden until fully loaded */}
+      {/* Main content - becomes visible when ready */}
       <div 
-        className={`w-full transition-opacity duration-300 ${isFullyLoaded ? 'opacity-100' : 'opacity-0'}`}
-        aria-hidden={!isFullyLoaded}
+        className={`w-full transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0 hidden'}`}
       >
         <BitcoinConverter />
       </div>
