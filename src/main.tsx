@@ -3,15 +3,26 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Apply theme immediately before any rendering happens
-if (typeof window !== 'undefined') {
-  const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
+// Check if running as PWA
+const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+
+// For PWA, minimize initialization to prioritize UI rendering
+if (!isPWA && typeof window !== 'undefined') {
+  // Only do this theme check for browser mode, PWA uses default dark
+  const savedTheme = localStorage.getItem('theme') || 'dark'; 
   document.documentElement.classList.add(savedTheme);
+} else if (isPWA) {
+  // In PWA mode, ensure dark theme is applied instantly
+  document.documentElement.classList.add('dark');
 }
 
 // Create root and render immediately for faster perceived performance
 const root = createRoot(document.getElementById("root")!)
 root.render(<App />)
+
+// Only initialize non-critical features after UI is rendered
+// For PWA, delay even longer to ensure UI is visible first
+const initDelay = isPWA ? 5000 : 3000;
 
 // Toast: show update banner when SW says "update available"
 function showUpdateToast(sw: ServiceWorker) {
@@ -58,9 +69,9 @@ function showUpdateToast(sw: ServiceWorker) {
   document.body.appendChild(banner);
 }
 
-// Register SW using requestIdleCallback with even longer delay to prioritize UI rendering
+// For PWA, we want to delay initialization of non-critical features
 if ('serviceWorker' in navigator) {
-  // Delay service worker registration even further for immediate UI rendering
+  // Use setTimeout with different delays for PWA vs browser
   setTimeout(() => {
     navigator.serviceWorker.register('/service-worker.js').then(registration => {
       console.log('Service Worker registered with scope:', registration.scope);
@@ -70,7 +81,7 @@ if ('serviceWorker' in navigator) {
         setTimeout(() => {
           registration.update();
           console.log('Checking for Service Worker updates...');
-        }, 10000); // Even longer delay for update check to prioritize UI rendering
+        }, isPWA ? 10000 : 5000); // Even longer delay for PWA
       });
 
       // Listen for SW message about new update
@@ -107,5 +118,15 @@ if ('serviceWorker' in navigator) {
       console.log('New Service Worker controller, reloading for fresh content...');
       window.location.reload();
     });
-  }, 5000); // Extremely delayed registration to ensure UI is visible immediately
+  }, initDelay); // Extra delayed registration for PWA
+}
+
+// Initialize service worker sync in a non-blocking way - much later for PWA
+if (typeof window !== 'undefined') {
+  // Defer the service worker initialization to after rendering
+  setTimeout(() => {
+    import("@/services/ratesService").then(module => {
+      module.initializeServiceWorkerSync();
+    });
+  }, isPWA ? 8000 : 3000); // Much longer delay for PWA
 }

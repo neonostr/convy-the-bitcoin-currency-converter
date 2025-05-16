@@ -36,6 +36,23 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" type="image/png" />
     <link rel="apple-touch-icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" />
+    
+    <!-- Critical inline CSS for PWA - ensures immediate UI display -->
+    <style>
+      /* Critical CSS for PWA mode - ensures immediate UI visibility */
+      @media all and (display-mode: standalone) {
+        body, html {
+          background-color: hsl(222.2, 84%, 4.9%) !important; /* Dark background */
+          color: hsl(210, 40%, 98%) !important;  /* Light text */
+          margin: 0;
+          padding: 0;
+        }
+        #root {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+    </style>
   </head>
 
   <body>

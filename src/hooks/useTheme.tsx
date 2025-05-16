@@ -5,7 +5,12 @@ type Theme = 'light' | 'dark';
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check if theme was previously set
+    // For PWA, prioritize immediate UI render with default dark theme
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      return 'dark'; // Default to dark in PWA mode for immediate rendering
+    }
+    
+    // For browser mode, we can afford to check localStorage
     const savedTheme = localStorage.getItem('theme') as Theme;
     if (savedTheme) return savedTheme;
     

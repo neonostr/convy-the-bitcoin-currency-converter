@@ -82,3 +82,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* PWA specific optimizations - disable animations for immediate render */
+@media all and (display-mode: standalone) {
+  /* In PWA mode, we prioritize immediate rendering over animations */
+  .animate-fade-in,
+  .animate-spin,
+  .animate-pulse {
+    animation: none !important;
+  }
+  
+  /* Make sure inputs are instantly visible */
+  input, button, select {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Ensure all content is visible immediately */
+  [class*="opacity-0"] {
+    opacity: 1 !important;
+  }
+  
+  /* Prevent any transitions that could delay rendering */
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+  }
+}
