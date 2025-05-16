@@ -25,29 +25,14 @@ const ALL_CURRENCIES: Currency[] = [
   'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
   'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
 ];
-const APP_VERSION = '1.1.0'; // Reverted back to 1.1.0 as requested
+const APP_VERSION = '1.2.0';
 
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 // Provider component
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-  // Check if running as PWA - do this early for instant rendering in PWA mode
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches;
-  
   const [settings, setSettings] = useState<Settings>(() => {
-    // For PWA, use simplified default settings to speed initial render
-    if (isPWA) {
-      return {
-        theme: 'dark', // Dark theme by default for PWA
-        displayCurrencies: DEFAULT_CURRENCIES,
-        decimalSeparator: '.',
-        includeThouSepWhenCopying: false,
-        alwaysDefaultToBtc: false,
-        showRateUpdateNotifications: true,
-      };
-    }
-    
     // Try-catch to prevent any localStorage errors from blocking UI rendering
     try {
       const savedSettings = localStorage.getItem('bitcoin-converter-settings');
@@ -61,7 +46,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     
     // Default settings - simplified for faster loading
     return {
-      theme: 'dark', // Dark theme by default
+      theme: 'dark', // Changed default theme to dark
       displayCurrencies: DEFAULT_CURRENCIES,
       decimalSeparator: '.',
       includeThouSepWhenCopying: false,
@@ -71,18 +56,22 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    // Save settings to localStorage whenever they change
-    // For PWA, use a longer delay to prioritize initial rendering
-    const saveTimeout = setTimeout(() => {
+    // Save settings to localStorage whenever they change - but defer this operation
+    setTimeout(() => {
       try {
         localStorage.setItem('bitcoin-converter-settings', JSON.stringify(settings));
       } catch (error) {
         console.error('Failed to save settings:', error);
       }
-    }, isPWA ? 1000 : 100); // Longer delay for PWA
+    }, 100);
     
-    return () => clearTimeout(saveTimeout);
-  }, [settings, isPWA]);
+    // Update theme on document - this is actually handled earlier in main.tsx now
+    // but we'll keep it here as a fallback
+    const { theme } = settings;
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+  }, [settings]);
 
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -106,7 +95,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         toggleTheme, 
         updateDisplayCurrencies, 
         allCurrencies: ALL_CURRENCIES,
-        appVersion: APP_VERSION // Using the reverted version number
+        appVersion: APP_VERSION
       }}
     >
       {children}
