@@ -12,6 +12,31 @@
     <meta name="description" content="Convert Bitcoin and track BTC prices with confidence. A beautiful, fast, and completely private currency converter with real-time price tracking that works offline. No tracking, no data collection - just simple and secure conversions." />
     <meta name="author" content="neonostr" />
 
+    <!-- Critical inline styles for immediate rendering -->
+    <style>
+      html, body {
+        background-color: hsl(222.2 84% 4.9%); /* Dark theme background */
+        color: hsl(210 40% 98%); /* Dark theme text */
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #root {
+        height: 100%;
+        width: 100%;
+        display: flex;
+      }
+    </style>
+
+    <!-- Apply dark theme instantly -->
+    <script>
+      (function() {
+        var savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.classList.add(savedTheme);
+      })();
+    </script>
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Convy - Your Private Bitcoin Currency Converter & Price Tracker" />

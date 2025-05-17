@@ -1,4 +1,29 @@
 
+/* Critical rendering CSS - applied immediately */
+html {
+  background-color: hsl(222.2 84% 4.9%); /* Dark theme background color */
+  color: hsl(210 40% 98%); /* Dark theme text color */
+}
+
+/* Ensure body covers full viewport immediately */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+}
+
+/* Hide visual flicker during load */
+.app-loading * {
+  transition: none !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

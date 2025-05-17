@@ -2,11 +2,31 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { toast } from "sonner"
 
 // Apply theme immediately before any rendering happens
+// This happens in the main entry point to ensure it's the first thing that happens
 if (typeof window !== 'undefined') {
-  const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
+  // Mark body as loading to prevent transitions during initial render
+  document.body.classList.add('app-loading');
+  
+  // Apply saved theme or default to dark
+  const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.classList.add(savedTheme);
+  
+  // Add inline style for instant background color
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+  if (isPWA) {
+    // For PWA, ensure dark theme background is applied instantly
+    const bgColor = 'hsl(222.2 84% 4.9%)'; // Dark theme background
+    document.documentElement.style.backgroundColor = bgColor;
+    document.body.style.backgroundColor = bgColor;
+  }
+  
+  // Remove loading class after a short delay
+  setTimeout(() => {
+    document.body.classList.remove('app-loading');
+  }, 300);
 }
 
 // Create root and render immediately for faster perceived performance
@@ -15,16 +35,10 @@ root.render(<App />)
 
 // Toast: show update banner when SW says "update available"
 function showUpdateToast(sw: ServiceWorker) {
-  // We're using shadcn/toast system for notification
-  // For a simple solution, append a banner div -- but best is to use your toast infra
-  // We'll use window.dispatchEvent for a minimal reference implementation
-  const id = 'pwa-update-banner';
-  if (document.getElementById(id)) return; // Prevent duplicates
-
-  // Use shadcn toast if possible, else fallback to a div
-  if (window && (window as any).showToast) {
-    (window as any).showToast({
-      title: "Update verfügbar!",
+  // We're using the sonner toast system for notification
+  toast(
+    "Update verfügbar!",
+    {
       description: "Eine neue Version von Convy ist da. Klicke zum Aktualisieren.",
       action: {
         label: "Neu laden",
@@ -32,30 +46,8 @@ function showUpdateToast(sw: ServiceWorker) {
           sw.postMessage({ type: 'SKIP_WAITING' });
         }
       }
-    });
-    return;
-  }
-
-  // Fallback: simple banner
-  const banner = document.createElement('div');
-  banner.id = id;
-  banner.style.position = 'fixed';
-  banner.style.bottom = '0';
-  banner.style.left = '0';
-  banner.style.right = '0';
-  banner.style.background = '#FFD600';
-  banner.style.color = '#222';
-  banner.style.textAlign = 'center';
-  banner.style.zIndex = '9999';
-  banner.style.padding = '1em';
-  banner.style.fontSize = '1rem';
-  banner.style.boxShadow = '0 -2px 8px rgba(0,0,0,0.15)';
-  banner.innerHTML = `Neue Version verfügbar. <button style="margin-left: 1em;padding:0.25em 0.75em;border-radius:0.3em;border:none;background:#222;color:#FFD600;cursor:pointer;">Neu laden</button>`;
-  banner.querySelector('button')?.addEventListener('click', () => {
-    sw.postMessage({ type: 'SKIP_WAITING' });
-    banner.remove();
-  });
-  document.body.appendChild(banner);
+    }
+  );
 }
 
 // Register SW using requestIdleCallback with even longer delay to prioritize UI rendering

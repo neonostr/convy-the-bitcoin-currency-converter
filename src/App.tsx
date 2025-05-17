@@ -8,13 +8,13 @@ import { SettingsProvider } from "@/hooks/useSettings";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { lazy, Suspense } from "react";
 
-// Import Index directly instead of lazy loading for faster initial render
+// Import Index directly for faster initial render
 import Index from "./pages/Index";
 
 // Lazy load non-critical pages
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Optimize query client config for faster startup
+// Pre-configure query client for faster startup
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,14 +27,18 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize service worker sync in a non-blocking way
+// Initialize service worker sync in a non-blocking way after app is visible
 if (typeof window !== 'undefined') {
-  // Defer the service worker initialization to after rendering
-  setTimeout(() => {
-    import("@/services/ratesService").then(module => {
-      module.initializeServiceWorkerSync();
-    });
-  }, 3000);
+  // Wait until after page is visible and interactive
+  window.addEventListener('load', () => {
+    requestIdleCallback(() => {
+      setTimeout(() => {
+        import("@/services/ratesService").then(module => {
+          module.initializeServiceWorkerSync();
+        });
+      }, 5000);
+    }, { timeout: 4000 });
+  });
 }
 
 const App = () => (
