@@ -25,7 +25,7 @@ const ALL_CURRENCIES: Currency[] = [
   'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
   'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
 ];
-const APP_VERSION = '1.1.0'; // Changed back to 1.1.0 as requested
+const APP_VERSION = '1.1.0'; // Keep version at 1.1.0 as requested
 
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -39,6 +39,15 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   if (typeof document !== 'undefined') {
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(initialTheme);
+    
+    // Directly apply critical styles for immediate visibility
+    if (initialTheme === 'dark') {
+      document.documentElement.style.backgroundColor = 'hsl(222.2 84% 4.9%)';
+      document.documentElement.style.color = 'hsl(210 40% 98%)';
+    } else {
+      document.documentElement.style.backgroundColor = 'hsl(0 0% 100%)';
+      document.documentElement.style.color = 'hsl(240 10% 3.9%)';
+    }
   }
   
   const [settings, setSettings] = useState<Settings>(() => {
@@ -47,7 +56,13 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       const savedSettings = localStorage.getItem('bitcoin-converter-settings');
       
       if (savedSettings) {
-        return JSON.parse(savedSettings);
+        const parsedSettings = JSON.parse(savedSettings);
+        // Ensure theme is applied immediately
+        if (typeof document !== 'undefined' && parsedSettings.theme) {
+          document.documentElement.classList.remove('light', 'dark');
+          document.documentElement.classList.add(parsedSettings.theme);
+        }
+        return parsedSettings;
       }
     } catch (error) {
       console.error('Failed to parse saved settings:', error);
@@ -81,6 +96,15 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
+    
+    // Apply critical colors directly for immediate effect
+    if (theme === 'dark') {
+      root.style.backgroundColor = 'hsl(222.2 84% 4.9%)';
+      root.style.color = 'hsl(210 40% 98%)';
+    } else {
+      root.style.backgroundColor = 'hsl(0 0% 100%)';
+      root.style.color = 'hsl(240 10% 3.9%)';
+    }
   }, [settings]);
 
   const updateSettings = (newSettings: Partial<Settings>) => {

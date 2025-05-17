@@ -4,6 +4,22 @@ import App from './App.tsx'
 import './index.css'
 import { toast } from "sonner"
 
+// Polyfill for requestIdleCallback for browsers that don't support it
+const requestIdleCallbackPolyfill = (callback: IdleRequestCallback, options?: IdleRequestOptions) => {
+  const timeout = options?.timeout || 1;
+  return setTimeout(() => {
+    const start = Date.now();
+    callback({
+      didTimeout: false,
+      timeRemaining: () => Math.max(0, 50 - (Date.now() - start))
+    });
+  }, timeout);
+};
+
+// Use the polyfill or native implementation
+const idle = window.requestIdleCallback || requestIdleCallbackPolyfill;
+const cancelIdle = window.cancelIdleCallback || clearTimeout;
+
 // Apply theme immediately before any rendering happens
 // This happens in the main entry point to ensure it's the first thing that happens
 if (typeof window !== 'undefined') {
@@ -16,11 +32,22 @@ if (typeof window !== 'undefined') {
   
   // Add inline style for instant background color
   const isPWA = window.matchMedia('(display-mode: standalone)').matches;
-  if (isPWA) {
-    // For PWA, ensure dark theme background is applied instantly
-    const bgColor = 'hsl(222.2 84% 4.9%)'; // Dark theme background
-    document.documentElement.style.backgroundColor = bgColor;
-    document.body.style.backgroundColor = bgColor;
+  const bgColor = savedTheme === 'dark' ? 'hsl(222.2 84% 4.9%)' : 'hsl(0 0% 100%)';
+  const textColor = savedTheme === 'dark' ? 'hsl(210 40% 98%)' : 'hsl(240 10% 3.9%)';
+  
+  // Force immediate background color
+  document.documentElement.style.backgroundColor = bgColor;
+  document.documentElement.style.color = textColor;
+  document.body.style.backgroundColor = bgColor;
+  document.body.style.color = textColor;
+  
+  // Force any main container to be visible immediately
+  const root = document.getElementById("root");
+  if (root) {
+    root.style.display = 'flex';
+    root.style.flex = '1';
+    root.style.backgroundColor = bgColor;
+    root.style.color = textColor;
   }
   
   // Remove loading class after a short delay
@@ -36,21 +63,18 @@ root.render(<App />)
 // Toast: show update banner when SW says "update available"
 function showUpdateToast(sw: ServiceWorker) {
   // We're using the sonner toast system for notification
-  toast(
-    "Update verfügbar!",
-    {
-      description: "Eine neue Version von Convy ist da. Klicke zum Aktualisieren.",
-      action: {
-        label: "Neu laden",
-        onClick: () => {
-          sw.postMessage({ type: 'SKIP_WAITING' });
-        }
+  toast("Update verfügbar!", {
+    description: "Eine neue Version von Convy ist da. Klicke zum Aktualisieren.",
+    action: {
+      label: "Neu laden",
+      onClick: () => {
+        sw.postMessage({ type: 'SKIP_WAITING' });
       }
     }
-  );
+  });
 }
 
-// Register SW using requestIdleCallback with even longer delay to prioritize UI rendering
+// Register SW using our polyfill with longer delay to prioritize UI rendering
 if ('serviceWorker' in navigator) {
   // Delay service worker registration even further for immediate UI rendering
   setTimeout(() => {
