@@ -25,44 +25,20 @@ const ALL_CURRENCIES: Currency[] = [
   'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
   'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
 ];
-const APP_VERSION = '1.1.0'; // Keep version at 1.1.0 as requested
+const APP_VERSION = '1.2.0';
 
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 // Provider component
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-  // Apply theme immediately before state initialization to avoid flash
-  const savedTheme = localStorage.getItem('bitcoin-converter-theme') as 'light' | 'dark';
-  const initialTheme = savedTheme || 'dark'; // Default to dark theme
-  
-  if (typeof document !== 'undefined') {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(initialTheme);
-    
-    // Directly apply critical styles for immediate visibility
-    if (initialTheme === 'dark') {
-      document.documentElement.style.backgroundColor = 'hsl(222.2 84% 4.9%)';
-      document.documentElement.style.color = 'hsl(210 40% 98%)';
-    } else {
-      document.documentElement.style.backgroundColor = 'hsl(0 0% 100%)';
-      document.documentElement.style.color = 'hsl(240 10% 3.9%)';
-    }
-  }
-  
   const [settings, setSettings] = useState<Settings>(() => {
     // Try-catch to prevent any localStorage errors from blocking UI rendering
     try {
       const savedSettings = localStorage.getItem('bitcoin-converter-settings');
       
       if (savedSettings) {
-        const parsedSettings = JSON.parse(savedSettings);
-        // Ensure theme is applied immediately
-        if (typeof document !== 'undefined' && parsedSettings.theme) {
-          document.documentElement.classList.remove('light', 'dark');
-          document.documentElement.classList.add(parsedSettings.theme);
-        }
-        return parsedSettings;
+        return JSON.parse(savedSettings);
       }
     } catch (error) {
       console.error('Failed to parse saved settings:', error);
@@ -70,7 +46,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     
     // Default settings - simplified for faster loading
     return {
-      theme: initialTheme, // Use already determined theme
+      theme: 'dark', // Changed default theme to dark
       displayCurrencies: DEFAULT_CURRENCIES,
       decimalSeparator: '.',
       includeThouSepWhenCopying: false,
@@ -84,27 +60,17 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => {
       try {
         localStorage.setItem('bitcoin-converter-settings', JSON.stringify(settings));
-        // Store theme separately for faster access on page load
-        localStorage.setItem('theme', settings.theme);
       } catch (error) {
         console.error('Failed to save settings:', error);
       }
     }, 100);
     
-    // Update theme on document
+    // Update theme on document - this is actually handled earlier in main.tsx now
+    // but we'll keep it here as a fallback
     const { theme } = settings;
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    
-    // Apply critical colors directly for immediate effect
-    if (theme === 'dark') {
-      root.style.backgroundColor = 'hsl(222.2 84% 4.9%)';
-      root.style.color = 'hsl(210 40% 98%)';
-    } else {
-      root.style.backgroundColor = 'hsl(0 0% 100%)';
-      root.style.color = 'hsl(240 10% 3.9%)';
-    }
   }, [settings]);
 
   const updateSettings = (newSettings: Partial<Settings>) => {

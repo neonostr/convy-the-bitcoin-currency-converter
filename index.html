@@ -12,77 +12,6 @@
     <meta name="description" content="Convert Bitcoin and track BTC prices with confidence. A beautiful, fast, and completely private currency converter with real-time price tracking that works offline. No tracking, no data collection - just simple and secure conversions." />
     <meta name="author" content="neonostr" />
 
-    <!-- Critical inline styles for immediate rendering -->
-    <style>
-      /* Critical rendering CSS applied before any JS runs */
-      html {
-        background-color: hsl(222.2 84% 4.9%); /* Dark theme background */
-        color: hsl(210 40% 98%); /* Dark theme text */
-      }
-      
-      html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-      }
-      
-      body {
-        background-color: hsl(222.2 84% 4.9%); /* Dark theme background */
-        color: hsl(210 40% 98%); /* Dark theme text */
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      }
-      
-      #root {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        background-color: hsl(222.2 84% 4.9%); /* Dark theme background */
-        color: hsl(210 40% 98%); /* Dark theme text */
-      }
-      
-      /* Pre-styled common elements to avoid layout shift */
-      .card {
-        background-color: hsl(222.2 84% 4.9%);
-        border: 1px solid hsla(210 40% 98% / 0.1);
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-      }
-      
-      .text-primary {
-        color: hsl(28 100% 54%);
-      }
-    </style>
-
-    <!-- Apply dark theme instantly, before any JS download or execution -->
-    <script>
-      (function() {
-        // Run immediately before any JS loads
-        var savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.classList.add(savedTheme);
-        
-        // Force immediate color application
-        var bgColor = savedTheme === 'dark' ? 'hsl(222.2 84% 4.9%)' : 'hsl(0 0% 100%)';
-        var textColor = savedTheme === 'dark' ? 'hsl(210 40% 98%)' : 'hsl(240 10% 3.9%)';
-        
-        document.documentElement.style.backgroundColor = bgColor;
-        document.documentElement.style.color = textColor;
-        
-        // Prerender UI shell
-        document.addEventListener('DOMContentLoaded', function() {
-          var root = document.getElementById('root');
-          if (root) {
-            root.style.backgroundColor = bgColor;
-            root.style.color = textColor;
-          }
-        });
-      })();
-    </script>
-
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Convy - Your Private Bitcoin Currency Converter & Price Tracker" />
@@ -110,17 +39,7 @@
   </head>
 
   <body>
-    <!-- Prerendered shell to avoid blank screen -->
-    <div id="root">
-      <div style="display: flex; min-height: 100vh; align-items: center; justify-content: center; background-color: hsl(222.2 84% 4.9%);">
-        <!-- This gets replaced but provides immediate visual content -->
-        <div style="padding: 1.5rem; border-radius: 0.75rem; max-width: 24rem; width: 100%; background-color: hsla(222.2, 84%, 4.9%, 0.8); border: 1px solid hsla(210, 40%, 98%, 0.1);">
-          <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
-            <div style="width: 2.5rem; height: 2.5rem; background-color: hsl(28, 100%, 54%); border-radius: 9999px;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
