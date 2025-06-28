@@ -134,10 +134,6 @@ const BitcoinConverter = () => {
           value={amount}
           onFocus={handleInputFocus}
           onChange={(e) => handleInputChange(e.target.value)}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck="false"
           autoFocus
         />
       </div>
