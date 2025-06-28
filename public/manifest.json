@@ -5,6 +5,8 @@
   "description": "A privacy-focused Bitcoin currency converter",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
   "background_color": "#000000",
   "theme_color": "#f7931a",
   "icons": [

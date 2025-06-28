@@ -81,4 +81,21 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Add these rules for better iOS keyboard support */
+  input, textarea {
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent zoom on input focus on iOS */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
