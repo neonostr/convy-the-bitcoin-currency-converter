@@ -94,6 +94,22 @@ const BitcoinConverter = () => {
     }
   };
 
+  // Enhanced input click handler for iOS PWA
+  const handleInputClick = () => {
+    if (inputRef.current) {
+      // Force focus and selection for iOS PWA
+      inputRef.current.focus();
+      inputRef.current.click();
+      // Small delay to ensure iOS processes the focus
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.select();
+        }
+      }, 100);
+    }
+    handleInputFocus();
+  };
+
   const copyToClipboard = (value: string) => {
     recordUserActivity();
     navigator.clipboard.writeText(value).then(() => {
@@ -127,14 +143,20 @@ const BitcoinConverter = () => {
       <div className="w-full mb-6">
         <Input
           ref={inputRef}
-          type="text"
+          type="number"
           inputMode="decimal"
+          pattern="[0-9]*"
           className="text-3xl md:text-4xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           placeholder={t('converter.enterAmount')}
           value={amount}
           onFocus={handleInputFocus}
+          onClick={handleInputClick}
           onChange={(e) => handleInputChange(e.target.value)}
           autoFocus
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="none"
+          spellCheck={false}
         />
       </div>
 
