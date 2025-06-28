@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -130,6 +129,41 @@ const BitcoinConverter = () => {
     }
   };
 
+  // Enhanced input change handler that normalizes decimal separators
+  const handleInputChangeWithNormalization = (value: string) => {
+    // Allow only numbers and decimal separators (both . and ,)
+    const sanitizedValue = value.replace(/[^0-9,.]/g, '');
+    
+    // Ensure only one decimal separator
+    let normalizedValue = sanitizedValue;
+    const dotCount = (sanitizedValue.match(/\./g) || []).length;
+    const commaCount = (sanitizedValue.match(/,/g) || []).length;
+    
+    // If both . and , are present, keep only the first one encountered
+    if (dotCount > 0 && commaCount > 0) {
+      const dotIndex = sanitizedValue.indexOf('.');
+      const commaIndex = sanitizedValue.indexOf(',');
+      if (dotIndex < commaIndex) {
+        normalizedValue = sanitizedValue.replace(/,/g, '');
+      } else {
+        normalizedValue = sanitizedValue.replace(/\./g, '');
+      }
+    }
+    
+    // Remove extra decimal separators (keep only the first one)
+    if (dotCount > 1) {
+      const parts = normalizedValue.split('.');
+      normalizedValue = parts[0] + '.' + parts.slice(1).join('');
+    }
+    if (commaCount > 1) {
+      const parts = normalizedValue.split(',');
+      normalizedValue = parts[0] + ',' + parts.slice(1).join('');
+    }
+    
+    recordUserActivity();
+    setAmount(normalizedValue);
+  };
+
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
       <div className="flex items-center justify-between w-full mb-6">
@@ -151,7 +185,7 @@ const BitcoinConverter = () => {
           value={amount}
           onFocus={handleInputFocus}
           onClick={handleInputClick}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={(e) => handleInputChangeWithNormalization(e.target.value)}
           autoFocus
           autoComplete="off"
           autoCorrect="off"
