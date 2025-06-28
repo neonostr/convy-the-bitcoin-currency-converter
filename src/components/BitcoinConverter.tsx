@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -93,22 +94,6 @@ const BitcoinConverter = () => {
     }
   };
 
-  // Enhanced input click handler for iOS PWA
-  const handleInputClick = () => {
-    if (inputRef.current) {
-      // Force focus and selection for iOS PWA
-      inputRef.current.focus();
-      inputRef.current.click();
-      // Small delay to ensure iOS processes the focus
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.select();
-        }
-      }, 100);
-    }
-    handleInputFocus();
-  };
-
   const copyToClipboard = (value: string) => {
     recordUserActivity();
     navigator.clipboard.writeText(value).then(() => {
@@ -129,41 +114,6 @@ const BitcoinConverter = () => {
     }
   };
 
-  // Enhanced input change handler that normalizes decimal separators
-  const handleInputChangeWithNormalization = (value: string) => {
-    // Allow only numbers and decimal separators (both . and ,)
-    const sanitizedValue = value.replace(/[^0-9,.]/g, '');
-    
-    // Ensure only one decimal separator
-    let normalizedValue = sanitizedValue;
-    const dotCount = (sanitizedValue.match(/\./g) || []).length;
-    const commaCount = (sanitizedValue.match(/,/g) || []).length;
-    
-    // If both . and , are present, keep only the first one encountered
-    if (dotCount > 0 && commaCount > 0) {
-      const dotIndex = sanitizedValue.indexOf('.');
-      const commaIndex = sanitizedValue.indexOf(',');
-      if (dotIndex < commaIndex) {
-        normalizedValue = sanitizedValue.replace(/,/g, '');
-      } else {
-        normalizedValue = sanitizedValue.replace(/\./g, '');
-      }
-    }
-    
-    // Remove extra decimal separators (keep only the first one)
-    if (dotCount > 1) {
-      const parts = normalizedValue.split('.');
-      normalizedValue = parts[0] + '.' + parts.slice(1).join('');
-    }
-    if (commaCount > 1) {
-      const parts = normalizedValue.split(',');
-      normalizedValue = parts[0] + ',' + parts.slice(1).join('');
-    }
-    
-    recordUserActivity();
-    setAmount(normalizedValue);
-  };
-
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
       <div className="flex items-center justify-between w-full mb-6">
@@ -177,20 +127,14 @@ const BitcoinConverter = () => {
       <div className="w-full mb-6">
         <Input
           ref={inputRef}
-          type="number"
+          type="text"
           inputMode="decimal"
-          pattern="[0-9]*"
           className="text-3xl md:text-4xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           placeholder={t('converter.enterAmount')}
           value={amount}
           onFocus={handleInputFocus}
-          onClick={handleInputClick}
-          onChange={(e) => handleInputChangeWithNormalization(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           autoFocus
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="none"
-          spellCheck={false}
         />
       </div>
 
