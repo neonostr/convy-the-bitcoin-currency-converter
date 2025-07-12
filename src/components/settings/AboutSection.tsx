@@ -8,7 +8,7 @@ import { useLanguage } from '@/hooks/useLanguage';
  */
 function renderAboutLocalized(text: string) {
   // Replace [Neo](neo)
-  text = text.replace(/\[Neo\]\(neo\)/g, '<a href="https://github.com/neonostr" class="underline font-medium" target="_blank" rel="noopener noreferrer">Neo</a>');
+  text = text.replace(/\[Neo\]\(neo\)/g, '<a href="https://neo21.dev" class="underline font-medium" target="_blank" rel="noopener noreferrer">Neo</a>');
   // Replace last [PWA](pwa) only
   const pwaAnchor = '<a href="https://what-is-a-pwa.app" class="underline font-medium" target="_blank" rel="noopener noreferrer">PWA</a>';
   // Use regex to find all [PWA](pwa), but only replace the last one
