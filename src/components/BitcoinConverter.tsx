@@ -8,6 +8,7 @@ import DonationPopup from '@/components/DonationPopup';
 import { useSettings } from '@/hooks/useSettings';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useConversion } from '@/hooks/useConversion';
+import { useUrlParams } from '@/hooks/useUrlParams';
 import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
@@ -34,6 +35,8 @@ const BitcoinConverter = () => {
     recordUserActivity,
     setDefaultBtcValue
   } = useConversion();
+  
+  const { updateUrl } = useUrlParams(selectedCurrency, handleCurrencySelect);
 
   // Immediately mark the component as visible on first render
   useEffect(() => {
@@ -79,6 +82,11 @@ const BitcoinConverter = () => {
       clearTimeout(timer);
     };
   }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc]);
+
+  // Update URL when currency or display currencies change
+  useEffect(() => {
+    updateUrl();
+  }, [selectedCurrency, settings.displayCurrencies, updateUrl]);
 
   const { displayCurrencies } = settings;
 
