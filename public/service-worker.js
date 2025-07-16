@@ -107,9 +107,10 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For Supabase function requests - let them pass through directly without interference
+  // For Supabase function requests - completely bypass service worker
   if (event.request.url.includes('supabase.co/functions/')) {
-    return; // Don't intercept at all, let the browser handle it
+    // Don't add event listener at all for these requests
+    return;
   }
 
   // For other API requests
