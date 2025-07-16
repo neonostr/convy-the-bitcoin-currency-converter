@@ -3,7 +3,7 @@
 
 // Check if Cache API is available
 const CACHE_AVAILABLE = typeof caches !== 'undefined';
-const CACHE_NAME = 'bitcoin-converter-cache-v5';
+const CACHE_NAME = 'bitcoin-converter-cache-v6';
 const APP_VERSION = '1.2.0';
 const APP_URLS_TO_CACHE = [
   '/',
@@ -106,9 +106,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For Supabase function requests - don't cache these, just pass through
+  // For Supabase function requests - pass through directly to network
   if (event.request.url.includes('supabase.co/functions/')) {
-    // Don't intercept Supabase function calls, let them go directly to network
+    event.respondWith(fetch(event.request));
     return;
   }
 
