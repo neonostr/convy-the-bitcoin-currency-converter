@@ -10,12 +10,13 @@ interface UrlParams {
 export const useUrlParams = (selectedCurrency?: Currency, onCurrencySelect?: (currency: Currency) => void) => {
   const { settings, updateDisplayCurrencies } = useSettings();
   
-  // Parse URL parameters on component mount only
+  // Parse URL parameters on component mount only, then clean the URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const base = urlParams.get('base') as Currency;
     const currenciesParam = urlParams.get('currencies');
 
+    // Apply URL parameters if they exist
     if (base && isValidCurrency(base) && onCurrencySelect) {
       onCurrencySelect(base);
     }
@@ -25,6 +26,11 @@ export const useUrlParams = (selectedCurrency?: Currency, onCurrencySelect?: (cu
       if (currencies.length >= 2) {
         updateDisplayCurrencies(currencies);
       }
+    }
+
+    // Clean the URL after applying parameters - remove all query parameters
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, []); // Only run once on mount
 

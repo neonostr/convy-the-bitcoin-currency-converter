@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useUrlParams } from '@/hooks/useUrlParams';
 import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
 import { Currency } from '@/types/currency.types';
@@ -13,18 +12,39 @@ const ShareableUrlSettings: React.FC = () => {
   const { settings } = useSettings();
   const { toast } = useToast();
   
-  // Get current selected currency from localStorage
-  const getCurrentCurrency = (): Currency => {
+  // State to track current selected currency for URL generation
+  const [currentCurrency, setCurrentCurrency] = useState<Currency>(() => {
     return (localStorage.getItem('selectedCurrency') || 'btc') as Currency;
-  };
+  });
   
-  const { generateShareableUrl } = useUrlParams(getCurrentCurrency(), undefined);
-  const [shareableUrl, setShareableUrl] = useState(() => generateShareableUrl());
+  // Generate shareable URL based on current state
+  const generateCurrentShareableUrl = useCallback(() => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const params = new URLSearchParams();
+    params.set('base', currentCurrency);
+    params.set('currencies', settings.displayCurrencies.join(','));
+    return `${baseUrl}?${params.toString()}`;
+  }, [currentCurrency, settings.displayCurrencies]);
+  
+  const [shareableUrl, setShareableUrl] = useState(() => generateCurrentShareableUrl());
 
-  // Update URL when settings change
+  // Listen for currency changes
   React.useEffect(() => {
-    setShareableUrl(generateShareableUrl());
-  }, [settings.displayCurrencies, generateShareableUrl]);
+    const handleCurrencyChange = (event: CustomEvent) => {
+      setCurrentCurrency(event.detail);
+    };
+    
+    window.addEventListener('currencyChanged', handleCurrencyChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('currencyChanged', handleCurrencyChange as EventListener);
+    };
+  }, []);
+
+  // Update URL when currency or settings change
+  React.useEffect(() => {
+    setShareableUrl(generateCurrentShareableUrl());
+  }, [generateCurrentShareableUrl]);
 
   const copyToClipboard = async () => {
     try {
