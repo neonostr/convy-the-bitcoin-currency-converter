@@ -50,15 +50,15 @@ const ShareableUrlSettings: React.FC = () => {
     try {
       await navigator.clipboard.writeText(shareableUrl);
       toast({
-        title: t('settings.shareableUrl.copied'),
-        description: t('settings.shareableUrl.copiedDescription'),
+        title: "URL Copied",
+        description: "Shareable URL copied to clipboard",
         duration: 2000,
       });
     } catch (err) {
       console.error('Failed to copy URL:', err);
       toast({
-        title: t('settings.shareableUrl.copyFailed'),
-        description: t('settings.shareableUrl.copyFailedDescription'),
+        title: "Copy Failed",
+        description: "Failed to copy URL to clipboard",
         duration: 2000,
         variant: "destructive"
       });
@@ -71,9 +71,9 @@ const ShareableUrlSettings: React.FC = () => {
 
   return (
     <div className="py-4">
-      <h3 className="text-lg font-medium mb-4">{t('settings.shareableUrl.title')}</h3>
+      <h3 className="text-lg font-medium mb-4">Shareable URL</h3>
       <p className="text-sm text-muted-foreground mb-4">
-        {t('settings.shareableUrl.description')}
+        Share your preferred currency configuration with others. The URL includes your selected base currency and display currencies in your preferred order.
       </p>
       
       <div className="space-y-4">
@@ -82,13 +82,13 @@ const ShareableUrlSettings: React.FC = () => {
             value={shareableUrl}
             readOnly
             className="flex-1 text-xs"
-            placeholder={t('settings.shareableUrl.placeholder')}
+            placeholder="Generating URL..."
           />
           <Button
             variant="outline"
             size="icon"
             onClick={copyToClipboard}
-            title={t('settings.shareableUrl.copyTitle')}
+            title="Copy URL"
           >
             <Copy className="h-4 w-4" />
           </Button>
@@ -96,18 +96,19 @@ const ShareableUrlSettings: React.FC = () => {
             variant="outline"
             size="icon"
             onClick={openInNewTab}
-            title={t('settings.shareableUrl.openTitle')}
+            title="Open in new tab"
           >
             <ExternalLink className="h-4 w-4" />
           </Button>
         </div>
+        
         <div className="text-xs text-muted-foreground">
-          <p className="mb-2"><strong>{t('settings.shareableUrl.howToUse')}</strong></p>
-          <ul className="list-disc list-outside space-y-1 pl-4">
-            <li>{t('settings.shareableUrl.step1')}</li>
-            <li>{t('settings.shareableUrl.step2')}</li>
-            <li>{t('settings.shareableUrl.step3')}</li>
-            <li>{t('settings.shareableUrl.step4')}</li>
+          <p className="mb-2"><strong>How to use:</strong></p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Set up your preferred base currency and display currencies</li>
+            <li>Arrange them in your desired order</li>
+            <li>Copy the URL above to share your configuration</li>
+            <li>Anyone opening this URL will see your exact setup</li>
           </ul>
         </div>
       </div>

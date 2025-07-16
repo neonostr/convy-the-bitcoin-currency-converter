@@ -30,24 +30,7 @@ export const translations: Record<string, Translations> = {
       },
       about: {
         title: 'Meet Convy',
-        description: "Your fast, privacy‑first Bitcoin currency converter and real‑time price tracker. All conversions and updates run 100% on your device—so your data stays private. I'm [Neo](neo), the builder, and I create native web apps for freedom‑loving people who want to escape the walled gardens of Apple and Co.",
-        checkOutMyApps: 'Check Out My Other Apps'
-      },
-      shareableUrl: {
-        title: 'Shareable URL',
-        description: 'Share your custom currency configuration with others or bookmark different setups for easy access. The URL includes your chosen base currency and display currencies, listed in your preferred order.',
-        placeholder: 'Generating URL...',
-        copyTitle: 'Copy URL',
-        openTitle: 'Open in new tab',
-        howToUse: 'How to use:',
-        step1: 'Set up your preferred base currency and display currencies',
-        step2: 'Arrange them in your desired order',
-        step3: 'Copy the URL above to share your configuration',
-        step4: 'Anyone opening this URL will see your exact setup',
-        copied: 'URL Copied',
-        copyFailed: 'Copy Failed',
-        copiedDescription: 'Shareable URL copied to clipboard',
-        copyFailedDescription: 'Failed to copy URL to clipboard'
+        description: "Your fast, privacy‑first Bitcoin currency converter and real‑time price tracker. All conversions and updates run 100% on your device—so your data stays private. I'm [Neo](neo), the builder, and I create native web apps for freedom‑loving people who want to escape the walled gardens of Apple and Co. Just add Convy to your home screen, and it behaves like a real app thanks to [PWA](pwa) support."
       }
     },
     converter: {
@@ -112,24 +95,7 @@ export const translations: Record<string, Translations> = {
       },
       about: {
         title: 'Conoce Convy',
-        description: 'Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados. Soy [Neo](neo), el creador, y diseño aplicaciones web nativas para personas amantes de la libertad que quieran liberarse de los jardines vallados de Apple y compañía.',
-        checkOutMyApps: 'Descubre Mis Otras Apps'
-      },
-      shareableUrl: {
-        title: 'URL Compartible',
-        description: 'Comparte tu configuración personalizada de monedas con otros o guarda diferentes configuraciones para fácil acceso. La URL incluye tu moneda base seleccionada y las monedas mostradas, listadas en tu orden preferido.',
-        placeholder: 'Generando URL...',
-        copyTitle: 'Copiar URL',
-        openTitle: 'Abrir en nueva pestaña',
-        howToUse: 'Cómo usar:',
-        step1: 'Configura tu moneda base y monedas mostradas preferidas',
-        step2: 'Ordénalas como prefieras',
-        step3: 'Copia la URL de arriba para compartir tu configuración',
-        step4: 'Cualquiera que abra esta URL verá tu configuración exacta',
-        copied: 'URL Copiada',
-        copyFailed: 'Error al Copiar',
-        copiedDescription: 'URL compartible copiada al portapapeles',
-        copyFailedDescription: 'Error al copiar URL al portapapeles'
+        description: 'Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados. Soy [Neo](neo), el creador, y diseño aplicaciones web nativas para personas amantes de la libertad que quieran liberarse de los jardines vallados de Apple y compañía. Simplemente agrega convy a tu pantalla de inicio y funcionará como una app real gracias al soporte [PWA](pwa).'
       }
     },
     converter: {
@@ -194,24 +160,7 @@ export const translations: Record<string, Translations> = {
       },
       about: {
         title: 'Lerne Convy kennen',
-        description: 'Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin [Neo](neo), der Entwickler, und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen.',
-        checkOutMyApps: 'Entdecke Meine Anderen Apps'
-      },
-      shareableUrl: {
-        title: 'Teilbare URL',
-        description: 'Teile deine benutzerdefinierte Währungskonfiguration mit anderen oder speichere verschiedene Setups für einfachen Zugriff. Die URL enthält deine gewählte Basiswährung und Anzeigewährungen in deiner bevorzugten Reihenfolge.',
-        placeholder: 'URL wird generiert...',
-        copyTitle: 'URL kopieren',
-        openTitle: 'In neuem Tab öffnen',
-        howToUse: 'So verwenden:',
-        step1: 'Richte deine bevorzugte Basiswährung und Anzeigewährungen ein',
-        step2: 'Ordne sie in deiner gewünschten Reihenfolge an',
-        step3: 'Kopiere die URL oben, um deine Konfiguration zu teilen',
-        step4: 'Jeder, der diese URL öffnet, sieht dein exaktes Setup',
-        copied: 'URL Kopiert',
-        copyFailed: 'Kopieren Fehlgeschlagen',
-        copiedDescription: 'Teilbare URL in die Zwischenablage kopiert',
-        copyFailedDescription: 'Fehler beim Kopieren der URL in die Zwischenablage'
+        description: 'Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin [Neo](neo), der Entwickler, und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen. Füge Convy App deinem Startbildschirm hinzu, um sie nahtlos wie eine echte App zu nutzen.'
       }
     },
     converter: {
