@@ -178,7 +178,7 @@ const BitcoinConverter = () => {
             const parts = footerText.split(anchorWord);
             return parts.map((part, idx, arr) => (
               idx < arr.length - 1 ? (
-                <React.Fragment key={idx}>
+                <span key={idx}>
                   {part}
                   <a
                     href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
@@ -188,9 +188,9 @@ const BitcoinConverter = () => {
                   >
                     {anchorWord}
                   </a>
-                </React.Fragment>
+                </span>
               ) : (
-                part
+                <span key={idx}>{part}</span>
               )
             ));
           })()

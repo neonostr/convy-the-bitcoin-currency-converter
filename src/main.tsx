@@ -102,10 +102,11 @@ if ('serviceWorker' in navigator) {
       console.error('Service Worker registration failed:', error);
     });
 
-    // Listen for controllerchange (when new SW activates after skipWaiting), then reload
+    // Listen for controllerchange (when new SW activates after skipWaiting)
+    // Only reload if user explicitly requested an update
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('New Service Worker controller, reloading for fresh content...');
-      window.location.reload();
+      console.log('New Service Worker controller activated');
+      // Remove automatic reload to prevent unwanted page refreshes
     });
   }, 5000); // Extremely delayed registration to ensure UI is visible immediately
 }
