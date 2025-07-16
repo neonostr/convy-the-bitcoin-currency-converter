@@ -101,7 +101,6 @@ const ShareableUrlSettings: React.FC = () => {
             <ExternalLink className="h-4 w-4" />
           </Button>
         </div>
-    
         <div className="text-xs text-muted-foreground">
           <p className="mb-2"><strong>How to use:</strong></p>
           <ul className="list-disc list-outside space-y-1 pl-4">
@@ -111,7 +110,6 @@ const ShareableUrlSettings: React.FC = () => {
             <li>Anyone opening this URL will see your exact setup</li>
           </ul>
         </div>
-// ... existing code ...
       </div>
     </div>
   );
