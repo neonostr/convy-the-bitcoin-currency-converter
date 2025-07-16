@@ -109,8 +109,7 @@ self.addEventListener('fetch', event => {
 
   // For Supabase function requests - let them pass through directly without interference
   if (event.request.url.includes('supabase.co/functions/')) {
-    event.respondWith(fetch(event.request));
-    return;
+    return; // Don't intercept at all, let the browser handle it
   }
 
   // For other API requests
