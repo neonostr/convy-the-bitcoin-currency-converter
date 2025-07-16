@@ -47,11 +47,9 @@ export const useConversion = () => {
     }
   }, []);
 
-  // Save currency preference and notify other components
+  // Save currency preference
   useEffect(() => {
     localStorage.setItem('selectedCurrency', selectedCurrency);
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new CustomEvent('currencyChanged', { detail: selectedCurrency }));
   }, [selectedCurrency]);
 
   // Use the conversion calculator
