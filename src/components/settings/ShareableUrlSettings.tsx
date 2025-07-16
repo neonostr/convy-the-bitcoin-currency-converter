@@ -5,6 +5,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useUrlParams } from '@/hooks/useUrlParams';
 import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/hooks/useSettings';
+import { Currency } from '@/types/currency.types';
 import { Copy, ExternalLink } from 'lucide-react';
 
 const ShareableUrlSettings: React.FC = () => {
@@ -13,33 +14,17 @@ const ShareableUrlSettings: React.FC = () => {
   const { toast } = useToast();
   
   // Get current selected currency from localStorage
-  const getCurrentCurrency = () => {
-    return localStorage.getItem('selectedCurrency') || 'btc';
+  const getCurrentCurrency = (): Currency => {
+    return (localStorage.getItem('selectedCurrency') || 'btc') as Currency;
   };
   
-  const generateCurrentUrl = () => {
-    const baseUrl = window.location.origin + window.location.pathname;
-    const params = new URLSearchParams();
-    params.set('base', getCurrentCurrency());
-    params.set('currencies', settings.displayCurrencies.join(','));
-    return `${baseUrl}?${params.toString()}`;
-  };
-  
-  const [shareableUrl, setShareableUrl] = useState(generateCurrentUrl());
+  const { generateShareableUrl } = useUrlParams(getCurrentCurrency(), undefined);
+  const [shareableUrl, setShareableUrl] = useState(() => generateShareableUrl());
 
   // Update URL when settings change
   React.useEffect(() => {
-    const updateUrl = () => setShareableUrl(generateCurrentUrl());
-    updateUrl();
-    
-    // Listen for custom currency change events
-    const handleCurrencyChange = () => updateUrl();
-    window.addEventListener('currencyChanged', handleCurrencyChange);
-    
-    return () => {
-      window.removeEventListener('currencyChanged', handleCurrencyChange);
-    };
-  }, [settings.displayCurrencies]);
+    setShareableUrl(generateShareableUrl());
+  }, [settings.displayCurrencies, generateShareableUrl]);
 
   const copyToClipboard = async () => {
     try {

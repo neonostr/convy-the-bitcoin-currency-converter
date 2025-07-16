@@ -36,7 +36,8 @@ const BitcoinConverter = () => {
     setDefaultBtcValue
   } = useConversion();
   
-  const { updateUrl } = useUrlParams(selectedCurrency, handleCurrencySelect);
+  // Only initialize from URL params, don't auto-update URL
+  useUrlParams(selectedCurrency, handleCurrencySelect);
 
   // Immediately mark the component as visible on first render
   useEffect(() => {
@@ -82,11 +83,6 @@ const BitcoinConverter = () => {
       clearTimeout(timer);
     };
   }, [recordUserActivity, setDefaultBtcValue, settings.alwaysDefaultToBtc]);
-
-  // Update URL when currency or display currencies change
-  useEffect(() => {
-    updateUrl();
-  }, [selectedCurrency, settings.displayCurrencies, updateUrl]);
 
   const { displayCurrencies } = settings;
 

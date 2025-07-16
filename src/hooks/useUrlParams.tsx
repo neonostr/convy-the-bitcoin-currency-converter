@@ -9,8 +9,8 @@ interface UrlParams {
 
 export const useUrlParams = (selectedCurrency?: Currency, onCurrencySelect?: (currency: Currency) => void) => {
   const { settings, updateDisplayCurrencies } = useSettings();
-
-  // Parse URL parameters on component mount
+  
+  // Parse URL parameters on component mount only
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const base = urlParams.get('base') as Currency;
@@ -26,7 +26,7 @@ export const useUrlParams = (selectedCurrency?: Currency, onCurrencySelect?: (cu
         updateDisplayCurrencies(currencies);
       }
     }
-  }, [onCurrencySelect, updateDisplayCurrencies]);
+  }, []); // Only run once on mount
 
   // Generate shareable URL based on current settings
   const generateShareableUrl = useCallback(() => {
@@ -41,21 +41,8 @@ export const useUrlParams = (selectedCurrency?: Currency, onCurrencySelect?: (cu
     return `${baseUrl}?${params.toString()}`;
   }, [selectedCurrency, settings.displayCurrencies]);
 
-  // Update URL without reloading the page
-  const updateUrl = useCallback(() => {
-    const params = new URLSearchParams();
-    if (selectedCurrency) {
-      params.set('base', selectedCurrency);
-    }
-    params.set('currencies', settings.displayCurrencies.join(','));
-    
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState({}, '', newUrl);
-  }, [selectedCurrency, settings.displayCurrencies]);
-
   return {
-    generateShareableUrl,
-    updateUrl
+    generateShareableUrl
   };
 };
 
