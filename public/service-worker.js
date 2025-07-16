@@ -106,9 +106,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For Supabase function requests - pass through directly to network
+  // For Supabase function requests - enhanced Safari compatibility
   if (event.request.url.includes('supabase.co/functions/')) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      fetch(event.request, {
+        method: event.request.method,
+        headers: event.request.headers,
+        body: event.request.method !== 'GET' && event.request.method !== 'HEAD' ? event.request.body : undefined,
+        credentials: 'omit',
+        mode: 'cors'
+      }).catch(error => {
+        console.log('Supabase function request failed:', error);
+        // Return a proper error response instead of letting it fail silently
+        return new Response(JSON.stringify({ error: 'Network request failed' }), {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      })
+    );
     return;
   }
 
