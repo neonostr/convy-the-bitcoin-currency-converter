@@ -8,6 +8,7 @@ import DonationPopup from '@/components/DonationPopup';
 import { useSettings } from '@/hooks/useSettings';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useConversion } from '@/hooks/useConversion';
+import { useUrlParams } from '@/hooks/useUrlParams';
 import CurrencySelector from '@/components/CurrencySelector';
 import ConversionResults from '@/components/ConversionResults';
 import { getLastUpdatedFormatted } from '@/utils/formatUtils';
@@ -34,6 +35,9 @@ const BitcoinConverter = () => {
     recordUserActivity,
     setDefaultBtcValue
   } = useConversion();
+  
+  // Only initialize from URL params, don't auto-update URL
+  useUrlParams(selectedCurrency, handleCurrencySelect);
 
   // Immediately mark the component as visible on first render
   useEffect(() => {
