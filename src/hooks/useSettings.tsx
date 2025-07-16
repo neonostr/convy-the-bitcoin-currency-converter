@@ -24,7 +24,7 @@ const ALL_CURRENCIES: Currency[] = [
   'btc', 'sats', 'usd', 'eur', 'cny', 'jpy', 'gbp', 'aud', 'cad', 'chf', 'inr', 'rub',
   'sek', 'nzd', 'krw', 'sgd', 'nok', 'mxn', 'brl', 'hkd', 'try', 'pln', 'zar'
 ];
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.2.1';
 
 // Create a context
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
