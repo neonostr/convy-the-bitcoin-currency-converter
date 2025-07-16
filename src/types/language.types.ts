@@ -30,6 +30,7 @@ export interface Translations {
     about?: {
       title: string;
       description: string;
+      checkOutMyApps: string;
     };
     shareableUrl: {
       title: string;
