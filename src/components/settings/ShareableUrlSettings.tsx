@@ -73,7 +73,7 @@ const ShareableUrlSettings: React.FC = () => {
     <div className="py-4">
       <h3 className="text-lg font-medium mb-4">Shareable URL</h3>
       <p className="text-sm text-muted-foreground mb-4">
-        Share your preferred currency configuration with others. The URL includes your selected base currency and display currencies in your preferred order.
+        Share your custom currency configuration with others or bookmark different setups for easy access. The URL includes your chosen base currency and display currencies, listed in your preferred order.
       </p>
       
       <div className="space-y-4">
