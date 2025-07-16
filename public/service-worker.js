@@ -1,4 +1,5 @@
 
+
 // Service Worker for Bitcoin Currency Converter - Optimized for fast startup
 
 // Check if Cache API is available
@@ -106,25 +107,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For Supabase function requests - enhanced Safari compatibility
+  // For Supabase function requests - let them pass through directly without interference
   if (event.request.url.includes('supabase.co/functions/')) {
-    event.respondWith(
-      fetch(event.request, {
-        method: event.request.method,
-        headers: event.request.headers,
-        body: event.request.method !== 'GET' && event.request.method !== 'HEAD' ? event.request.body : undefined,
-        credentials: 'omit',
-        mode: 'cors'
-      }).catch(error => {
-        console.log('Supabase function request failed:', error);
-        // Return a proper error response instead of letting it fail silently
-        return new Response(JSON.stringify({ error: 'Network request failed' }), {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: { 'Content-Type': 'application/json' }
-        });
-      })
-    );
+    event.respondWith(fetch(event.request));
     return;
   }
 
