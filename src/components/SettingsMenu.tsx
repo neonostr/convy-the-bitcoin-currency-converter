@@ -11,6 +11,7 @@ import NumberFormatSettings from '@/components/settings/NumberFormatSettings';
 import PriceTrackerSettings from '@/components/settings/PriceTrackerSettings';
 import AboutSection from '@/components/settings/AboutSection';
 import AppVersion from '@/components/settings/AppVersion';
+import ShareableUrlSettings from '@/components/settings/ShareableUrlSettings';
 
 const SettingsMenu: React.FC = () => {
   const { t } = useLanguage();
@@ -36,6 +37,7 @@ const SettingsMenu: React.FC = () => {
         <CurrencySettings isOpen={isOpen} />
         <NumberFormatSettings />
         <PriceTrackerSettings />
+        <ShareableUrlSettings />
         <AboutSection />
         <AppVersion />
       </SheetContent>

@@ -1,5 +1,7 @@
 import React from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
 
 /**
  * Helper function to render text with special markdown-like anchor placeholders.
@@ -33,10 +35,20 @@ const AboutSection = () => {
   } = useLanguage();
   const aboutTitle = t('settings.about.title');
   const aboutDescription = t('settings.about.description');
+  const checkOutMyApps = t('settings.about.checkOutMyApps');
+  
   return <section className="py-4 border-t">
       <h3 className="text-lg font-semibold mb-2">{aboutTitle}</h3>
-      <div>
+      <div className="space-y-4">
         {renderAboutLocalized(aboutDescription)}
+        <Button 
+          variant="outline" 
+          className="w-full" 
+          onClick={() => window.open('https://neo21.dev', '_blank', 'noopener,noreferrer')}
+        >
+          <ExternalLink className="mr-2 h-4 w-4" />
+          {checkOutMyApps}
+        </Button>
       </div>
     </section>;
 };
