@@ -106,17 +106,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For API requests
-  if (event.request.url.includes('/api/') || 
-      event.request.url.includes('coingecko') || 
-      event.request.url.includes('supabase')) {
+  // For Supabase function requests - don't cache these, just pass through
+  if (event.request.url.includes('supabase.co/functions/')) {
+    // Don't intercept Supabase function calls, let them go directly to network
+    return;
+  }
+
+  // For other API requests
+  if (event.request.url.includes('/api/') || event.request.url.includes('coingecko')) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, response.clone());
-            return response;
-          }).catch(() => response); // Return response even if caching fails
+          // Only cache GET requests that are successful
+          if (response.ok && event.request.method === 'GET') {
+            return caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, response.clone());
+              return response;
+            }).catch(() => response); // Return response even if caching fails
+          }
+          return response;
         })
         .catch(() => {
           return caches.match(event.request).catch(() => 
