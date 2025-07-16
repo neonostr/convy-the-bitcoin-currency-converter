@@ -30,23 +30,6 @@ export interface Translations {
     about?: {
       title: string;
       description: string;
-      checkOutMyApps: string;
-    };
-    shareableUrl: {
-      title: string;
-      description: string;
-      placeholder: string;
-      copyTitle: string;
-      openTitle: string;
-      howToUse: string;
-      step1: string;
-      step2: string;
-      step3: string;
-      step4: string;
-      copied: string;
-      copyFailed: string;
-      copiedDescription: string;
-      copyFailedDescription: string;
     };
   };
   converter: {

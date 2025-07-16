@@ -55,7 +55,7 @@ const loadRatesFromStorage = (): CoinRates => {
 const loadRatesFromSWCache = async (): Promise<CoinRates | null> => {
   if ('caches' in window) {
     try {
-      const cache = await caches.open('bitcoin-converter-cache-v6');
+      const cache = await caches.open('bitcoin-converter-cache-v5');
       const response = await cache.match('bitcoin-rates-data');
       if (response) {
         const data = await response.json();
