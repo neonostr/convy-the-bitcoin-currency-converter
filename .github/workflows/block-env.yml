@@ -1,0 +1,23 @@
+name: Block .env files
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  block-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fail if .env-like files are tracked
+        run: |
+          set -e
+          matches="$(git ls-files | grep -E '(^|/)\.env(\..*)?$' || true)"
+          if [ -n "$matches" ]; then
+            echo "ERROR: Found tracked .env files:"
+            echo "$matches"
+            exit 1
+          fi
