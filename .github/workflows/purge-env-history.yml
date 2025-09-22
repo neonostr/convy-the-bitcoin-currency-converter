@@ -1,0 +1,54 @@
+name: Purge .env from history
+
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: purge-env-history
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    if: ${{ !contains(github.event.head_commit.message, '[history-clean]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install git-filter-repo
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install git-filter-repo
+
+      - name: Configure git
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "github-actions"
+
+      - name: Rewrite history to remove .env files
+        run: |
+          set -e
+          # Remove .env and any variants (e.g., .env.local, .env.production)
+          git filter-repo --invert-paths \
+            --path .env \
+            --path-glob ".env*" \
+            --force
+
+      - name: Add cleanup marker commit
+        run: |
+          git commit --allow-empty -m "[history-clean] purge .env from history"
+
+      - name: Force push rewritten history
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          # Push the rewritten branch and tags
+          git push --force origin HEAD:${BRANCH_NAME}
+          git push --force --tags origin
