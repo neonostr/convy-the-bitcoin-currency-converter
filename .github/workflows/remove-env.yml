@@ -1,0 +1,46 @@
+name: Remove tracked .env file
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: remove-env-on-push
+  cancel-in-progress: false
+
+jobs:
+  remove-env:
+    if: ${{ !contains(github.event.head_commit.message, '[remove-env-bot]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "github-actions"
+
+      - name: Delete .env if tracked
+        id: del
+        run: |
+          set -e
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "found=true" >> $GITHUB_OUTPUT
+            git rm -f .env
+            git commit -m "[remove-env-bot] remove .env from repository"
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push changes
+        if: steps.del.outputs.found == 'true'
+        run: |
+          git push origin HEAD:${{ github.ref_name }}
