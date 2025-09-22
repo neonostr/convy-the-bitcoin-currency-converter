@@ -15,6 +15,11 @@ export interface Translations {
       showRateNotifications: string;
       notificationsDescription: string;
     };
+    persistentInput: {
+      title: string;
+      label: string;
+      description: string;
+    };
     numberFormat: {
       title: string;
       useCommaAsDecimalSeparator: string;

@@ -16,6 +16,11 @@ export const translations: Record<string, Translations> = {
         showRateNotifications: 'Show rate update notifications',
         notificationsDescription: 'When enabled, you will get a notification each time rates are automatically updated.'
       },
+      persistentInput: {
+        title: 'Input Behavior',
+        label: 'Keep input when changing currency',
+        description: 'Input value stays when switching currencies, only clears on manual focus',
+      },
       numberFormat: {
         title: 'Number Format',
         useCommaAsDecimalSeparator: 'Use comma as decimal separator',
@@ -98,6 +103,11 @@ export const translations: Record<string, Translations> = {
         showRateNotifications: 'Mostrar notificaciones de actualización de tipos de cambio',
         notificationsDescription: 'Cuando está habilitado, recibirás una notificación cada vez que las tasas se actualicen automáticamente.'
       },
+      persistentInput: {
+        title: 'Comportamiento de Entrada',
+        label: 'Mantener entrada al cambiar moneda',
+        description: 'El valor de entrada se mantiene al cambiar monedas, solo se borra con foco manual',
+      },
       numberFormat: {
         title: 'Formato de Números',
         useCommaAsDecimalSeparator: 'Usar coma como separador decimal',
@@ -179,6 +189,11 @@ export const translations: Record<string, Translations> = {
         btcPriceTrackerMode: 'BTC-Preisverfolgungsmodus',
         showRateNotifications: 'Benachrichtigungen zu Kurs-Updates anzeigen',
         notificationsDescription: 'Wenn aktiviert, erhältst du eine Benachrichtigung, sobald die Kurse automatisch aktualisiert werden.'
+      },
+      persistentInput: {
+        title: 'Eingabeverhalten',
+        label: 'Eingabe bei Währungswechsel behalten',
+        description: 'Eingabewert bleibt beim Wechseln von Währungen, wird nur bei manuellem Fokus gelöscht',
       },
       numberFormat: {
         title: 'Zahlenformat',

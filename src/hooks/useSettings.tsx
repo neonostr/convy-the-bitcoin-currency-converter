@@ -8,6 +8,7 @@ export interface Settings {
   includeThouSepWhenCopying: boolean;
   alwaysDefaultToBtc: boolean;
   showRateUpdateNotifications: boolean;
+  persistentInputMode: boolean;
 }
 
 interface SettingsContextType {
@@ -51,6 +52,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       includeThouSepWhenCopying: false,
       alwaysDefaultToBtc: false,
       showRateUpdateNotifications: true,
+      persistentInputMode: false,
     };
   });
 

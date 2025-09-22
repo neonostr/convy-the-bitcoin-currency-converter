@@ -113,7 +113,8 @@ const BitcoinConverter = () => {
 
   const onCurrencySelect = (currency: Currency) => {
     handleCurrencySelect(currency);
-    if (inputRef.current) {
+    // Only focus input if persistent input mode is disabled
+    if (!settings.persistentInputMode && inputRef.current) {
       inputRef.current.focus();
     }
   };
