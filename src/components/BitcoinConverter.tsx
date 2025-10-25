@@ -120,7 +120,7 @@ const BitcoinConverter = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
+    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in h-full">
       <div className="flex items-center justify-between w-full mb-6">
         <div className="flex items-center space-x-2">
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />
@@ -171,7 +171,7 @@ const BitcoinConverter = () => {
         onResultClick={copyToClipboard}
       />
       
-      <div className="text-xs text-muted-foreground mb-4 text-center">
+      <div className="text-xs text-muted-foreground mb-4 text-center mt-auto">
         {
           (() => {
             const footerText = t('converter.ratesFooter');
