@@ -189,8 +189,8 @@ const BitcoinConverter = () => {
         </>
       ) : (
         <>
-          {statusSection}
           {resultsSection}
+          {statusSection}
           {inputSection}
         </>
       )}
