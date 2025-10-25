@@ -37,7 +37,7 @@ export const translations: Record<string, Translations> = {
       about: {
         title: "Meet Convy",
         description:
-          "Your fast, privacy‑first Bitcoin currency converter and real‑time price tracker. All conversions and updates run 100% on your device, so your data stays private. I'm [Neo](neo), the builder, and I create native web apps for freedom loving people who want to escape the walled gardens of Apple and Co.",
+          "Your fast, privacy first Bitcoin currency converter and real‑time price tracker. All conversions and updates run 100% on your device, so your data stays private. I'm [Neo](neo), the builder, and I create native web apps for freedom loving people who want to escape the walled gardens of Apple and Co.",
         checkOutMyApps: "Check Out My Other Apps",
       },
       shareableUrl: {
