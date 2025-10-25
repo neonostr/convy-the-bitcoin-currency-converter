@@ -9,6 +9,7 @@ export interface Settings {
   alwaysDefaultToBtc: boolean;
   showRateUpdateNotifications: boolean;
   persistentInputMode: boolean;
+  inputPosition: 'top' | 'bottom';
 }
 
 interface SettingsContextType {
@@ -53,6 +54,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       alwaysDefaultToBtc: false,
       showRateUpdateNotifications: true,
       persistentInputMode: false,
+      inputPosition: 'top',
     };
   });
 
