@@ -80,19 +80,9 @@
 
   body {
     @apply bg-background text-foreground overflow-hidden;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-    overscroll-behavior: none;
   }
   
   html {
     @apply overflow-hidden;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-    overscroll-behavior: none;
   }
 }
