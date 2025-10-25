@@ -51,7 +51,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       decimalSeparator: '.',
       includeThouSepWhenCopying: false,
       alwaysDefaultToBtc: false,
-      showRateUpdateNotifications: true,
+      showRateUpdateNotifications: false,
       persistentInputMode: false,
     };
   });
