@@ -21,11 +21,6 @@ export const translations: Record<string, Translations> = {
         label: 'Keep input when changing currency',
         description: 'Input value stays when switching currencies, only clears on manual focus',
       },
-      inputPosition: {
-        title: 'Input Position',
-        label: 'Input at Bottom',
-        description: 'Place input and currency buttons at the bottom (mobile-friendly)',
-      },
       numberFormat: {
         title: 'Number Format',
         useCommaAsDecimalSeparator: 'Use comma as decimal separator',
@@ -113,11 +108,6 @@ export const translations: Record<string, Translations> = {
         label: 'Mantener entrada al cambiar moneda',
         description: 'El valor de entrada se mantiene al cambiar monedas, solo se borra con foco manual',
       },
-      inputPosition: {
-        title: 'Posición de Entrada',
-        label: 'Entrada en la Parte Inferior',
-        description: 'Coloca entrada y botones de moneda en la parte inferior (optimizado para móvil)',
-      },
       numberFormat: {
         title: 'Formato de Números',
         useCommaAsDecimalSeparator: 'Usar coma como separador decimal',
@@ -204,11 +194,6 @@ export const translations: Record<string, Translations> = {
         title: 'Eingabeverhalten',
         label: 'Eingabe bei Währungswechsel behalten',
         description: 'Eingabewert bleibt beim Wechseln von Währungen, wird nur bei manuellem Fokus gelöscht',
-      },
-      inputPosition: {
-        title: 'Eingabeposition',
-        label: 'Eingabe unten',
-        description: 'Platziere Eingabe und Währungsbuttons unten (mobilfreundlich)',
       },
       numberFormat: {
         title: 'Zahlenformat',

@@ -119,8 +119,16 @@ const BitcoinConverter = () => {
     }
   };
 
-  const inputSection = (
-    <>
+  return (
+    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
+      <div className="flex items-center justify-between w-full mb-6">
+        <div className="flex items-center space-x-2">
+          <Bitcoin className="text-bitcoin-orange h-8 w-8" />
+          <h1 className="text-2xl font-bold">{t('converter.title')}</h1>
+        </div>
+        <SettingsMenu />
+      </div>
+
       <div className="w-full mb-6">
         <Input
           ref={inputRef}
@@ -140,11 +148,7 @@ const BitcoinConverter = () => {
         selectedCurrency={selectedCurrency} 
         onCurrencySelect={onCurrencySelect} 
       />
-    </>
-  );
 
-  const statusSection = (
-    <>
       {isLoading && initialLoad ? (
         <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
           <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -159,43 +163,15 @@ const BitcoinConverter = () => {
           {t('converter.lastUpdated')} {getLastUpdatedFormatted(rates.lastUpdated)}
         </div>
       )}
-    </>
-  );
 
-  const resultsSection = (
-    <ConversionResults 
-      displayCurrencies={settings.displayCurrencies}
-      selectedCurrency={selectedCurrency}
-      conversions={conversions}
-      onResultClick={copyToClipboard}
-    />
-  );
-
-  return (
-    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in h-full">
-      <div className="flex items-center justify-between w-full mb-6">
-        <div className="flex items-center space-x-2">
-          <Bitcoin className="text-bitcoin-orange h-8 w-8" />
-          <h1 className="text-2xl font-bold">{t('converter.title')}</h1>
-        </div>
-        <SettingsMenu />
-      </div>
-
-      {settings.inputPosition === 'top' ? (
-        <>
-          {inputSection}
-          {statusSection}
-          {resultsSection}
-        </>
-      ) : (
-        <>
-          {resultsSection}
-          {inputSection}
-          {statusSection}
-        </>
-      )}
+      <ConversionResults 
+        displayCurrencies={settings.displayCurrencies}
+        selectedCurrency={selectedCurrency}
+        conversions={conversions}
+        onResultClick={copyToClipboard}
+      />
       
-      <div className="text-xs text-muted-foreground mb-4 text-center mt-auto">
+      <div className="text-xs text-muted-foreground mb-4 text-center">
         {
           (() => {
             const footerText = t('converter.ratesFooter');

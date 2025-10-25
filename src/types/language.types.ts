@@ -20,11 +20,6 @@ export interface Translations {
       label: string;
       description: string;
     };
-    inputPosition: {
-      title: string;
-      label: string;
-      description: string;
-    };
     numberFormat: {
       title: string;
       useCommaAsDecimalSeparator: string;

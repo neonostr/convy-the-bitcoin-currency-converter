@@ -10,7 +10,6 @@ import CurrencySettings from '@/components/settings/CurrencySettings';
 import NumberFormatSettings from '@/components/settings/NumberFormatSettings';
 import PriceTrackerSettings from '@/components/settings/PriceTrackerSettings';
 import PersistentInputSettings from '@/components/settings/PersistentInputSettings';
-import InputPositionSettings from '@/components/settings/InputPositionSettings';
 import AboutSection from '@/components/settings/AboutSection';
 import AppVersion from '@/components/settings/AppVersion';
 import ShareableUrlSettings from '@/components/settings/ShareableUrlSettings';
@@ -40,7 +39,6 @@ const SettingsMenu: React.FC = () => {
         <NumberFormatSettings />
         <PriceTrackerSettings />
         <PersistentInputSettings />
-        <InputPositionSettings />
         <ShareableUrlSettings />
         <AboutSection />
         <AppVersion />
