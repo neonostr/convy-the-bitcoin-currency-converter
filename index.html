@@ -151,7 +151,12 @@
                  document.referrer.includes('android-app://');
         }
         
-        if (isPWA()) {
+        // Check if on app path (for PWA welcome screen)
+        function isAppPath() {
+          return window.location.pathname === '/app' || window.location.pathname.startsWith('/app');
+        }
+        
+        if (isPWA() && isAppPath()) {
           document.documentElement.classList.add('pwa-mode');
         }
       })();
@@ -207,7 +212,11 @@
                document.referrer.includes('android-app://');
       }
       
-      if (isPWA()) {
+      function isAppPath() {
+        return window.location.pathname === '/app' || window.location.pathname.startsWith('/app');
+      }
+      
+      if (isPWA() && isAppPath()) {
         // Start checking after a minimum delay
         setTimeout(checkAppReady, 500);
         

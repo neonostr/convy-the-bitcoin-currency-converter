@@ -3,10 +3,11 @@
 
 // Check if Cache API is available
 const CACHE_AVAILABLE = typeof caches !== 'undefined';
-const CACHE_NAME = 'bitcoin-converter-cache-v5';
-const APP_VERSION = '1.2.0';
+const CACHE_NAME = 'bitcoin-converter-cache-v6';
+const APP_VERSION = '1.3.0';
 const APP_URLS_TO_CACHE = [
   '/',
+  '/app',
   '/index.html',
   '/src/main.tsx',
   '/src/index.css',
@@ -98,7 +99,10 @@ self.addEventListener('fetch', event => {
         })
         .catch(() => {
           console.log('Navigation request falling back to cache');
-          return caches.match('/').catch(() => 
+          // For PWA, always try to serve /app first, then fall back to root
+          const url = new URL(event.request.url);
+          const fallbackPath = url.pathname.startsWith('/app') ? '/app' : '/';
+          return caches.match(fallbackPath).catch(() => 
             new Response('App offline', { status: 503, statusText: 'Service Unavailable' })
           );
         })
