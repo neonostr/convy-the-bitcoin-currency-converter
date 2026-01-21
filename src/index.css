@@ -79,10 +79,11 @@
   }
 
   body {
-    @apply bg-background text-foreground overflow-hidden;
+    /* Allow scrolling (landing page + app). Individual pages/components can opt-out if needed. */
+    @apply bg-background text-foreground overflow-x-hidden overflow-y-auto;
   }
   
   html {
-    @apply overflow-hidden;
+    @apply overflow-x-hidden overflow-y-auto;
   }
 }
