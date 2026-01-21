@@ -1,9 +1,9 @@
-
 {
   "name": "Convy - Bitcoin Currency Converter",
   "short_name": "Convy",
   "description": "A privacy-focused Bitcoin currency converter",
-  "start_url": "/",
+  "start_url": "/app",
+  "scope": "/app",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#f7931a",

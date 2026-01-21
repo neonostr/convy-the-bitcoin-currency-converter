@@ -8,8 +8,9 @@ import { SettingsProvider } from "@/hooks/useSettings";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { lazy, Suspense } from "react";
 
-// Import Index directly instead of lazy loading for faster initial render
+// Import pages
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 
 // Lazy load non-critical pages
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -46,7 +47,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/app" element={<Index />} />
               <Route path="*" element={
                 <Suspense fallback={<div className="p-4">Loading...</div>}>
                   <NotFound />
