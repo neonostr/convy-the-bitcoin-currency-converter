@@ -2,18 +2,17 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-
 interface HeroProps {
   onInstallClick: () => void;
 }
-
-const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
-  return (
-    <section className="min-h-[85vh] flex flex-col items-center justify-center px-6 pt-14">
+const Hero: React.FC<HeroProps> = ({
+  onInstallClick
+}) => {
+  return <section className="min-h-[85vh] flex flex-col items-center justify-center px-6 pt-14">
       <div className="max-w-3xl mx-auto text-center space-y-8">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          
           Free & Open Source
         </div>
         
@@ -39,12 +38,7 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
             </Button>
           </Link>
           
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="h-12 px-8 text-base"
-            onClick={onInstallClick}
-          >
+          <Button variant="outline" size="lg" className="h-12 px-8 text-base" onClick={onInstallClick}>
             Install App
           </Button>
         </div>
@@ -54,8 +48,6 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
           Works offline · 15+ currencies · Real-time rates
         </p>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;
