@@ -24,7 +24,7 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
 
         {/* Main heading */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] tracking-tight">
-          Convert <span className="text-primary">Bitcoin</span> to any currency
+          <span className="text-primary">Bitcoin</span> → Anything
         </h1>
 
         {/* Subheading */}
