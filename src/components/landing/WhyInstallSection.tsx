@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { Zap, Save, Gauge, Smartphone } from 'lucide-react';
+import { Zap, Database, Gauge, Smartphone } from 'lucide-react';
 import Section from './Section';
-import FeatureCard from './FeatureCard';
 import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
 
 interface WhyInstallSectionProps {
   onInstallClick: () => void;
@@ -14,53 +13,59 @@ const WhyInstallSection: React.FC<WhyInstallSectionProps> = ({ onInstallClick })
     {
       icon: Zap,
       title: 'Instant Access',
-      description: 'One tap from your home screen.',
+      description: 'One tap from your home screen',
     },
     {
-      icon: Save,
-      title: 'Remember Settings',
-      description: 'Your preferences persist between sessions.',
+      icon: Database,
+      title: 'Persistent Settings',
+      description: 'Your preferences are saved',
     },
     {
       icon: Gauge,
-      title: 'Faster Load',
-      description: 'Works even with poor connection.',
+      title: 'Faster Performance',
+      description: 'Works even offline',
     },
     {
       icon: Smartphone,
-      title: 'Native Feel',
-      description: 'Full-screen, no browser UI.',
+      title: 'Native Experience',
+      description: 'Full-screen, no browser UI',
     },
   ];
 
   return (
-    <Section>
-      <h2 className="text-3xl font-bold text-foreground text-center mb-4">
-        Why Install?
-      </h2>
-      <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-        Get the best experience by installing Convy on your device.
-      </p>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {benefits.map((benefit) => (
-          <FeatureCard
-            key={benefit.title}
-            icon={benefit.icon}
-            title={benefit.title}
-            description={benefit.description}
-          />
-        ))}
-      </div>
-      
-      <div className="flex justify-center">
-        <Button 
-          size="lg" 
-          className="px-8"
-          onClick={onInstallClick}
-        >
-          Install Convy
-        </Button>
+    <Section id="install">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+            Install for the best experience
+          </h2>
+          <p className="text-muted-foreground">
+            Add Convy to your home screen for instant access.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-10">
+          {benefits.map((benefit) => (
+            <div key={benefit.title} className="text-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <benefit.icon className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground mb-1">{benefit.title}</h3>
+              <p className="text-xs text-muted-foreground">{benefit.description}</p>
+            </div>
+          ))}
+        </div>
+        
+        <div className="flex justify-center">
+          <Button 
+            size="lg" 
+            className="h-12 px-8 gap-2"
+            onClick={onInstallClick}
+          >
+            <Download className="w-4 h-4" />
+            Install Convy
+          </Button>
+        </div>
       </div>
     </Section>
   );

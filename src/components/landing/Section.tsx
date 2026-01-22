@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -10,8 +9,8 @@ interface SectionProps {
 
 const Section: React.FC<SectionProps> = ({ children, className, id }) => {
   return (
-    <section id={id} className={cn("py-16 px-4", className)}>
-      <div className="max-w-4xl mx-auto">
+    <section id={id} className={cn("py-20 px-6", className)}>
+      <div className="max-w-5xl mx-auto">
         {children}
       </div>
     </section>
