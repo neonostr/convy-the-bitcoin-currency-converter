@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Github } from 'lucide-react';
 
 interface HeroProps {
   onInstallClick: () => void;
@@ -13,7 +13,7 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
       <div className="max-w-3xl mx-auto text-center space-y-8">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          <Github className="w-3.5 h-3.5" />
           Free & Open Source
         </div>
         
