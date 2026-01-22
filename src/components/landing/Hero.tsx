@@ -17,8 +17,7 @@ const Hero: React.FC<HeroProps> = ({
         </a>
 
         {/* Main heading */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] tracking-tight">
-          Your <span className="text-primary">Private
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] tracking-tight">Your Private Bitcoin Currency Converter and Price Tracker<span className="text-primary">Private
         </span> to any currency
         </h1>
 
