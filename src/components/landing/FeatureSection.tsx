@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Coins, RefreshCw, WifiOff } from 'lucide-react';
+import { Coins, RefreshCw, WifiOff, Lock } from 'lucide-react';
 import Section from './Section';
 import FeatureCard from './FeatureCard';
 
@@ -9,7 +8,7 @@ const FeatureSection: React.FC = () => {
     {
       icon: Coins,
       title: 'Multiple Currencies',
-      description: 'Convert between Bitcoin, Sats and 15+ fiat currencies with ease.',
+      description: 'Convert between Bitcoin, Sats and 15+ fiat currencies instantly.',
     },
     {
       icon: RefreshCw,
@@ -21,18 +20,25 @@ const FeatureSection: React.FC = () => {
       title: 'Works Offline',
       description: 'Access your converter anytime, even without internet.',
     },
+    {
+      icon: Lock,
+      title: 'Privacy First',
+      description: 'No accounts, no tracking. Your data stays on your device.',
+    },
   ];
 
   return (
-    <Section>
-      <h2 className="text-3xl font-bold text-foreground text-center mb-4">
-        Simple & Powerful
-      </h2>
-      <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-        Everything you need to convert Bitcoin, nothing you don't.
-      </p>
+    <Section id="features">
+      <div className="text-center mb-12">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+          How it works
+        </h2>
+        <p className="text-muted-foreground max-w-lg mx-auto">
+          Everything you need to convert Bitcoin, nothing you don't.
+        </p>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {features.map((feature) => (
           <FeatureCard
             key={feature.title}
