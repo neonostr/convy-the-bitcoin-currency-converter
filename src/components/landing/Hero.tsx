@@ -12,10 +12,15 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
     <section className="min-h-[85vh] flex flex-col items-center justify-center px-6 pt-14">
       <div className="max-w-3xl mx-auto text-center space-y-8">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+        <a 
+          href="https://github.com/pfrancke/convy" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+        >
           <Github className="w-3.5 h-3.5" />
           Free & Open Source
-        </div>
+        </a>
         
         {/* Main heading */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] tracking-tight">
