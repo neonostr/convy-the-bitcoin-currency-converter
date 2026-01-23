@@ -121,9 +121,11 @@ const BitcoinConverter = () => {
     }
   };
 
+  const desktopTight = !isInstalled;
+
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
-      <div className="flex items-center justify-between w-full mb-6">
+      <div className={`flex items-center justify-between w-full ${desktopTight ? 'mb-6 lg:mb-5' : 'mb-6'}`}>
         <div className="flex items-center space-x-2">
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />
           <h1 className="text-2xl font-bold">{t('converter.title')}</h1>
@@ -131,12 +133,12 @@ const BitcoinConverter = () => {
         <SettingsMenu />
       </div>
 
-      <div className="w-full mb-6">
+      <div className={`w-full ${desktopTight ? 'mb-6 lg:mb-5' : 'mb-6'}`}>
         <Input
           ref={inputRef}
           type="text"
           inputMode="decimal"
-          className="text-3xl md:text-4xl font-bold p-6 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="text-3xl font-bold p-6 lg:p-5 text-center w-full border border-bitcoin-orange focus:border-bitcoin-orange focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           placeholder={t('converter.enterAmount')}
           value={amount}
           onFocus={handleInputFocus}
