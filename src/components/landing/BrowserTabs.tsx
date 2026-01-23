@@ -22,12 +22,18 @@ const BrowserTabs: React.FC<BrowserTabsProps> = ({ selectedBrowser, onBrowserCha
       {browsers.map((browser) => (
         <button
           key={browser.id}
-          onClick={() => onBrowserChange(browser.id)}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBrowserChange(browser.id);
+          }}
           className={cn(
-            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+            "flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer select-none",
+            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
             selectedBrowser === browser.id
               ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
           )}
         >
           {browser.label}
