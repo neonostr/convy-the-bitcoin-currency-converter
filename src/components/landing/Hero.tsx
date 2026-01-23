@@ -35,8 +35,8 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-center pt-4">
           <Button size="lg" className="h-12 px-8 text-base gap-2" onClick={onInstallClick}>
+            Install Convy
             <Download className="w-4 h-4" />
-            Install App
           </Button>
 
           <Link to="/app">

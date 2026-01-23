@@ -62,8 +62,8 @@ const WhyInstallSection: React.FC<WhyInstallSectionProps> = ({ onInstallClick })
             className="h-12 px-8 gap-2"
             onClick={onInstallClick}
           >
-            <Download className="w-4 h-4" />
             Install Convy
+            <Download className="w-4 h-4" />
           </Button>
         </div>
       </div>
