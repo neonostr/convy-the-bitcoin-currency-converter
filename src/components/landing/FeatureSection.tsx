@@ -1,5 +1,5 @@
 import React from 'react';
-import { Coins, RefreshCw, WifiOff, Lock } from 'lucide-react';
+import { Coins, RefreshCw, Cpu, Lock } from 'lucide-react';
 import Section from './Section';
 import FeatureCard from './FeatureCard';
 
@@ -16,9 +16,9 @@ const FeatureSection: React.FC = () => {
       description: 'Always up-to-date exchange rates from trusted sources.',
     },
     {
-      icon: WifiOff,
-      title: 'Works Offline',
-      description: 'Access your converter anytime, even without internet.',
+      icon: Cpu,
+      title: 'On-Device Calculation',
+      description: 'All math happens locally. We only fetch rates—your data never leaves.',
     },
     {
       icon: Lock,
