@@ -70,6 +70,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => {
       try {
         localStorage.setItem('bitcoin-converter-settings', JSON.stringify(settings));
+        // Also sync theme to standalone key for splash screen/initial load
+        localStorage.setItem('theme', settings.theme);
       } catch (error) {
         console.error('Failed to save settings:', error);
       }
