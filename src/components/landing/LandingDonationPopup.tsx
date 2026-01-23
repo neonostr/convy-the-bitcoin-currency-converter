@@ -83,7 +83,7 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
               <span>Lightning Address</span>
             </div>
             
-            <div className="flex items-center justify-between gap-2 bg-muted rounded-md px-3 py-2">
+            <div className="flex items-center justify-center gap-2 bg-muted rounded-md px-3 py-2">
               <code className="text-xs text-foreground font-mono">
                 {LIGHTNING_ADDRESS}
               </code>
