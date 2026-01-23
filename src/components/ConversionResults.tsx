@@ -20,7 +20,7 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
   const { settings } = useSettings();
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-3 mb-4">
+    <div className="w-full space-y-4 mb-4">
       {displayCurrencies
         .filter(currency => currency !== selectedCurrency)
         .map((currency) => {
@@ -28,7 +28,7 @@ const ConversionResults: React.FC<ConversionResultsProps> = ({
           return (
             <div
               key={currency}
-              className="bg-secondary p-4 lg:p-3 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors"
+              className="bg-secondary p-4 rounded-md cursor-pointer hover:bg-secondary/80 transition-colors"
               onClick={() => onResultClick(
                 formatForCopy(
                   value, 
