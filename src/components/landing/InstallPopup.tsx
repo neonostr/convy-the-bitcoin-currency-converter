@@ -16,12 +16,28 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
   const [selectedBrowser, setSelectedBrowser] = useState<BrowserType>('safari');
   const [helpOpen, setHelpOpen] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
+  const [autoInstallAttempted, setAutoInstallAttempted] = useState(false);
+
+  // Auto-trigger native install prompt when dialog opens and browser supports it
+  useEffect(() => {
+    if (open && hasNativePrompt && !autoInstallAttempted && !isInstalled) {
+      setAutoInstallAttempted(true);
+      handleInstall();
+    }
+  }, [open, hasNativePrompt, autoInstallAttempted, isInstalled]);
 
   useEffect(() => {
     if (open) {
       setSelectedBrowser(getBrowser());
     }
   }, [open, getBrowser]);
+
+  // Reset auto-install flag when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setAutoInstallAttempted(false);
+    }
+  }, [open]);
 
   const handleInstall = async () => {
     if (hasNativePrompt) {
