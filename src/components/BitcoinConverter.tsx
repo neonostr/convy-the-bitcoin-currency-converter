@@ -1,5 +1,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Bitcoin, LoaderCircle } from 'lucide-react';
@@ -35,6 +36,7 @@ const BitcoinConverter = () => {
     recordUserActivity,
     setDefaultBtcValue
   } = useConversion();
+  const { isInstalled } = useInstallPrompt();
   
   // Only initialize from URL params, don't auto-update URL
   useUrlParams(selectedCurrency, handleCurrencySelect);
@@ -174,7 +176,11 @@ const BitcoinConverter = () => {
       <div className="text-xs text-muted-foreground mb-4 text-center">
         {
           (() => {
-            const footerText = t('converter.ratesFooter');
+            let footerText = t('converter.ratesFooter');
+            if (isInstalled) {
+              const addToHomeScreen = t('converter.addToHomeScreen');
+              footerText = footerText.replace(addToHomeScreen, '').trim();
+            }
             const anchorWord = t('converter.sourceCode');
             const parts = footerText.split(anchorWord);
             return parts.map((part, idx, arr) => (
