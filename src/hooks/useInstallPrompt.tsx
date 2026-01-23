@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -49,13 +49,13 @@ export function useInstallPrompt() {
     };
   }, []);
 
-  const promptInstall = async (): Promise<boolean> => {
+  const promptInstall = useCallback(async (): Promise<boolean> => {
     if (!deferredPrompt) return false;
 
     try {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      
+
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
         setIsInstallable(false);
@@ -66,9 +66,9 @@ export function useInstallPrompt() {
       console.error('Error prompting install:', error);
       return false;
     }
-  };
+  }, [deferredPrompt]);
 
-  const getBrowser = (): 'safari' | 'chrome' | 'edge' | 'other' => {
+  const getBrowser = useCallback((): 'safari' | 'chrome' | 'edge' | 'other' => {
     const ua = navigator.userAgent.toLowerCase();
     
     // Check for Edge first (it includes "chrome" in UA)
@@ -84,7 +84,7 @@ export function useInstallPrompt() {
       return 'safari';
     }
     return 'other';
-  };
+  }, []);
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isAndroid = /Android/.test(navigator.userAgent);

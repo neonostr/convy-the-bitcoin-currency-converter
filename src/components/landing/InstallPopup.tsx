@@ -30,7 +30,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
     if (open) {
       setSelectedBrowser(getBrowser());
     }
-  }, [open, getBrowser]);
+  }, [open]);
 
   // Reset auto-install flag when dialog closes
   useEffect(() => {
