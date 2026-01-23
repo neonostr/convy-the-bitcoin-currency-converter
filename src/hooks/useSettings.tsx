@@ -44,9 +44,18 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       console.error('Failed to parse saved settings:', error);
     }
     
-    // Default settings - simplified for faster loading
+    // Determine default theme based on system preference
+    const getDefaultTheme = (): 'light' | 'dark' => {
+      if (typeof window !== 'undefined') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return prefersDark ? 'dark' : 'light';
+      }
+      return 'dark';
+    };
+    
+    // Default settings - use system theme preference for first visit
     return {
-      theme: 'dark', // Changed default theme to dark
+      theme: getDefaultTheme(),
       displayCurrencies: DEFAULT_CURRENCIES,
       decimalSeparator: '.',
       includeThouSepWhenCopying: false,
