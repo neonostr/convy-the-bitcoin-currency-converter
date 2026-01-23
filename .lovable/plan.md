@@ -1,80 +1,67 @@
 
-# Proper PWA Update Fix: Add Manifest ID + Version Bump
+# Prevent PWA Scroll Bounce for Native App Experience
 
-## Why This Works (Not a Workaround)
+## Overview
 
-The current manifest is missing an `id` property. Without it, Chrome uses the `start_url` as the unique app identifier. When we changed `start_url` from `/` to `/app`, Chrome may interpret this as a different application, breaking the update chain.
+Add scroll-prevention styles that only apply when the app is running as an installed PWA (using the `.pwa-mode` class). Regular browser users on the landing page will be completely unaffected.
 
-By adding a stable `id`, we ensure:
-1. Chrome recognizes the app identity regardless of `start_url` changes
-2. Manifest updates (including `start_url`) properly propagate to existing installations
-3. Once updated, PWAs open directly at `/app` where the splash screen works naturally
+## Changes
 
-## Implementation Steps
+### 1. Add PWA-specific styles to `src/index.css`
 
-### Step 1: Add stable ID to manifest.json
-**File: `public/manifest.json`**
+Add new CSS rules after the existing `@layer base` block (after line 89):
 
-Add an `id` property that uniquely identifies the app. This should never change:
+```css
+/* PWA-specific styles - prevent scroll bounce for native app feel */
+/* These ONLY apply when .pwa-mode class is present (installed PWAs only) */
+html.pwa-mode,
+html.pwa-mode body {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: none;
+}
 
-```json
-{
-  "id": "convy-bitcoin-converter",
-  "name": "Convy - Bitcoin Currency Converter",
-  "short_name": "Convy",
-  "start_url": "/app",
-  ...
+html.pwa-mode #root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
 }
 ```
 
-### Step 2: Update app version for verification
-**File: `src/hooks/useSettings.tsx`**
+### 2. Update viewport meta tag in `index.html`
 
-Change version to `1.2.2` so users can verify the update worked:
+Update the viewport meta tag to include scaling prevention and keyboard handling:
 
-```typescript
-const APP_VERSION = '1.2.2';
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
 ```
 
-### Step 3: Bump service worker cache version
-**File: `public/service-worker.js`**
+### 3. Add touch-manipulation to `src/pages/Index.tsx`
 
-Force cache refresh:
+Update the main container class to re-enable internal touch gestures:
 
-```javascript
-const CACHE_NAME = 'bitcoin-converter-cache-v8';
-const APP_VERSION = '1.4.1';
+```tsx
+<div className="flex h-[100dvh] items-center justify-center p-4 bg-background overflow-hidden touch-manipulation">
 ```
 
----
+## Why This Is Safe for Landing Page
 
-## What Happens After Deployment
-
-### On Chrome/Edge (Android/Desktop):
-1. Browser detects manifest changes within ~24 hours
-2. App ID ensures update applies to existing installation
-3. `start_url` updates to `/app`
-4. PWA now opens at `/app` directly
-5. Splash screen works correctly
-
-### The LandingPage redirect (already in place):
-- Acts as a **bridge** during the 24-hour update window
-- Once manifest updates propagate, this code path is never hit
-- PWAs will open at `/app` directly, skipping LandingPage entirely
-
-### On iOS/Safari:
-- Unfortunately, iOS doesn't support manifest updates for installed PWAs
-- Users would need to re-add the app
-- The LandingPage redirect handles this case permanently
+- The `.pwa-mode` class is ONLY added when `isPWA()` returns true (standalone mode detection)
+- Browser users visiting the landing page will NOT have this class
+- All scroll-prevention CSS is scoped to `html.pwa-mode` selector
+- Landing page scrolling remains completely normal
 
 ## Files to Modify
-1. `public/manifest.json` - Add `id` property
-2. `src/hooks/useSettings.tsx` - Update to version 1.2.2
-3. `public/service-worker.js` - Bump cache version
 
-## Testing
-After a day or two:
-1. Open existing PWA installation
-2. Check settings - should show version 1.2.2
-3. Splash screen should appear correctly
-4. App should open directly at `/app` (check URL if possible)
+| File | Change |
+|------|--------|
+| `src/index.css` | Add PWA scroll-prevention styles |
+| `index.html` | Update viewport meta tag |
+| `src/pages/Index.tsx` | Add `touch-manipulation` class |
