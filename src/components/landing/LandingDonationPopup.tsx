@@ -50,7 +50,7 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="mx-2 max-w-[calc(100%-1rem)] sm:max-w-xs p-4">
+      <DialogContent className="left-[50%] translate-x-[-50%] w-[calc(100%-2rem)] max-w-xs p-5">
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-2">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
