@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Github } from "lucide-react";
+import { Download, Github } from "lucide-react";
 
 interface HeroProps {
   onInstallClick: () => void;
@@ -34,9 +34,9 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-center pt-4">
-          <Button size="lg" className="h-12 px-8 text-base gap-2 group" onClick={onInstallClick}>
+          <Button size="lg" className="h-12 px-8 text-base gap-2" onClick={onInstallClick}>
+            <Download className="w-4 h-4" />
             Install App
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Button>
 
           <Link to="/app">
