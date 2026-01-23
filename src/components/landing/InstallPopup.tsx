@@ -74,7 +74,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
   }
   const renderBrowserInstructions = () => {
     if (selectedBrowser === 'safari') {
-      return <div className="space-y-4">
+      return <div className="space-y-4 pt-2">
           <ol className="space-y-3 text-sm">
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
@@ -96,7 +96,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
         </div>;
     }
     if (selectedBrowser === 'chrome') {
-      return <div className="space-y-4">
+      return <div className="space-y-4 pt-2">
           <ol className="space-y-3 text-sm">
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
@@ -118,7 +118,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
         </div>;
     }
     if (selectedBrowser === 'edge') {
-      return <div className="space-y-4">
+      return <div className="space-y-4 pt-2">
           <ol className="space-y-3 text-sm">
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
@@ -141,7 +141,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
     }
 
     // Other browsers
-    return <div className="space-y-4">
+    return <div className="space-y-4 pt-2">
         <ol className="space-y-3 text-sm">
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
@@ -176,7 +176,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
             <Button className="w-full" size="lg" onClick={handleInstall} disabled={isInstalling}>
               {isInstalling ? 'Installing...' : 'Install Now'}
             </Button>
-          </div> : <div className="space-y-4 py-4">
+          </div> : <div className="space-y-5 py-5">
             <BrowserTabs selectedBrowser={selectedBrowser} onBrowserChange={setSelectedBrowser} />
             
             {renderBrowserInstructions()}
