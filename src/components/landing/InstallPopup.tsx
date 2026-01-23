@@ -75,16 +75,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
   const renderBrowserInstructions = () => {
     if (selectedBrowser === 'safari') {
       return <div className="space-y-4">
-          <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <Share className="w-8 h-8" />
-              <span className="text-2xl">→</span>
-              <div className="flex items-center gap-1 bg-background rounded-lg px-3 py-2">
-                <Plus className="w-5 h-5" />
-                <span className="text-sm">Add to Home Screen</span>
-              </div>
-            </div>
-          </div>
+          
           
           <ol className="space-y-3 text-sm">
             <li className="flex gap-3">
