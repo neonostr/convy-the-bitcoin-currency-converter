@@ -122,7 +122,7 @@ const BitcoinConverter = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full mx-auto p-4 animate-fade-in">
+    <div className="flex flex-col items-center w-full max-w-md mx-auto p-4 animate-fade-in">
       <div className="flex items-center justify-between w-full mb-6">
         <div className="flex items-center space-x-2">
           <Bitcoin className="text-bitcoin-orange h-8 w-8" />
