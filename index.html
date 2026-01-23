@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Convy - The Privacy-First Bitcoin Currency Converter &amp; Price Tracker</title>
     
     <!-- Theme color for Safari UI chrome - dark by default -->
@@ -37,41 +37,19 @@
     <link rel="icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" type="image/png" />
     <link rel="apple-touch-icon" href="/lovable-uploads/1312301f-1d52-44de-aef4-c630e8329bb4.png" />
     
-    <script>
-      // CRITICAL: Apply theme BEFORE any CSS is parsed to prevent flash
-      (function() {
-        var savedTheme = localStorage.getItem('theme');
-        var theme;
-        
-        if (savedTheme) {
-          theme = savedTheme;
-        } else {
-          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          theme = prefersDark ? 'dark' : 'light';
-        }
-        
-        document.documentElement.classList.add(theme);
-        
-        // Check if running in PWA mode
-        function isPWA() {
-          return window.matchMedia('(display-mode: standalone)').matches ||
-                 window.navigator.standalone === true ||
-                 document.referrer.includes('android-app://');
-        }
-        
-        function isAppPath() {
-          return window.location.pathname === '/' || 
-                 window.location.pathname === '/app' || 
-                 window.location.pathname.startsWith('/app');
-        }
-        
-        if (isPWA() && isAppPath()) {
-          document.documentElement.classList.add('pwa-mode');
-        }
-      })();
-    </script>
-    
     <style>
+      /* Immediate theme application */
+      :root {
+        --background: 210 40% 98%;
+        --foreground: 222.2 84% 4.9%;
+        --bitcoin-orange: 28 100% 54%;
+      }
+      
+      .dark {
+        --background: 222.2 84% 4.9%;
+        --foreground: 210 40% 98%;
+      }
+      
       /* Welcome screen styles - only visible in PWA mode */
       #welcome-screen {
         position: fixed;
@@ -79,25 +57,15 @@
         left: 0;
         width: 100%;
         height: 100%;
-        display: none;
+        background: hsl(var(--background));
+        color: hsl(var(--foreground));
+        display: none; /* Hidden by default */
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 9999;
         transition: opacity 0.3s ease-out;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      }
-      
-      /* Light mode welcome screen - use .light class for explicit matching */
-      .light #welcome-screen {
-        background: hsl(210, 40%, 98%);
-        color: hsl(222.2, 84%, 4.9%);
-      }
-      
-      /* Dark mode welcome screen */
-      .dark #welcome-screen {
-        background: hsl(222.2, 84%, 4.9%);
-        color: hsl(210, 40%, 98%);
       }
       
       /* Show welcome screen only in PWA mode */
@@ -108,7 +76,7 @@
       .welcome-logo {
         width: 80px;
         height: 80px;
-        background: hsl(28, 100%, 54%);
+        background: hsl(var(--bitcoin-orange));
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -139,7 +107,7 @@
       .loading-dot {
         width: 8px;
         height: 8px;
-        background: hsl(28, 100%, 54%);
+        background: hsl(var(--bitcoin-orange));
         border-radius: 50%;
         animation: bounce 1.4s infinite ease-in-out both;
       }
@@ -162,20 +130,50 @@
         pointer-events: none;
       }
       
-      /* Bitcoin icon - contrast with orange background */
+      /* Bitcoin icon SVG */
       .bitcoin-icon {
         width: 40px;
         height: 40px;
-      }
-      
-      .light .bitcoin-icon {
-        fill: hsl(222.2, 84%, 4.9%);
-      }
-      
-      .dark .bitcoin-icon {
-        fill: hsl(210, 40%, 98%);
+        fill: hsl(var(--background));
       }
     </style>
+    
+    <script>
+      // Apply theme immediately before any rendering
+      (function() {
+        // Check for saved theme first (user preference)
+        const savedTheme = localStorage.getItem('theme');
+        let theme;
+        
+        if (savedTheme) {
+          // User has manually set a preference
+          theme = savedTheme;
+        } else {
+          // First visit: use system preference
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          theme = prefersDark ? 'dark' : 'light';
+        }
+        
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(theme);
+        
+        // Check if running in PWA mode and add class to body
+        function isPWA() {
+          return window.matchMedia('(display-mode: standalone)').matches ||
+                 window.navigator.standalone === true ||
+                 document.referrer.includes('android-app://');
+        }
+        
+        // Check if on app path (for PWA welcome screen)
+        function isAppPath() {
+          return window.location.pathname === '/app' || window.location.pathname.startsWith('/app');
+        }
+        
+        if (isPWA() && isAppPath()) {
+          document.documentElement.classList.add('pwa-mode');
+        }
+      })();
+    </script>
     <meta property="og:title" content="Convy - The Privacy-First Bitcoin Currency Converter &amp; Price Tracker">
   <meta name="twitter:title" content="Convy - The Privacy-First Bitcoin Currency Converter &amp; Price Tracker">
   <meta property="og:description" content="Fast, private, and secure Bitcoin conversions with real-time price tracking.">
@@ -232,9 +230,7 @@
       }
       
       function isAppPath() {
-        return window.location.pathname === '/' || 
-               window.location.pathname === '/app' || 
-               window.location.pathname.startsWith('/app');
+        return window.location.pathname === '/app' || window.location.pathname.startsWith('/app');
       }
       
       if (isPWA() && isAppPath()) {
