@@ -75,17 +75,6 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
   const renderBrowserInstructions = () => {
     if (selectedBrowser === 'safari') {
       return <div className="space-y-4">
-          <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <Share className="w-8 h-8" />
-              <span className="text-2xl">→</span>
-              <div className="flex items-center gap-1 bg-background rounded-lg px-3 py-2">
-                <Plus className="w-5 h-5" />
-                <span className="text-sm">Add to Home Screen</span>
-              </div>
-            </div>
-          </div>
-          
           <ol className="space-y-3 text-sm">
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
@@ -108,17 +97,6 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
     }
     if (selectedBrowser === 'chrome') {
       return <div className="space-y-4">
-          <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <MoreVertical className="w-8 h-8" />
-              <span className="text-2xl">→</span>
-              <div className="flex items-center gap-1 bg-background rounded-lg px-3 py-2">
-                <Download className="w-5 h-5" />
-                <span className="text-sm">Install app</span>
-              </div>
-            </div>
-          </div>
-          
           <ol className="space-y-3 text-sm">
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
@@ -141,17 +119,6 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
     }
     if (selectedBrowser === 'edge') {
       return <div className="space-y-4">
-          <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <MoreVertical className="w-8 h-8" />
-              <span className="text-2xl">→</span>
-              <div className="flex items-center gap-1 bg-background rounded-lg px-3 py-2">
-                <ExternalLink className="w-5 h-5" />
-                <span className="text-sm">Apps → Install</span>
-              </div>
-            </div>
-          </div>
-          
           <ol className="space-y-3 text-sm">
             <li className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
@@ -175,17 +142,6 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
 
     // Other browsers
     return <div className="space-y-4">
-        <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
-          <div className="flex items-center gap-4 text-muted-foreground">
-            <MoreVertical className="w-8 h-8" />
-            <span className="text-2xl">→</span>
-            <div className="flex items-center gap-1 bg-background rounded-lg px-3 py-2">
-              <Download className="w-5 h-5" />
-              <span className="text-sm">Install / Add to Home</span>
-            </div>
-          </div>
-        </div>
-        
         <ol className="space-y-3 text-sm">
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">1</span>
