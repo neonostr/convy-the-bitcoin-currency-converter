@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Bitcoin, Download, Share, MoreVertical, Plus, ExternalLink } from 'lucide-react';
+import { Github, Download, Share, MoreVertical, Plus, ExternalLink } from 'lucide-react';
 import BrowserTabs, { BrowserType } from './BrowserTabs';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -56,9 +56,15 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
-                <Bitcoin className="w-10 h-10 text-primary-foreground" />
-              </div>
+              <a
+                href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+              >
+                <Github className="w-3.5 h-3.5" />
+                Free & Open Source
+              </a>
             </div>
             <DialogTitle className="text-center text-xl">Already Installed!</DialogTitle>
           </DialogHeader>
@@ -222,9 +228,15 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
-              <Bitcoin className="w-10 h-10 text-primary-foreground" />
-            </div>
+            <a
+              href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+            >
+              <Github className="w-3.5 h-3.5" />
+              Free & Open Source
+            </a>
           </div>
           <DialogTitle className="text-center text-xl">Install Convy</DialogTitle>
         </DialogHeader>
