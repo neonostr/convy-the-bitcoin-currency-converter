@@ -1,80 +1,77 @@
 
-# Proper PWA Update Fix: Add Manifest ID + Version Bump
+# Fix PWA Splash Screen Not Respecting User Theme Setting
 
-## Why This Works (Not a Workaround)
+## Problem Identified
 
-The current manifest is missing an `id` property. Without it, Chrome uses the `start_url` as the unique app identifier. When we changed `start_url` from `/` to `/app`, Chrome may interpret this as a different application, breaking the update chain.
+The splash screen always appears in dark mode because there are **two different localStorage keys** being used for theme storage:
 
-By adding a stable `id`, we ensure:
-1. Chrome recognizes the app identity regardless of `start_url` changes
-2. Manifest updates (including `start_url`) properly propagate to existing installations
-3. Once updated, PWAs open directly at `/app` where the splash screen works naturally
+| Key | Used By | Purpose |
+|-----|---------|---------|
+| `'theme'` | index.html, main.tsx, useTheme.tsx | Splash screen + landing page |
+| `'bitcoin-converter-settings'` | useSettings.tsx | App settings (contains theme inside object) |
 
-## Implementation Steps
+When you toggle the theme in the app settings:
+1. The theme is saved inside the settings object at `'bitcoin-converter-settings'`
+2. The document class is updated (so the app looks correct)
+3. **But `'theme'` localStorage key is never updated**
 
-### Step 1: Add stable ID to manifest.json
-**File: `public/manifest.json`**
+When the PWA opens:
+1. The splash screen script reads from `localStorage.getItem('theme')`
+2. This value is stale (or never set), so it falls back to system preference or stays dark
+3. The splash screen appears in the wrong theme
 
-Add an `id` property that uniquely identifies the app. This should never change:
+## Solution
 
-```json
-{
-  "id": "convy-bitcoin-converter",
-  "name": "Convy - Bitcoin Currency Converter",
-  "short_name": "Convy",
-  "start_url": "/app",
-  ...
-}
-```
+Update `useSettings.tsx` to also sync the theme to the standalone `'theme'` localStorage key whenever settings change. This ensures the splash screen initialization script reads the correct, current theme preference.
 
-### Step 2: Update app version for verification
-**File: `src/hooks/useSettings.tsx`**
+## Implementation
 
-Change version to `1.2.2` so users can verify the update worked:
+### File: `src/hooks/useSettings.tsx`
+
+Update the useEffect that saves settings to also sync the theme to the standalone localStorage key:
 
 ```typescript
-const APP_VERSION = '1.2.2';
+useEffect(() => {
+  // Save settings to localStorage whenever they change - but defer this operation
+  setTimeout(() => {
+    try {
+      localStorage.setItem('bitcoin-converter-settings', JSON.stringify(settings));
+      // Also sync theme to standalone key for splash screen/initial load
+      localStorage.setItem('theme', settings.theme);
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
+  }, 100);
+  
+  // Update theme on document
+  const { theme } = settings;
+  const root = window.document.documentElement;
+  root.classList.remove('light', 'dark');
+  root.classList.add(theme);
+}, [settings]);
 ```
 
-### Step 3: Bump service worker cache version
-**File: `public/service-worker.js`**
+**Location**: Lines 68-84 in `src/hooks/useSettings.tsx`
 
-Force cache refresh:
+## Why This Works
 
-```javascript
-const CACHE_NAME = 'bitcoin-converter-cache-v8';
-const APP_VERSION = '1.4.1';
-```
+1. When user changes theme in settings, both localStorage keys get updated
+2. Next time PWA opens, splash screen script reads correct theme from `'theme'` key
+3. Splash screen immediately displays with correct light/dark colors
+4. No changes needed to index.html or main.tsx - they already read from the right key
 
----
+## Technical Details
 
-## What Happens After Deployment
+### Files to modify
+- `src/hooks/useSettings.tsx` - Add one line to sync theme to standalone key
 
-### On Chrome/Edge (Android/Desktop):
-1. Browser detects manifest changes within ~24 hours
-2. App ID ensures update applies to existing installation
-3. `start_url` updates to `/app`
-4. PWA now opens at `/app` directly
-5. Splash screen works correctly
+### No changes needed
+- `index.html` - Already correctly reads from `'theme'` key
+- `main.tsx` - Already correctly reads from `'theme'` key
+- `useTheme.tsx` - Used only for landing page, already syncs correctly
 
-### The LandingPage redirect (already in place):
-- Acts as a **bridge** during the 24-hour update window
-- Once manifest updates propagate, this code path is never hit
-- PWAs will open at `/app` directly, skipping LandingPage entirely
-
-### On iOS/Safari:
-- Unfortunately, iOS doesn't support manifest updates for installed PWAs
-- Users would need to re-add the app
-- The LandingPage redirect handles this case permanently
-
-## Files to Modify
-1. `public/manifest.json` - Add `id` property
-2. `src/hooks/useSettings.tsx` - Update to version 1.2.2
-3. `public/service-worker.js` - Bump cache version
-
-## Testing
-After a day or two:
-1. Open existing PWA installation
-2. Check settings - should show version 1.2.2
-3. Splash screen should appear correctly
-4. App should open directly at `/app` (check URL if possible)
+### Testing
+1. Open the app and set theme to light mode in settings
+2. Close the PWA completely
+3. Reopen the PWA
+4. Splash screen should now appear in light mode
