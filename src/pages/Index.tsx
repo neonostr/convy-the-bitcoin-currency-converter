@@ -7,7 +7,7 @@ const Index = () => {
   // Only add vertical padding on desktop when NOT installed as PWA
   const containerClasses = isInstalled 
     ? "flex h-[100dvh] items-center justify-center p-4 bg-background overflow-hidden"
-    : "flex h-[100dvh] items-center justify-center p-4 md:py-12 lg:py-16 bg-background overflow-hidden";
+    : "flex min-h-[100dvh] items-center justify-center p-4 md:py-12 lg:py-16 bg-background overflow-y-auto";
 
   return (
     <div className={containerClasses}>
