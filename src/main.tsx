@@ -5,8 +5,14 @@ import './index.css'
 
 // Apply theme immediately before any rendering happens
 if (typeof window !== 'undefined') {
-  const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
-  document.documentElement.classList.add(savedTheme);
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    document.documentElement.classList.add(savedTheme);
+  } else {
+    // First visit: use system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
+  }
 }
 
 // Create root and render immediately for faster perceived performance

@@ -141,8 +141,20 @@
     <script>
       // Apply theme immediately before any rendering
       (function() {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.classList.add(savedTheme);
+        // Check for saved theme first (user preference)
+        const savedTheme = localStorage.getItem('theme');
+        let theme;
+        
+        if (savedTheme) {
+          // User has manually set a preference
+          theme = savedTheme;
+        } else {
+          // First visit: use system preference
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          theme = prefersDark ? 'dark' : 'light';
+        }
+        
+        document.documentElement.classList.add(theme);
         
         // Check if running in PWA mode and add class to body
         function isPWA() {
