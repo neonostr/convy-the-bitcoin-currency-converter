@@ -6,6 +6,7 @@ import './index.css'
 // Apply theme immediately before any rendering happens
 if (typeof window !== 'undefined') {
   const savedTheme = localStorage.getItem('theme');
+  document.documentElement.classList.remove('light', 'dark');
   if (savedTheme) {
     document.documentElement.classList.add(savedTheme);
   } else {
