@@ -1,9 +1,9 @@
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 import { Bitcoin, LoaderCircle } from 'lucide-react';
-import CopiedPill from '@/components/CopiedPill';
 import SettingsMenu from '@/components/SettingsMenu';
 import DonationPopup from '@/components/DonationPopup';
 import { useSettings } from '@/hooks/useSettings';
@@ -18,11 +18,11 @@ import { logAppOpen } from "@/services/eventLogger";
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
   const { settings } = useSettings();
   const { t, language } = useLanguage();
   const [initialLoad, setInitialLoad] = useState(true);
-  const [isVisible, setIsVisible] = useState(true);
-  const [showCopied, setShowCopied] = useState(false);
+  const [isVisible, setIsVisible] = useState(true); // Control component visibility
   const { 
     amount, 
     setAmount, 
@@ -100,18 +100,18 @@ const BitcoinConverter = () => {
     }
   };
 
-  const copyToClipboard = useCallback((value: string) => {
+  const copyToClipboard = (value: string) => {
     recordUserActivity();
     navigator.clipboard.writeText(value).then(() => {
-      setShowCopied(true);
+      toast({
+        title: "Copied to clipboard",
+        description: `Copied ${value}`,
+        duration: 2000,
+      });
     }).catch(err => {
       console.error('Failed to copy:', err);
     });
-  }, [recordUserActivity]);
-
-  const hideCopiedPill = useCallback(() => {
-    setShowCopied(false);
-  }, []);
+  };
 
   const onCurrencySelect = (currency: Currency) => {
     handleCurrencySelect(currency);
@@ -205,7 +205,6 @@ const BitcoinConverter = () => {
       </div>
 
       <DonationPopup />
-      <CopiedPill show={showCopied} onHide={hideCopiedPill} />
     </div>
   );
 };
