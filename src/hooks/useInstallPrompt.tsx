@@ -53,6 +53,10 @@ export function useInstallPrompt() {
     if (!deferredPrompt) return false;
 
     try {
+      // Save current theme before installation so PWA inherits it
+      const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', currentTheme);
+      
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
 
