@@ -3,8 +3,8 @@
 
 // Check if Cache API is available
 const CACHE_AVAILABLE = typeof caches !== 'undefined';
-const CACHE_NAME = 'bitcoin-converter-cache-v7';
-const APP_VERSION = '1.4.0';
+const CACHE_NAME = 'bitcoin-converter-cache-v8';
+const APP_VERSION = '1.4.1';
 const APP_URLS_TO_CACHE = [
   '/',
   '/app',
