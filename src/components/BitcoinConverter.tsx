@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Bitcoin, LoaderCircle } from 'lucide-react';
 import SettingsMenu from '@/components/SettingsMenu';
 import DonationPopup from '@/components/DonationPopup';
@@ -18,7 +18,6 @@ import { logAppOpen } from "@/services/eventLogger";
 
 const BitcoinConverter = () => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
   const { settings } = useSettings();
   const { t, language } = useLanguage();
   const [initialLoad, setInitialLoad] = useState(true);
@@ -103,10 +102,8 @@ const BitcoinConverter = () => {
   const copyToClipboard = (value: string) => {
     recordUserActivity();
     navigator.clipboard.writeText(value).then(() => {
-      toast({
-        title: "Copied to clipboard",
-        description: `Copied ${value}`,
-        duration: 2000,
+      toast.success(`Copied ${value}`, {
+        duration: 1500,
       });
     }).catch(err => {
       console.error('Failed to copy:', err);
