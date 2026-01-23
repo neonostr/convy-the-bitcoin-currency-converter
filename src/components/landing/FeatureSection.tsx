@@ -8,7 +8,7 @@ const FeatureSection: React.FC = () => {
     {
       icon: Coins,
       title: "Multiple Currencies",
-      description: "Convert between Bitcoin, Sats and 15+ fiat currencies instantly.",
+      description: "Convert between Bitcoin, Sats and 21+ fiat currencies instantly.",
     },
     {
       icon: RefreshCw,
