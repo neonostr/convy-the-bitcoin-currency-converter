@@ -34,16 +34,16 @@ const Hero: React.FC<HeroProps> = ({ onInstallClick }) => {
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-center pt-4">
+          <Button size="lg" className="h-12 px-8 text-base gap-2 group" onClick={onInstallClick}>
+            Install App
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+          </Button>
+
           <Link to="/app">
-            <Button size="lg" className="h-12 px-8 text-base gap-2 group">
-              Try It Now
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            <Button variant="outline" size="lg" className="h-12 px-8 text-base">
+              Use Web Version
             </Button>
           </Link>
-
-          <Button variant="outline" size="lg" className="h-12 px-8 text-base" onClick={onInstallClick}>
-            Install App
-          </Button>
         </div>
 
         {/* Trust indicator */}
