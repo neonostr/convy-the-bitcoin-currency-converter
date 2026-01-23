@@ -165,8 +165,11 @@
         }
         
         // Check if on app path (for PWA welcome screen)
+        // Include root path for PWA users since iOS doesn't update manifest start_url
         function isAppPath() {
-          return window.location.pathname === '/app' || window.location.pathname.startsWith('/app');
+          return window.location.pathname === '/' || 
+                 window.location.pathname === '/app' || 
+                 window.location.pathname.startsWith('/app');
         }
         
         if (isPWA() && isAppPath()) {
@@ -230,7 +233,9 @@
       }
       
       function isAppPath() {
-        return window.location.pathname === '/app' || window.location.pathname.startsWith('/app');
+        return window.location.pathname === '/' || 
+               window.location.pathname === '/app' || 
+               window.location.pathname.startsWith('/app');
       }
       
       if (isPWA() && isAppPath()) {
