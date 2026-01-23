@@ -1,30 +1,25 @@
 
-# Prevent PWA Scroll Bounce for Native App Experience
+# Fix PWA UI Vertical Centering
 
-## Overview
+## Problem
 
-Add scroll-prevention styles that only apply when the app is running as an installed PWA (using the `.pwa-mode` class). Regular browser users on the landing page will be completely unaffected.
+The UI elements appear stuck to the top of the screen in PWA mode instead of being properly centered. This happens because:
+
+1. PWA mode applies `position: fixed` to `#root`
+2. The `Index.tsx` wrapper also uses `fixed inset-0`
+3. Nested fixed positioning causes the flex centering to fail
+
+## Solution
+
+Adjust the CSS and layout so that centering happens at the `#root` level in PWA mode, avoiding the nested fixed positioning conflict.
 
 ## Changes
 
-### 1. Add PWA-specific styles to `src/index.css`
+### 1. Update PWA styles in `src/index.css`
 
-Add new CSS rules after the existing `@layer base` block (after line 89):
+Make `#root` a flex container that centers content in PWA mode:
 
 ```css
-/* PWA-specific styles - prevent scroll bounce for native app feel */
-/* These ONLY apply when .pwa-mode class is present (installed PWAs only) */
-html.pwa-mode,
-html.pwa-mode body {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
-  touch-action: none;
-}
-
 html.pwa-mode #root {
   position: fixed;
   top: 0;
@@ -32,36 +27,40 @@ html.pwa-mode #root {
   right: 0;
   bottom: 0;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 ```
 
-### 2. Update viewport meta tag in `index.html`
+### 2. Simplify `src/pages/Index.tsx`
 
-Update the viewport meta tag to include scaling prevention and keyboard handling:
-
-```html
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
-```
-
-### 3. Add touch-manipulation to `src/pages/Index.tsx`
-
-Update the main container class to re-enable internal touch gestures:
+Remove the `fixed inset-0` from the wrapper since the centering will now be handled by `#root` in PWA mode. The component should work for both PWA and browser modes:
 
 ```tsx
-<div className="flex h-[100dvh] items-center justify-center p-4 bg-background overflow-hidden touch-manipulation">
+const Index = () => {
+  return (
+    <div className="min-h-[100dvh] w-full flex items-center justify-center p-4 bg-background overflow-hidden touch-manipulation">
+      <BitcoinConverter />
+    </div>
+  );
+};
 ```
 
-## Why This Is Safe for Landing Page
+This uses `min-h-[100dvh]` which:
+- Works in regular browser mode (landing page flow)
+- Fills the viewport correctly in PWA mode where `#root` is fixed
 
-- The `.pwa-mode` class is ONLY added when `isPWA()` returns true (standalone mode detection)
-- Browser users visiting the landing page will NOT have this class
-- All scroll-prevention CSS is scoped to `html.pwa-mode` selector
-- Landing page scrolling remains completely normal
-
-## Files to Modify
+## Technical Details
 
 | File | Change |
 |------|--------|
-| `src/index.css` | Add PWA scroll-prevention styles |
-| `index.html` | Update viewport meta tag |
-| `src/pages/Index.tsx` | Add `touch-manipulation` class |
+| `src/index.css` | Add `display: flex`, `align-items: center`, `justify-content: center` to `.pwa-mode #root` |
+| `src/pages/Index.tsx` | Change from `fixed inset-0` to `min-h-[100dvh] w-full` for better compatibility |
+
+## Why This Works
+
+- In **PWA mode**: `#root` is fixed full-screen and acts as the centering container. The `Index` div fills it and centers its child.
+- In **browser mode**: `#root` is normal flow, the `Index` div uses `min-h-[100dvh]` to fill the viewport and center content.
+
+This eliminates the nested `position: fixed` conflict that was preventing proper vertical centering.
