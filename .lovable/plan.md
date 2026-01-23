@@ -1,86 +1,86 @@
 
-# Fix PWA Splash Screen Theme Issues
+# Replace Radix Toast with Sonner for Copy Confirmation
 
-## Problem Identified
-The splash screen always appears in dark mode regardless of the user's theme preference. This happens because:
+## Overview
+Replace the current intrusive Radix toast notification with Sonner's minimal bottom toast for copy-to-clipboard confirmations. Sonner provides a more modern, less intrusive notification style that appears at the bottom of the screen and auto-dismisses quickly.
 
-1. **Hardcoded dark class**: The HTML element starts with `class="dark"` hardcoded
-2. **Missing class removal**: The inline scripts that apply the theme use `classList.add()` without first removing the opposite class, resulting in the HTML having both `dark` and `light` classes
-3. **CSS specificity**: When both classes exist, `.dark` styles override the base `:root` styles, making the splash screen always appear dark
-
-## Solution
-Fix the theme application at all early loading points to properly remove existing theme classes before adding the new one.
+## Current State
+- `BitcoinConverter.tsx` imports `useToast` from `@/hooks/use-toast` (Radix-based)
+- The `copyToClipboard` function uses the Radix toast with title and description
+- Both Radix `Toaster` and Sonner `Toaster` components are already included in `App.tsx`
+- Sonner is fully configured in `src/components/ui/sonner.tsx` with theme support
 
 ## Implementation Steps
 
-### Step 1: Remove hardcoded dark class from HTML
-**File: `index.html` (line 3)**
+### Step 1: Update BitcoinConverter.tsx imports
+**File: `src/components/BitcoinConverter.tsx`**
 
-Remove the hardcoded `class="dark"` from the HTML element. The theme will be applied dynamically by the inline script before any content renders.
+Replace the Radix toast import with Sonner's toast:
 
-```html
-<!-- Before -->
-<html lang="en" class="dark">
-
-<!-- After -->
-<html lang="en">
-```
-
-### Step 2: Fix inline script to remove opposite class
-**File: `index.html` (line 157)**
-
-Update the inline script to first remove any existing theme classes before adding the correct one:
-
-```javascript
-// Before
-document.documentElement.classList.add(theme);
+```tsx
+// Before (line 5)
+import { useToast } from '@/hooks/use-toast';
 
 // After
-document.documentElement.classList.remove('light', 'dark');
-document.documentElement.classList.add(theme);
+import { toast } from 'sonner';
 ```
 
-### Step 3: Fix main.tsx theme application
-**File: `src/main.tsx` (lines 7-16)**
+### Step 2: Remove useToast hook usage
+**File: `src/components/BitcoinConverter.tsx`**
 
-Apply the same fix - remove existing classes before adding the new theme:
+Remove the hook call since Sonner uses a direct function:
 
-```typescript
-// Before
-if (savedTheme) {
-  document.documentElement.classList.add(savedTheme);
-} else {
-  document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
-}
+```tsx
+// Before (line 21)
+const { toast } = useToast();
 
 // After
-document.documentElement.classList.remove('light', 'dark');
-if (savedTheme) {
-  document.documentElement.classList.add(savedTheme);
-} else {
-  document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
-}
+// Remove this line entirely - toast is imported directly
 ```
 
----
+### Step 3: Update copyToClipboard function
+**File: `src/components/BitcoinConverter.tsx`**
 
-## Technical Details
+Simplify the toast call to use Sonner's minimal API:
 
-### Why this fixes the splash screen
-- The splash screen uses CSS variables (`--background`, `--foreground`) that are defined differently in `:root` (light) vs `.dark` (dark mode)
-- By ensuring only ONE theme class exists on the HTML element at any time, the correct CSS variables are applied
-- The fix happens in the inline script which runs before any rendering, so the splash screen will immediately have the correct theme
+```tsx
+// Before (lines 103-114)
+const copyToClipboard = (value: string) => {
+  recordUserActivity();
+  navigator.clipboard.writeText(value).then(() => {
+    toast({
+      title: "Copied to clipboard",
+      description: `Copied ${value}`,
+      duration: 2000,
+    });
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+  });
+};
 
-### Files affected
-1. `index.html` - Remove hardcoded class + fix inline script
-2. `src/main.tsx` - Fix theme application logic
+// After
+const copyToClipboard = (value: string) => {
+  recordUserActivity();
+  navigator.clipboard.writeText(value).then(() => {
+    toast.success(`Copied ${value}`, {
+      duration: 1500,
+    });
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+  });
+};
+```
 
-### No changes needed
-- `src/hooks/useTheme.tsx` - Already correct (removes both classes before adding)
-- `src/hooks/useSettings.tsx` - Already correct (removes both classes before adding)
+## Benefits
+- **Less intrusive**: Sonner toasts are smaller and appear at the bottom of the screen
+- **Faster dismiss**: Reduced duration from 2000ms to 1500ms for quicker feedback
+- **Single line message**: Removed the separate title/description for a cleaner look
+- **Modern appearance**: Sonner has a more polished, minimal design
+- **Already configured**: Sonner is already set up with theme support in the project
 
-### Testing
-After implementation, the splash screen should:
-- Appear in light mode when user has light theme preference
-- Appear in dark mode when user has dark theme preference
-- Respect the theme saved during PWA installation from the landing page
+## Files to Modify
+1. `src/components/BitcoinConverter.tsx` - Update import and toast usage
+
+## No Changes Needed
+- `src/App.tsx` - Sonner `Toaster` component is already included
+- `src/components/ui/sonner.tsx` - Already configured with theme support
