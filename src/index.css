@@ -108,4 +108,7 @@ html.pwa-mode #root {
   right: 0;
   bottom: 0;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
