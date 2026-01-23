@@ -56,7 +56,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
   };
   if (isInstalled) {
     return <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-sm rounded-xl">
           <DialogHeader className="text-center">
             <div className="flex justify-center mb-4">
               <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors">
@@ -207,7 +207,7 @@ const InstallPopup: React.FC<InstallPopupProps> = ({
       </div>;
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-sm max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader className="text-center">
           
           <DialogTitle className="text-center text-xl">Install Convy</DialogTitle>
