@@ -5,14 +5,21 @@ import { Github, Download, Share, MoreVertical, Plus, ExternalLink } from 'lucid
 import BrowserTabs, { BrowserType } from './BrowserTabs';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
 interface InstallPopupProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
-  const { getBrowser, promptInstall, hasNativePrompt, isIOS, isInstalled } = useInstallPrompt();
+const InstallPopup: React.FC<InstallPopupProps> = ({
+  open,
+  onOpenChange
+}) => {
+  const {
+    getBrowser,
+    promptInstall,
+    hasNativePrompt,
+    isIOS,
+    isInstalled
+  } = useInstallPrompt();
   const [selectedBrowser, setSelectedBrowser] = useState<BrowserType>('safari');
   const [helpOpen, setHelpOpen] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
@@ -25,7 +32,6 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
       handleInstall();
     }
   }, [open, hasNativePrompt, autoInstallAttempted, isInstalled]);
-
   useEffect(() => {
     if (open) {
       setSelectedBrowser(getBrowser());
@@ -38,7 +44,6 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
       setAutoInstallAttempted(false);
     }
   }, [open]);
-
   const handleInstall = async () => {
     if (hasNativePrompt) {
       setIsInstalling(true);
@@ -49,19 +54,12 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
       }
     }
   };
-
   if (isInstalled) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+    return <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <a
-                href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
-              >
+              <a href="https://github.com/neonostr/convy-the-bitcoin-currency-converter" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors">
                 <Github className="w-3.5 h-3.5" />
                 Free & Open Source
               </a>
@@ -72,14 +70,11 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
             Convy is already installed on your device. Look for it on your home screen!
           </p>
         </DialogContent>
-      </Dialog>
-    );
+      </Dialog>;
   }
-
   const renderBrowserInstructions = () => {
     if (selectedBrowser === 'safari') {
-      return (
-        <div className="space-y-4">
+      return <div className="space-y-4">
           <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
             <div className="flex items-center gap-4 text-muted-foreground">
               <Share className="w-8 h-8" />
@@ -106,18 +101,13 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
             </li>
           </ol>
           
-          {isIOS && (
-            <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
+          {isIOS && <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
               💡 Safari is the only browser that can install PWAs on iOS
-            </p>
-          )}
-        </div>
-      );
+            </p>}
+        </div>;
     }
-
     if (selectedBrowser === 'chrome') {
-      return (
-        <div className="space-y-4">
+      return <div className="space-y-4">
           <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
             <div className="flex items-center gap-4 text-muted-foreground">
               <MoreVertical className="w-8 h-8" />
@@ -147,13 +137,10 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
           <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
             💡 The install icon appears after a few seconds on the page
           </p>
-        </div>
-      );
+        </div>;
     }
-
     if (selectedBrowser === 'edge') {
-      return (
-        <div className="space-y-4">
+      return <div className="space-y-4">
           <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
             <div className="flex items-center gap-4 text-muted-foreground">
               <MoreVertical className="w-8 h-8" />
@@ -183,13 +170,11 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
           <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
             💡 Edge has excellent PWA support with automatic updates
           </p>
-        </div>
-      );
+        </div>;
     }
 
     // Other browsers
-    return (
-      <div className="space-y-4">
+    return <div className="space-y-4">
         <div className="bg-muted rounded-xl p-4 flex items-center justify-center">
           <div className="flex items-center gap-4 text-muted-foreground">
             <MoreVertical className="w-8 h-8" />
@@ -219,48 +204,24 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
         <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
           💡 For best experience, use Chrome, Edge, or Safari
         </p>
-      </div>
-    );
+      </div>;
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <a
-              href="https://github.com/neonostr/convy-the-bitcoin-currency-converter"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
-            >
-              <Github className="w-3.5 h-3.5" />
-              Free & Open Source
-            </a>
-          </div>
+          
           <DialogTitle className="text-center text-xl">Install Convy</DialogTitle>
         </DialogHeader>
 
-        {hasNativePrompt ? (
-          <div className="space-y-4 py-4">
+        {hasNativePrompt ? <div className="space-y-4 py-4">
             <p className="text-center text-muted-foreground">
               Add Convy to your home screen for quick access and offline use.
             </p>
-            <Button 
-              className="w-full" 
-              size="lg"
-              onClick={handleInstall}
-              disabled={isInstalling}
-            >
+            <Button className="w-full" size="lg" onClick={handleInstall} disabled={isInstalling}>
               {isInstalling ? 'Installing...' : 'Install Now'}
             </Button>
-          </div>
-        ) : (
-          <div className="space-y-4 py-4">
-            <BrowserTabs
-              selectedBrowser={selectedBrowser}
-              onBrowserChange={setSelectedBrowser}
-            />
+          </div> : <div className="space-y-4 py-4">
+            <BrowserTabs selectedBrowser={selectedBrowser} onBrowserChange={setSelectedBrowser} />
             
             {renderBrowserInstructions()}
             
@@ -278,11 +239,8 @@ const InstallPopup: React.FC<InstallPopupProps> = ({ open, onOpenChange }) => {
                 </ul>
               </CollapsibleContent>
             </Collapsible>
-          </div>
-        )}
+          </div>}
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default InstallPopup;
