@@ -81,7 +81,7 @@ export const translations: Record<string, Translations> = {
       generating: "Generating Lightning invoice...",
       copied: "Copied to clipboard",
       description: "Choose an amount to send:",
-      scanQR: "Scan this QR code with your Lightning wallet to pay",
+      scanQR: "Scan this QR code with your Lightning wallet",
       copyInvoice: "Copy Invoice",
       thankYou: {
         title: "Thank you for valuing my work.",
