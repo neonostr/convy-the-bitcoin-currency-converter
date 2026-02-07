@@ -140,7 +140,7 @@ const DonationPopup: React.FC = () => {
           <span>{t('donation.button')}</span>
         </a>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-sm max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
           <DialogTitle className="flex items-center justify-center gap-2">
             <Coffee className="h-5 w-5 text-bitcoin-orange" />
