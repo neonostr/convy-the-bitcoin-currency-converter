@@ -77,14 +77,14 @@ export const translations: Record<string, Translations> = {
     donation: {
       button: "Zap me a coffee",
       title: "Support This Project",
-      subtitle: "Send a Bitcoin Lightning donation",
+      subtitle: "No ads. No tracking. Just sats.",
       generating: "Generating Lightning invoice...",
       copied: "Copied to clipboard",
       description: "Choose an amount to send:",
       scanQR: "Scan this QR code with your Lightning wallet to pay",
       copyInvoice: "Copy Invoice",
       thankYou: {
-        title: "Thank you for your donation!",
+        title: "Thank you for valuing my work.",
         subtitle: "Your donation helps keep this project going",
       },
     },
