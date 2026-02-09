@@ -51,8 +51,8 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="left-[50%] translate-x-[-50%] w-[calc(100%-2rem)] max-w-xs p-5">
-        <DialogHeader className="text-center">
-          <div className="flex justify-center mb-2">
+        <DialogHeader className="text-center space-y-2">
+          <div className="flex justify-center">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary" />
             </div>
@@ -60,7 +60,7 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
           <DialogTitle className="text-center text-base">Thank you for caring</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3 py-2">
+        <div className="space-y-3">
 
           {qrData && (
             <div className="flex justify-center">
