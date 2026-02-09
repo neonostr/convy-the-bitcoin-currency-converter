@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Heart, Zap, Copy, Check } from 'lucide-react';
 import QRCode from 'qrcode';
@@ -50,31 +50,25 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="left-[50%] translate-x-[-50%] w-[calc(100%-2rem)] max-w-xs p-5">
-        <DialogHeader className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary" />
-            </div>
+      <DialogContent className="left-[50%] translate-x-[-50%] w-[calc(100%-2rem)] max-w-xs p-5 pb-6">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Heart className="w-5 h-5 text-primary" />
           </div>
-          <DialogTitle className="text-center text-base">Thank you for caring</DialogTitle>
-        </DialogHeader>
 
-        <div className="space-y-3">
+          <DialogTitle className="text-center text-base">Thank you for caring</DialogTitle>
 
           {qrData && (
-            <div className="flex justify-center">
-              <div className="bg-white p-2 rounded-lg">
-                <img 
-                  src={qrData} 
-                  alt="Lightning Address QR Code" 
-                  className="w-36 h-36 sm:w-40 sm:h-40"
-                />
-              </div>
+            <div className="bg-white p-2 rounded-lg">
+              <img 
+                src={qrData} 
+                alt="Lightning Address QR Code" 
+                className="w-36 h-36 sm:w-40 sm:h-40"
+              />
             </div>
           )}
 
-          <div className="space-y-1.5">
+          <div className="w-full space-y-1.5">
             <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
               <Zap className="w-3 h-3 text-primary" />
               <span>Lightning Address</span>
@@ -98,7 +92,6 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
               </Button>
             </div>
           </div>
-
         </div>
       </DialogContent>
     </Dialog>
