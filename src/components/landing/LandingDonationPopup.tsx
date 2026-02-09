@@ -65,13 +65,16 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
           <div style={{ height: 12 }} />
 
           {qrData && (
-            <div className="bg-white p-2 rounded-lg">
+            <a
+              href={`lightning:${LIGHTNING_ADDRESS}`}
+              className="bg-white p-2 rounded-lg block cursor-pointer hover:opacity-90 transition-opacity"
+            >
               <img
                 src={qrData}
                 alt="Lightning Address QR Code"
                 className="w-36 h-36 sm:w-40 sm:h-40"
               />
-            </div>
+            </a>
           )}
 
           <div style={{ height: 12 }} />
