@@ -49,17 +49,20 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="left-[50%] translate-x-[-50%] w-[calc(100%-2rem)] max-w-xs !p-0 !gap-0 overflow-hidden">
-        <div className="flex flex-col items-center pt-6 pb-7 px-5">
+      <DialogContent
+        className="left-[50%] translate-x-[-50%] w-[calc(100%-2rem)] max-w-xs overflow-hidden"
+        style={{ padding: 0, gap: 0 }}
+      >
+        <div className="flex flex-col items-center" style={{ padding: '24px 20px 28px' }}>
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
             <Heart className="w-5 h-5 text-primary" />
           </div>
 
-          <div className="h-3" />
+          <div style={{ height: 12 }} />
 
           <DialogTitle className="text-center text-base">Thank you for caring</DialogTitle>
 
-          <div className="h-3" />
+          <div style={{ height: 12 }} />
 
           {qrData && (
             <div className="bg-white p-2 rounded-lg">
@@ -71,7 +74,7 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
             </div>
           )}
 
-          <div className="h-3" />
+          <div style={{ height: 12 }} />
 
           <div className="w-full space-y-1.5">
             <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
