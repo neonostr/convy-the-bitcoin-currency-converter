@@ -57,13 +57,10 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
               <Heart className="w-5 h-5 text-primary" />
             </div>
           </div>
-          <DialogTitle className="text-center text-base">Support Convy</DialogTitle>
+          <DialogTitle className="text-center text-base">Thank you for caring</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 py-2">
-          <p className="text-center text-xs text-muted-foreground">
-            No ads. No tracking. Just sats.
-          </p>
 
           {qrData && (
             <div className="flex justify-center">
@@ -102,9 +99,6 @@ const LandingDonationPopup: React.FC<LandingDonationPopupProps> = ({ open, onOpe
             </div>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground">
-            Thank you for valuing my work.
-          </p>
         </div>
       </DialogContent>
     </Dialog>
