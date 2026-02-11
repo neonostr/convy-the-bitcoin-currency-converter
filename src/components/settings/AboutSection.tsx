@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Heart } from 'lucide-react';
+import LandingDonationPopup from '@/components/landing/LandingDonationPopup';
 
 /**
  * Helper function to render text with special markdown-like anchor placeholders.
@@ -30,17 +31,25 @@ function renderAboutLocalized(text: string) {
  * AboutSection (for Settings/Sheet)
  */
 const AboutSection = () => {
-  const {
-    t
-  } = useLanguage();
+  const { t } = useLanguage();
+  const [donationOpen, setDonationOpen] = useState(false);
   const aboutTitle = t('settings.about.title');
   const aboutDescription = t('settings.about.description');
   const checkOutMyApps = t('settings.about.checkOutMyApps');
+  const leaveTip = t('settings.about.leaveTip');
   
   return <section className="py-4 border-t">
       <h3 className="text-lg font-semibold mb-2">{aboutTitle}</h3>
       <div className="space-y-4">
         {renderAboutLocalized(aboutDescription)}
+        <Button 
+          variant="outline" 
+          className="w-full" 
+          onClick={() => setDonationOpen(true)}
+        >
+          <Heart className="mr-2 h-4 w-4 text-primary fill-primary" />
+          {leaveTip}
+        </Button>
         <Button 
           variant="outline" 
           className="w-full" 
@@ -50,6 +59,7 @@ const AboutSection = () => {
           {checkOutMyApps}
         </Button>
       </div>
+      <LandingDonationPopup open={donationOpen} onOpenChange={setDonationOpen} />
     </section>;
 };
 export default AboutSection;
