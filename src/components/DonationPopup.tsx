@@ -14,13 +14,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 
 const INITIAL_AMOUNT = 1000;
 
-interface DonationPopupProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  showTrigger?: boolean;
-}
-
-const DonationPopup: React.FC<DonationPopupProps> = ({ open: controlledOpen, onOpenChange: controlledOnOpenChange, showTrigger = true }) => {
+const DonationPopup: React.FC = () => {
   const [amount, setAmount] = useState<number>(INITIAL_AMOUNT);
   const [isSending, setIsSending] = useState<boolean>(false);
   const [invoice, setInvoice] = useState<string>('');
@@ -29,8 +23,7 @@ const DonationPopup: React.FC<DonationPopupProps> = ({ open: controlledOpen, onO
   const [paymentConfirmed, setPaymentConfirmed] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { toast } = useToast();
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const [isOpen, setIsOpen] = useState(false);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
   const { settings } = useSettings();
   const { t } = useLanguage();
@@ -59,11 +52,7 @@ const DonationPopup: React.FC<DonationPopupProps> = ({ open: controlledOpen, onO
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (controlledOnOpenChange) {
-      controlledOnOpenChange(open);
-    } else {
-      setInternalOpen(open);
-    }
+    setIsOpen(open);
     
     if (!open) {
       resetState();
@@ -145,14 +134,12 @@ const DonationPopup: React.FC<DonationPopupProps> = ({ open: controlledOpen, onO
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      {showTrigger && (
-        <DialogTrigger asChild onClick={handleTriggerClick}>
-          <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
-            <Coffee className="h-4 w-4 mr-1" />
-            <span>{t('donation.button')}</span>
-          </a>
-        </DialogTrigger>
-      )}
+      <DialogTrigger asChild onClick={handleTriggerClick}>
+        <a className="flex items-center text-xs text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors cursor-pointer">
+          <Coffee className="h-4 w-4 mr-1" />
+          <span>{t('donation.button')}</span>
+        </a>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-sm max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
           <DialogTitle className="flex items-center justify-center gap-2">

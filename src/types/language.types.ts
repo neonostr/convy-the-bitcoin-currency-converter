@@ -36,7 +36,6 @@ export interface Translations {
       title: string;
       description: string;
       checkOutMyApps: string;
-      leaveTip: string;
     };
     shareableUrl: {
       title: string;
