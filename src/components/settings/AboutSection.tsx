@@ -47,7 +47,7 @@ const AboutSection = () => {
           className="w-full" 
           onClick={() => setDonationOpen(true)}
         >
-          <Heart className="mr-2 h-4 w-4 text-primary fill-primary" />
+          <Heart className="mr-2 h-4 w-4 text-primary" />
           {leaveTip}
         </Button>
         <Button 
