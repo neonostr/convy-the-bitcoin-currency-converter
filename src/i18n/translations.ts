@@ -37,7 +37,7 @@ export const translations: Record<string, Translations> = {
       about: {
         title: "Meet Convy",
         description:
-          "Your fast, privacy first Bitcoin currency converter and real time price tracker. All conversions and updates run 100% on your device, so your data stays private. I'm [Neo](neo), the builder, and I create native web apps for freedom loving people who want to escape the walled gardens of Apple and Co.",
+          "Your fast, privacy first Bitcoin currency converter and real time price tracker. All conversions and updates run 100% on your device, so your data stays private.",
         checkOutMyApps: "More apps by Neo21.dev",
         leaveTip: "If you like this, leave a tip",
       },
@@ -131,7 +131,7 @@ export const translations: Record<string, Translations> = {
       about: {
         title: "Conoce Convy",
         description:
-          "Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados. Soy [Neo](neo), el creador, y diseño aplicaciones web nativas para personas amantes de la libertad que quieran liberarse de los jardines vallados de Apple y compañía.",
+          "Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados.",
         checkOutMyApps: "Más apps de Neo21.dev",
         leaveTip: "Si te gusta, deja una propina",
       },
@@ -225,7 +225,7 @@ export const translations: Record<string, Translations> = {
       about: {
         title: "Lerne Convy kennen",
         description:
-          "Deinen schnellen, datenschutz­orientierten Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat. Ich bin [Neo](neo), der Entwickler, und ich erstelle native Web‑Apps für freiheits­liebende Menschen, die den Walled Gardens von Apple & Co. entkommen wollen.",
+          "Dein schneller, datenschutz­orientierter Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat.",
         checkOutMyApps: "Mehr Apps von Neo21.dev",
         leaveTip: "Wenn dir das gefällt, hinterlasse ein Trinkgeld",
       },
