@@ -38,7 +38,7 @@ export const translations: Record<string, Translations> = {
         title: "Meet Convy",
         description:
           "Your fast, privacy first Bitcoin currency converter and real time price tracker. All conversions and updates run 100% on your device, so your data stays private.",
-        checkOutMyApps: "More apps by Neo21.dev",
+        checkOutMyApps: "More apps by neo21.dev",
         leaveTip: "If you like this, leave a tip",
       },
       shareableUrl: {
@@ -132,7 +132,7 @@ export const translations: Record<string, Translations> = {
         title: "Conoce Convy",
         description:
           "Tu conversor de divisas de Bitcoin rápido y centrado en la privacidad, y rastreador de precios en tiempo real. Todas las conversiones y actualizaciones se realizan al 100 % en tu dispositivo, manteniendo tus datos privados.",
-        checkOutMyApps: "Más apps de Neo21.dev",
+        checkOutMyApps: "Más apps de neo21.dev",
         leaveTip: "Si te gusta, deja una propina",
       },
       shareableUrl: {
@@ -226,7 +226,7 @@ export const translations: Record<string, Translations> = {
         title: "Lerne Convy kennen",
         description:
           "Dein schneller, datenschutz­orientierter Bitcoin-Währungs­umrechner und Echtzeit-Preis­tracker. Alle Umrechnungen und Updates laufen zu 100 % auf deinem Gerät – so bleiben deine Daten privat.",
-        checkOutMyApps: "Mehr Apps von Neo21.dev",
+        checkOutMyApps: "Mehr Apps von neo21.dev",
         leaveTip: "Wenn dir das gefällt, hinterlasse ein Trinkgeld",
       },
       shareableUrl: {
