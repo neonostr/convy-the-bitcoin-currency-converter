@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
+import { getBrandUrl } from '@/lib/brandDomain';
 
 const Footer: React.FC = () => {
   return (
@@ -10,7 +11,7 @@ const Footer: React.FC = () => {
         <p className="flex items-center gap-1">
           Made with <Heart className="w-3.5 h-3.5 text-primary fill-primary" /> by{' '}
           <a 
-            href="https://neo21.dev" 
+            href={getBrandUrl()} 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-foreground relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[2px] after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left"
