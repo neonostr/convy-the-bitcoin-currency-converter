@@ -3,6 +3,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Heart } from 'lucide-react';
 import LandingDonationPopup from '@/components/landing/LandingDonationPopup';
+import { getBrandDomain, getBrandUrl } from '@/lib/brandDomain';
 
 /**
  * Helper function to render text with special markdown-like anchor placeholders.
@@ -11,7 +12,7 @@ import LandingDonationPopup from '@/components/landing/LandingDonationPopup';
  */
 function renderAboutLocalized(text: string) {
   // Replace [Neo](neo)
-  text = text.replace(/\[Neo\]\(neo\)/g, '<a href="https://neo21.dev" class="underline font-medium" target="_blank" rel="noopener noreferrer">Neo</a>');
+  text = text.replace(/\[Neo\]\(neo\)/g, `<a href="${getBrandUrl()}" class="underline font-medium" target="_blank" rel="noopener noreferrer">Neo</a>`);
   // Replace last [PWA](pwa) only
   const pwaAnchor = '<a href="https://what-is-a-pwa.app" class="underline font-medium" target="_blank" rel="noopener noreferrer">PWA</a>';
   // Use regex to find all [PWA](pwa), but only replace the last one
