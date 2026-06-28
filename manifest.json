@@ -1,0 +1,25 @@
+{
+  "id": "convy-bitcoin-converter",
+  "name": "Convy - Bitcoin Currency Converter",
+  "short_name": "Convy",
+  "description": "A privacy-focused Bitcoin currency converter",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#f7931a",
+  "icons": [
+    {
+      "src": "/lovable-uploads/3ea16b8d-4ec7-4ac2-8195-8c5575377664.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/94f20957-5441-4a0d-a9c8-9f555a8c5f5f.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
