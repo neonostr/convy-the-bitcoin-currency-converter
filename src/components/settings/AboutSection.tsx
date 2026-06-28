@@ -36,7 +36,8 @@ const AboutSection = () => {
   const [donationOpen, setDonationOpen] = useState(false);
   const aboutTitle = t('settings.about.title');
   const aboutDescription = t('settings.about.description');
-  const checkOutMyApps = t('settings.about.checkOutMyApps');
+  // Swap the literal domain in the localized label to match the active brand domain.
+  const checkOutMyApps = t('settings.about.checkOutMyApps').replace('neo21.dev', getBrandDomain());
   const leaveTip = t('settings.about.leaveTip');
   
   return <section className="py-4 border-t">
@@ -54,7 +55,7 @@ const AboutSection = () => {
         <Button 
           variant="outline" 
           className="w-full" 
-          onClick={() => window.open('https://neo21.dev', '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open(getBrandUrl(), '_blank', 'noopener,noreferrer')}
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           {checkOutMyApps}
